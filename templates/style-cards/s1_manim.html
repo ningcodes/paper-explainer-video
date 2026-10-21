@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>Manim Style Hook</title>
+<style>
+html,body{margin:0;padding:0;width:1920px;height:1080px;overflow:hidden;background:#1C1C1C;}
+#bg{position:absolute;left:0;top:0;width:1920px;height:1080px;
+  background:radial-gradient(ellipse 75% 70% at 46% 52%, #222222 0%, #1C1C1C 55%, #141414 100%);}
+svg{position:absolute;left:0;top:0;}
+#av{position:absolute;left:1670px;top:860px;width:242px;height:220px;}
+#cap{position:absolute;left:0;top:962px;width:1640px;padding-left:280px;box-sizing:border-box;text-align:center;}
+#capin{display:inline-block;font-family:'Noto Serif CJK SC',serif;font-weight:600;font-size:44px;line-height:60px;color:#ECECEC;
+  padding:2px 22px 4px;background:rgba(10,10,10,0.55);border-radius:6px;letter-spacing:1px;white-space:nowrap;}
+#capin .lm{font-family:'Latin Modern Roman',serif;font-weight:700;font-size:48px;}
+.lm{font-family:'Latin Modern Roman',serif;}
+</style></head>
+<body>
+<div id="bg"></div>
+<svg id="S" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+<div id="cap"><span id="capin"></span></div>
+<img id="av">
+<script>
+'use strict';
+window.DURATION = 13.6;
+const C = {BLUE:'#58C4DD', TEAL:'#5CD0B3', GREEN:'#83C167', YELLOW:'#F4D345', RED:'#FC6255', GOLD:'#F0AC5F', GREY:'#888888', W:'#ECECEC', BG:'#1C1C1C'};
+const NS = 'http://www.w3.org/2000/svg';
+const S = document.getElementById('S');
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,e)=>a+(b-a)*e;
+const sig=x=>1/(1+Math.exp(-x));
+const smooth=x=>{x=clamp(x);return (sig(10*(x-0.5))-sig(-5))/(sig(5)-sig(-5));};
+const prog=(t,t0,d)=>clamp((t-t0)/d);
+const sp=(t,t0,d)=>smooth(prog(t,t0,d));
+const there_and_back=x=>{x=clamp(x);return smooth(x<0.5?2*x:2-2*x);};
+function el(tag, attrs, parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);(parent||S).appendChild(e);return e;}
+function hex2rgb(h){h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16));}
+function mix(a,b,e){const A=hex2rgb(a),B=hex2rgb(b);return 'rgb('+A.map((v,i)=>Math.round(lerp(v,B[i],e))).join(',')+')';}
+
+// ---------- text objects with per-glyph Write() ----------
+// parts: [[str, {font, italic, color, size}]...]  (each char gets its own tspan)
+const FONTS = {lm:"'Latin Modern Roman',serif", math:"'Latin Modern Math',serif", cjk:"'Noto Serif CJK SC',serif"};
+function Tex(parent, parts, o){
+  const g = el('g', {}, parent);
+  const t = el('text', {x:0, y:0, 'text-anchor':o.anchor||'middle', 'font-size':o.size, fill:o.color||C.W,
+    'stroke-linejoin':'round','stroke-linecap':'round'}, g);
+  if(o.weight) t.setAttribute('font-weight', o.weight);
+  const spans=[];
+  for(const [str, po] of parts){
+    for(const ch of Array.from(str)){
+      const s = el('tspan', {}, t); s.textContent = ch===' '?'\u00A0':ch;
+      s.setAttribute('font-family', FONTS[po.font||'lm']);
+      if(po.italic) s.setAttribute('font-style','italic');
+      if(po.size) s.setAttribute('font-size', po.size);
+      if(po.weight) s.setAttribute('font-weight', po.weight);
+      const col = po.color||o.color||C.W; s.setAttribute('fill', col); s.setAttribute('stroke', col);
+      s._col = col;
+      if(ch.trim()) spans.push(s); else s.setAttribute('stroke','none');
+    }
+  }
+  const obj = {g, t, spans, size:o.size, L:(o.size)*7};
+  return obj;
+}
+// Manim Write: outline draws with lag, then fill comes in, outline thins out
+function write(obj, p, lag){
+  const n = obj.spans.length; const r = lag==null ? Math.min(0.35, 3/Math.max(n,1)) : lag;
+  const d = 1/(1+r*(n-1));
+  const sw = Math.max(1.2, obj.size/34);
+  obj.spans.forEach((s,i)=>{
+    const pi = clamp((p - i*r*d)/d);
+    const a = clamp(pi/0.6)*obj.L;
+    s.setAttribute('stroke-dasharray', a.toFixed(1)+' '+obj.L.toFixed(1));
+    s.setAttribute('stroke-width', (pi>=1||a<0.6?0:sw).toFixed(2));
+    s.setAttribute('stroke-opacity', (1-clamp((pi-0.75)/0.25)).toFixed(3));
+    s.setAttribute('fill-opacity', clamp((pi-0.4)/0.55).toFixed(3));
+  });
+}
+function setPose(g, x, y, s, op){ g.setAttribute('transform', `translate(${x.toFixed(2)},${y.toFixed(2)}) scale(${(s==null?1:s).toFixed(4)})`); if(op!=null) g.setAttribute('opacity', clamp(op).toFixed(3)); }
+function create(e, p){ // pathLength=1 shapes
+  e.setAttribute('stroke-dasharray', `${clamp(p).toFixed(4)} 2`);
+  e.setAttribute('visibility', p<=0?'hidden':'visible');
+}
+function recolor(obj, col){ obj.spans.forEach(s=>{s.setAttribute('fill',col);s.setAttribute('stroke',col);}); }
+
+// ================= BUILD =================
+const cam = el('g', {});
+// --- NumberPlane (faint) ---
+const plane = el('g', {opacity:1}, cam);
+const planeLines=[];
+for(let x=-120; x<=2040; x+=120){ const L=el('line',{x1:x,y1:-60,x2:x,y2:1140,stroke:C.BLUE,'stroke-width':x===840?1.6:1,'stroke-opacity':x===840?0.16:0.10,pathLength:1},plane); planeLines.push([L,Math.abs(x-840)]); }
+for(let y=-60; y<=1140; y+=120){ const L=el('line',{x1:-120,y1:y,x2:2040,y2:y,stroke:C.BLUE,'stroke-width':y===540?1.6:1,'stroke-opacity':y===540?0.16:0.10,pathLength:1},plane); planeLines.push([L,Math.abs(y-540)]); }
+for(let x=-60; x<=2040; x+=120){ const L=el('line',{x1:x,y1:-60,x2:x,y2:1140,stroke:C.BLUE,'stroke-width':0.6,'stroke-opacity':0.035,pathLength:1},plane); planeLines.push([L,Math.abs(x-840)+30]); }
+for(let y=0; y<=1140; y+=120){ const L=el('line',{x1:-120,y1:y,x2:2040,y2:y,stroke:C.BLUE,'stroke-width':0.6,'stroke-opacity':0.035,pathLength:1},plane); planeLines.push([L,Math.abs(y-540)+30]); }
+
+// --- source label ---
+const gSrc = el('g',{},cam);
+const srcTitle = Tex(gSrc, [['Google',{font:'lm'}],[' 新论文',{font:'cjk',weight:600}]], {size:50, anchor:'start'});
+setPose(srcTitle.g, 0, 0, 1);
+const srcSub = Tex(gSrc, [['·  Google Cloud AI × Northwestern',{font:'lm'}]], {size:30, anchor:'start', color:C.GREY});
+const bigH = Tex(cam, [['Harness',{font:'lm',italic:true}],['²',{font:'lm'}]], {size:150, anchor:'start', color:C.TEAL});
+const bigHs = Tex(cam, [['Google Cloud AI',{font:'lm'}],[' × ',{font:'lm'}],['Northwestern',{font:'lm'}]], {size:40, color:C.GREY});
+const srcLine = el('line',{x1:0,y1:68,x2:520,y2:68,stroke:C.GREY,'stroke-width':1.5,pathLength:1,'stroke-opacity':0.7},gSrc);
+
+// --- diagram: model square + weight grid + lock + harness ring ---
+const gD = el('g',{},cam);
+const SQ=300;
+const sq = el('rect',{x:-SQ/2,y:-SQ/2,width:SQ,height:SQ,fill:C.BLUE,'fill-opacity':0,stroke:C.BLUE,'stroke-width':4,pathLength:1},gD);
+const W = [[0.31,-0.72,0.08,0.54],[-0.19,0.93,-0.44,0.27],[0.66,-0.05,0.38,-0.81],[-0.57,0.12,0.79,-0.26]];
+const cells=[];
+for(let r=0;r<4;r++)for(let c=0;c<4;c++){
+  const v=W[r][c]; const s=(v<0?'−':'')+Math.abs(v).toFixed(2).replace(/^0/,'');
+  const o=Tex(gD,[[s,{font:'lm'}]],{size:26,color:C.W});
+  setPose(o.g, -105+c*70, -105+r*70+11, 1); o.r=r;o.c=c;o.v=v; cells.push(o);
+}
+const gridLines=[];
+for(let k=1;k<4;k++){ gridLines.push(el('line',{x1:-140+k*70,y1:-140,x2:-140+k*70,y2:140,stroke:C.BLUE,'stroke-opacity':0.35,'stroke-width':1.2,pathLength:1},gD));
+  gridLines.push(el('line',{x1:-140,y1:-140+k*70,x2:140,y2:-140+k*70,stroke:C.BLUE,'stroke-opacity':0.35,'stroke-width':1.2,pathLength:1},gD)); }
+// lock sits on top edge
+const gLock = el('g',{},gD);
+const lockBack = el('rect',{x:-34,y:-26,width:68,height:54,rx:7,fill:C.BG,stroke:'none'},gLock);
+const lockBody = el('rect',{x:-34,y:-26,width:68,height:54,rx:7,fill:'none',stroke:C.W,'stroke-width':4,pathLength:1},gLock);
+const lockArc = el('path',{d:'M -20 -26 V -42 A 20 20 0 0 1 20 -42 V -26',fill:'none',stroke:C.W,'stroke-width':4,'stroke-linecap':'round',pathLength:1},gLock);
+const lockHole = el('path',{d:'M 0 -6 V 10',fill:'none',stroke:C.W,'stroke-width':5,'stroke-linecap':'round',pathLength:1},gLock);
+const modelLbl = Tex(gD,[['模型 ',{font:'cjk',weight:600}],['𝜃',{font:'math'}]],{size:38,color:C.BLUE});
+// harness ring
+const R=270;
+const ring = el('circle',{cx:0,cy:0,r:R,fill:'none',stroke:C.TEAL,'stroke-width':5,pathLength:1,transform:'rotate(-90)'},gD);
+const ringGlow = el('circle',{cx:0,cy:0,r:R,fill:'none',stroke:C.TEAL,'stroke-width':18,'stroke-opacity':0},gD);
+const LBL=['提示词','护栏','技能','工具说明','脚本','记忆'];
+const ANG=[-120,-60,0,60,120,180];
+const dots=[], labels=[];
+LBL.forEach((s,i)=>{
+  const a=ANG[i]*Math.PI/180;
+  dots.push(el('circle',{cx:R*Math.cos(a),cy:R*Math.sin(a),r:9,fill:C.TEAL},gD));
+  const anchor = Math.abs(Math.cos(a))<0.2?'middle':(Math.cos(a)>0?'start':'end');
+  labels.push(Tex(cam,[[s,{font:'cjk',weight:600}]],{size:36,color:C.W,anchor}));
+});
+const harnessWord = Tex(cam,[['Harness',{font:'lm',italic:true}]],{size:64,color:C.TEAL});
+
+// --- formula on the right: Δθ = 0  -> agent = model + Harness ---
+const fDelta = Tex(cam,[['Δ',{font:'math'}],['𝜃',{font:'math'}],[' = 0',{font:'lm'}]],{size:96,color:C.YELLOW});
+const fDeltaSub = Tex(cam,[['一行权重都没动',{font:'cjk'}]],{size:32,color:C.GREY});
+const fA = Tex(cam,[['agent',{font:'lm',italic:true}],[' = ',{font:'lm'}],['model',{font:'lm',italic:true,color:C.BLUE}]],{size:62,anchor:'start'});
+const fB = Tex(cam,[[' + ',{font:'lm'}],['Harness',{font:'lm',italic:true,color:C.TEAL}]],{size:62,anchor:'start'});
+
+// --- task + tables ---
+const taskT = Tex(cam,[['一个真实的职场任务',{font:'cjk',weight:600}]],{size:46,anchor:'start'});
+const taskS = Tex(cam,[['JobBench',{font:'lm',italic:true}],[' · 制片人对账',{font:'cjk'}]],{size:30,anchor:'start',color:C.GREY});
+const scoreT = Tex(cam,[['事后打分',{font:'cjk',weight:600}]],{size:46,anchor:'start'});
+const scoreS = Tex(cam,[['JobBench',{font:'lm',italic:true}],[' · 制片人对账 · 单个案例',{font:'cjk'}]],{size:30,anchor:'start',color:C.GREY});
+const TBX=[960,1190,1420], ROWY=[418,488,558,628], TT=[['排期',C.BLUE],['人员',C.GOLD],['预算',C.GREEN]];
+const DATA=[['3/02','3/03','3/04','3/05'],['12','8','15','6'],['2.4','1.6','1.8','1.2']];
+const gT = el('g',{},cam);
+const tables = TT.map(([name,col],k)=>{
+  const g=el('g',{},gT);
+  const title=Tex(g,[[name,{font:'cjk',weight:600}]],{size:36,color:col}); setPose(title.g,TBX[k],340,1);
+  const x0=TBX[k]-70,x1=TBX[k]+70,y0=370,y1=660;
+  const bl=el('path',{d:`M ${x0+16} ${y0} H ${x0} V ${y1} H ${x0+16}`,fill:'none',stroke:C.W,'stroke-width':3.5,pathLength:1},g);
+  const br=el('path',{d:`M ${x1-16} ${y0} H ${x1} V ${y1} H ${x1-16}`,fill:'none',stroke:C.W,'stroke-width':3.5,pathLength:1},g);
+  const ents=DATA[k].map((s,r)=>{const o=Tex(g,[[s,{font:'lm'}]],{size:38}); setPose(o.g,TBX[k],ROWY[r]+13,1); return o;});
+  return {g,title,bl,br,ents};
+});
+const fix = Tex(gT,[['3.0',{font:'lm'}]],{size:38,color:C.GREEN}); setPose(fix.g,TBX[2],ROWY[2]+13,1);
+const rowLbl = ROWY.map((y,r)=>{const o=Tex(gT,[['d',{font:'lm',italic:true}],[String(r+1),{font:'lm',size:24}]],{size:36,color:C.GREY}); setPose(o.g,820,y+12,1); return o;});
+const rowBox = ROWY.map(y=>el('rect',{x:875,y:y-30,width:630,height:60,rx:4,fill:C.YELLOW,'fill-opacity':0,stroke:C.YELLOW,'stroke-width':3,pathLength:1},gT));
+const checks = ROWY.map(y=>el('path',{d:`M ${1532} ${y} l 12 13 l 24 -28`,fill:'none',stroke:C.GREEN,'stroke-width':6,'stroke-linecap':'round','stroke-linejoin':'round',pathLength:1},gT));
+const relation = Tex(gT,[['人员',{font:'cjk'}],[' × 0.2k = ',{font:'lm'}],['预算',{font:'cjk'}]],{size:30,color:C.GREY});
+setPose(relation.g, 1190, 712, 1);
+
+// --- score: number line + odometer ---
+const gNL = el('g',{},cam);
+const NLX0=820, NLX1=1560, NLY=660; const nx=v=>lerp(NLX0,NLX1,v/100);
+const nlAxis = el('line',{x1:NLX0-20,y1:NLY,x2:NLX1+20,y2:NLY,stroke:C.W,'stroke-width':3,pathLength:1},gNL);
+const nlTicks=[], nlNums=[];
+for(let v=0;v<=100;v+=10){ const big=v%50===0; nlTicks.push(el('line',{x1:nx(v),y1:NLY-(big?14:9),x2:nx(v),y2:NLY+(big?14:9),stroke:C.W,'stroke-width':2.5,pathLength:1},gNL));
+  if(big){const o=Tex(gNL,[[String(v),{font:'lm'}]],{size:30,color:C.W}); setPose(o.g,nx(v),NLY+46,1); nlNums.push(o);} }
+const trail = el('line',{x1:nx(43),y1:NLY,x2:nx(43),y2:NLY,stroke:C.YELLOW,'stroke-width':7,'stroke-linecap':'round'},gNL);
+const ghost = el('circle',{cx:nx(43),cy:NLY,r:9,fill:C.GREY},gNL);
+const ghostLbl = Tex(gNL,[['43',{font:'lm'}]],{size:30,color:C.GREY});
+const dot = el('circle',{cx:nx(43),cy:NLY,r:13,fill:C.YELLOW},gNL);
+const brace = el('path',{d:'',fill:'none',stroke:C.TEAL,'stroke-width':3,pathLength:1},gNL);
+const braceLbl = Tex(gNL,[['只改 ',{font:'cjk',weight:600}],['Harness',{font:'lm',italic:true}]],{size:32,color:C.TEAL});
+const foot = Tex(gNL,[['原文 ',{font:'cjk'}],['43.1 → 77.8',{font:'lm'}],[' · 事后评分',{font:'cjk'}]],{size:28,color:C.GREY});
+// odometer digits
+const gNum = el('g',{},cam);
+const NUMS=240, DH=NUMS*1.0;
+const defs = el('defs',{});
+const clip = el('clipPath',{id:'numclip'},defs); el('rect',{x:-200,y:-NUMS*0.80,width:400,height:NUMS*1.0},clip);
+const gNumIn = el('g',{'clip-path':'url(#numclip)'},gNum);
+const digitCols=[0,1].map(k=>{
+  const g=el('g',{},gNumIn); const objs=[];
+  for(let d=0; d<=10; d++){ const o=Tex(g,[[String(d%10),{font:'lm'}]],{size:NUMS}); setPose(o.g,0,d*DH,1); objs.push(o); }
+  return {g,objs};
+});
+const DW = NUMS*0.5;
+const ptsLbl = Tex(gNum,[['分',{font:'cjk',weight:600}]],{size:64,color:C.GREY,anchor:'start'});
+const arrow = el('path',{d:'M 690 470 C 780 420, 860 420, 940 440',fill:'none',stroke:C.W,'stroke-width':3.5,pathLength:1,'stroke-linecap':'round'},cam);
+const arrowHead = el('path',{d:'M 940 440 l -20 -12 M 940 440 l -16 16',fill:'none',stroke:C.W,'stroke-width':3.5,'stroke-linecap':'round'},cam);
+
+// --- progress bar (outside camera) ---
+const gBar = el('g',{});
+const SECT=['钩子','背景','核心思路','走一遍例子','自进化','结果','冷水','收获'];
+const BX0=96,BX1=1824,BW=(BX1-BX0)/8, BY=50;
+el('rect',{x:0,y:0,width:1920,height:64,fill:'#161616'},gBar);
+el('line',{x1:BX0,y1:BY,x2:BX1,y2:BY,stroke:'#4a4a4a','stroke-width':2},gBar);
+const barFill = el('line',{x1:BX0,y1:BY,x2:BX0,y2:BY,stroke:C.YELLOW,'stroke-width':3},gBar);
+const barDot = el('circle',{cx:BX0,cy:BY,r:5,fill:C.YELLOW},gBar);
+SECT.forEach((n,i)=>{
+  const x=BX0+i*BW; const act=i===0;
+  el('line',{x1:x,y1:BY-7,x2:x,y2:BY+7,stroke:act?C.YELLOW:'#666','stroke-width':2},gBar);
+  const t=el('text',{x:x+10,y:36,'font-size':act?28:24,fill:act?C.YELLOW:'#8a8a8a'},gBar);
+  const a=el('tspan',{'font-family':FONTS.lm,'font-weight':act?700:400},t); a.textContent=String(i+1).padStart(2,'0')+'  ';
+  const b=el('tspan',{'font-family':FONTS.cjk,'font-weight':act?600:400,'font-size':act?26:22},t); b.textContent=n;
+});
+el('line',{x1:BX1,y1:BY-7,x2:BX1,y2:BY+7,stroke:'#666','stroke-width':2},gBar);
+
+// ---------- captions ----------
+const CAPS=[[0.15,1.04,'<span class="lm">Google</span> 新论文：'],[1.33,2.81,'模型一行权重都没动'],[3.19,5.09,'只改了模型外面那一层，叫 <span class="lm"><i>Harness</i></span>'],
+ [5.41,6.60,'一个真实的职场任务'],[6.72,9.72,'帮制片人把排期、人员和预算几份表对上账'],[10.10,12.59,'事后打分从 <span class="lm">43</span> 分涨到 <span class="lm">78</span> 分']];
+const capEl=document.getElementById('capin'); const capBox=document.getElementById('cap');
+
+// ---------- cues ----------
+window.CUES=[{t:0.12,type:'whoosh',d:0.5,soft:true},{t:1.35,type:'pop',soft:true},{t:2.25,type:'tick'},{t:2.55,type:'pop',soft:true},
+ {t:3.25,type:'whoosh',d:0.6,soft:true},{t:3.6,type:'pop',soft:true},{t:3.8,type:'pop',soft:true},{t:4.0,type:'pop',soft:true},{t:4.2,type:'pop',soft:true},{t:4.4,type:'pop',soft:true},{t:4.6,type:'pop',soft:true},
+ {t:4.75,type:'tick',key:true},{t:5.45,type:'whoosh',d:0.8},{t:6.85,type:'paper'},{t:7.5,type:'pop'},{t:8.0,type:'pop'},{t:8.5,type:'pop'},
+ {t:9.05,type:'tick'},{t:9.2,type:'tick'},{t:9.35,type:'tick'},{t:9.5,type:'tick'},{t:10.1,type:'whoosh',d:0.7,soft:true},{t:10.85,type:'pop'},
+ {t:11.4,type:'whoosh',d:0.9,soft:true},{t:12.25,type:'tick',key:true},{t:12.7,type:'pop',soft:true}];
+
+// ---------- avatar ----------
+const av=document.getElementById('av'); const AV=[];
+const avLoads=[]; for(let i=0;i<242;i++){const im=new Image(); im.src='../kit/av/'+String(i).padStart(3,'0')+'.png'; AV.push(im.src); avLoads.push(im.decode().catch(()=>{}));}
+// soft pedestal under avatar
+el('ellipse',{cx:1791,cy:1072,rx:120,ry:14,fill:'#000','fill-opacity':0.35});
+
+// ================= SEEK =================
+window.seek = function(t){
+  // camera: slow push-in about the composition centre
+  const cs = 1 + 0.03*smooth(t/13.6);
+  cam.setAttribute('transform',`translate(860,520) scale(${cs.toFixed(4)}) translate(-860,-520)`);
+
+  // number plane LaggedStart from centre
+  planeLines.forEach(([L,d])=>create(L, sp(t, -0.7 + d/1100*0.9, 0.9)));
+
+  // source label
+  setPose(gSrc, 96, 140, 1);
+  write(srcTitle, prog(t,-0.45,1.2));
+  if(!window._hw) window._hw = bigH.t.getComputedTextLength();
+  const hw=window._hw, hm=sp(t,1.05,0.7), hsc=lerp(1,0.2,hm);
+  setPose(bigH.g, lerp(960-hw/2, 98, hm), lerp(590, 186, hm), hsc);
+  write(bigH, prog(t,-0.3,1.1));
+  setPose(bigHs.g, 960, 670 - 20*hm, 1, 1-hm); write(bigHs, prog(t,0.15,0.7));
+  setPose(srcSub.g, 2 + hw*0.2 + 14, 46, 1);
+  write(srcSub, prog(t,1.45,0.6));
+  create(srcLine, sp(t,0.4,0.9));
+  // fade sub a bit later to reduce clutter? keep.
+
+  // ---- diagram pose ----
+  const mB = sp(t,5.45,1.0);               // shrink to the left
+  const dx=lerp(560,370,mB), dy=lerp(530,520,mB), ds=lerp(1,0.6,mB);
+  setPose(gD, dx, dy, ds);
+  create(sq, sp(t,1.2,0.75));
+  sq.setAttribute('fill-opacity', (0.10*sp(t,1.8,0.5)).toFixed(3));
+  gridLines.forEach((l,i)=>create(l, sp(t,1.55+i*0.04,0.5)));
+  const freeze = sp(t,2.2,0.5);
+  cells.forEach((o,i)=>{
+    const st = 1.55 + (o.r+o.c)*0.07;
+    write(o, prog(t,st,0.55));
+    const col = mix(C.W, '#7d97a1', freeze);
+    o.spans.forEach(s=>{s.setAttribute('fill',col); s.setAttribute('stroke',col);});
+  });
+  // lock on top edge
+  const lp = prog(t,2.15,0.6);
+  setPose(gLock, 0, -SQ/2, 1 + 0.25*there_and_back(prog(t,2.6,0.45)));
+  lockBack.setAttribute('opacity', smooth(lp*2).toFixed(3));
+  create(lockBody, smooth(lp)); create(lockArc, sp(t,2.25,0.5)); create(lockHole, sp(t,2.55,0.3));
+  const lockCol = mix(C.W, C.YELLOW, there_and_back(prog(t,2.6,0.45)));
+  [lockBody,lockArc,lockHole].forEach(e=>e.setAttribute('stroke',lockCol));
+  setPose(modelLbl.g, 0, SQ/2+62, 1); write(modelLbl, prog(t,1.6,0.7));
+  // ring
+  create(ring, sp(t,3.25,1.0));
+  const ind = there_and_back(prog(t,12.15,0.6));
+  ringGlow.setAttribute('stroke-opacity',(0.18*ind).toFixed(3));
+  ring.setAttribute('stroke-width', (5+3*ind).toFixed(2));
+  dots.forEach((d,i)=>{const p=sp(t,3.55+i*0.2,0.3); d.setAttribute('r',(9*p*(1+0.6*there_and_back(prog(t,3.55+i*0.2,0.5)))).toFixed(2));});
+  const LR=R+44, lfs=lerp(1,0.8,mB);
+  labels.forEach((o,i)=>{
+    const a=ANG[i]*Math.PI/180; const st=3.55+i*0.2; const p=sp(t,st,0.45);
+    const ox = Math.cos(a)*(LR*ds + 34*lfs*0.35*Math.abs(Math.cos(a))*0), oy = Math.sin(a)*LR*ds;
+    const yoff = 12*lfs + (Math.abs(Math.cos(a))<0.2? (Math.sin(a)>0?18:-4)*lfs:0) + Math.sin(a)*8*lfs;
+    setPose(o.g, dx+ox + Math.cos(a)*(1-p)*-30, dy+oy+yoff, lfs);
+    write(o, prog(t,st,0.5));
+  });
+  // Harness word: centred under the ring top? -> place at ring bottom-left side… use centre bottom
+  const hp = prog(t,4.45,0.6);
+  setPose(harnessWord.g, dx, dy + (R+70)*ds + 22*lerp(1,0.62,mB), lerp(1,0.62,mB));
+  write(harnessWord, hp);
+  harnessWord.g.setAttribute('opacity', (1-sp(t,5.45,0.5)).toFixed(3));
+
+  // ---- formula ----
+  // Δθ = 0 written 2.0, transforms out at 3.3
+  const dOut = sp(t,3.25,0.6);
+  setPose(fDelta.g, 1330, 520 - 40*dOut, 1-0.3*dOut, 1-dOut); write(fDelta, prog(t,1.95,0.7));
+  setPose(fDeltaSub.g, 1330, 590 - 40*dOut, 1, 1-dOut); write(fDeltaSub, prog(t,2.3,0.6));
+  // agent = model (+ Harness)
+  const fx = lerp(1380,330,sp(t,5.6,0.9)), fy = lerp(520,850,sp(t,5.42,0.6)), fs = lerp(1,0.57,sp(t,5.45,0.8));
+  if(!window._fw){ window._fw=[fA.t.getComputedTextLength(), fB.t.getComputedTextLength()]; }
+  const [wA,wB]=window._fw; const fx0 = fx - (wA+wB)/2*fs;
+  setPose(fA.g, fx0, fy + 40*(1-sp(t,3.3,0.6)), fs, sp(t,3.3,0.4));
+  write(fA, prog(t,3.3,0.8));
+  // fB starts at right edge of fA
+  setPose(fB.g, fx0 + wA*fs, fy, fs);
+  write(fB, prog(t,4.5,0.75));
+  const fbInd = there_and_back(prog(t,4.8,0.5));
+  fB.spans.slice(1).forEach(s=>{const c=mix(C.TEAL,C.YELLOW,fbInd);s.setAttribute('fill',c);s.setAttribute('stroke',c);});
+
+  // ---- task ----
+  const toScore = sp(t,10.1,0.6);
+  setPose(taskT.g, 860, 210 - 30*toScore, 1, 1-toScore); write(taskT, prog(t,5.5,0.9));
+  setPose(taskS.g, 862, 260 - 30*toScore, 1, 1-toScore); write(taskS, prog(t,5.9,0.8));
+  setPose(scoreT.g, 860, 210 + 30*(1-sp(t,10.25,0.5)), 1, sp(t,10.25,0.3)); write(scoreT, prog(t,10.25,0.7));
+  setPose(scoreS.g, 862, 260 + 30*(1-sp(t,10.45,0.5)), 1, sp(t,10.45,0.3)); write(scoreS, prog(t,10.45,0.8));
+
+  // tables: brackets Create lagged, entries written when named
+  const nameT=[7.45,7.95,8.45];
+  tables.forEach((tb,k)=>{
+    const bp = sp(t,6.8+k*0.15,0.6);
+    create(tb.bl,bp); create(tb.br,bp);
+    write(tb.title, prog(t,6.85+k*0.15,0.6));
+    tb.ents.forEach((o,r)=>write(o, prog(t,nameT[k]+r*0.08,0.45)));
+    const out = sp(t,10.1+k*0.08,0.5);
+    tb.g.setAttribute('transform',`translate(0,${(-50*out).toFixed(1)})`); tb.g.setAttribute('opacity',(1-out).toFixed(3));
+    const ind=there_and_back(prog(t,nameT[k]-0.05,0.4));
+    recolor(tb.title, mix(TT[k][1], C.YELLOW, ind));
+  });
+  // red mismatch -> fix
+  const bad = tables[2].ents[2];
+  const fixp = sp(t,9.05,0.45);
+  recolor(bad, C.RED);
+  bad.g.setAttribute('opacity',(1-fixp).toFixed(3));
+  setPose(bad.g, TBX[2], ROWY[2]+13 - 30*fixp, 1, 1-fixp);
+  setPose(fix.g, TBX[2], ROWY[2]+13 + 30*(1-fixp), 1, fixp); write(fix, prog(t,9.05,0.5));
+  rowLbl.forEach((o,r)=>write(o, prog(t,6.95+r*0.06,0.5)));
+  rowBox.forEach((b,r)=>{const st=8.95+r*0.15; const c=prog(t,st,0.35); const u=sp(t,st+0.45,0.35);
+    create(b, smooth(c)); b.setAttribute('stroke-opacity',(1-u).toFixed(3)); b.setAttribute('fill-opacity',(0.12*there_and_back(c)).toFixed(3));});
+  checks.forEach((c,r)=>create(c, sp(t,9.1+r*0.15,0.3)));
+  write(relation, prog(t,9.05,0.8));
+  const gTout = sp(t,10.1,0.55);
+  gT.setAttribute('opacity',(1-gTout).toFixed(3));
+  // (tables groups are inside gT; extra fade handled per-group)
+
+  // ---- score ----
+  const nlp = sp(t,10.3,0.8);
+  create(nlAxis, nlp);
+  nlTicks.forEach((l,i)=>create(l, sp(t,10.4+i*0.04,0.3)));
+  nlNums.forEach((o,i)=>write(o, prog(t,10.5+i*0.15,0.5)));
+  const v = lerp(43,78, sp(t,11.4,0.85));
+  const dotOn = sp(t,10.85,0.3);
+  dot.setAttribute('cx',nx(v).toFixed(2)); dot.setAttribute('r',(13*dotOn*(1+0.5*there_and_back(prog(t,12.15,0.6)))).toFixed(2));
+  trail.setAttribute('x2',nx(v).toFixed(2)); trail.setAttribute('opacity', v>43.2?1:0);
+  ghost.setAttribute('r',(9*sp(t,11.4,0.2)).toFixed(2));
+  setPose(ghostLbl.g, nx(43), NLY-30, 1); write(ghostLbl, prog(t,11.45,0.4));
+  const bp = sp(t,12.25,0.5);
+  const bx0=nx(43), bx1=nx(78), bm=(bx0+bx1)/2, by=NLY+64;
+  brace.setAttribute('d',`M ${bx0} ${by} Q ${bx0} ${by+14} ${bx0+16} ${by+14} L ${bm-14} ${by+14} Q ${bm} ${by+14} ${bm} ${by+28} Q ${bm} ${by+14} ${bm+14} ${by+14} L ${bx1-16} ${by+14} Q ${bx1} ${by+14} ${bx1} ${by}`);
+  create(brace, bp);
+  setPose(braceLbl.g, bm, by+66, 1); write(braceLbl, prog(t,12.35,0.6));
+  setPose(foot.g, 1190, 880, 1); write(foot, prog(t,12.55,0.7));
+  // big DecimalNumber (odometer)
+  const numIn = prog(t,10.85,0.6);
+  const ind78 = there_and_back(prog(t,12.15,0.6));
+  setPose(gNum, 1170, 520, 1 + 0.12*ind78);
+  const tens = Math.floor(v/10), ones = v - tens*10;
+  const carry = smooth(clamp((ones-9)/1));    // roll tens during last unit of ones
+  const tensPos = tens + carry;
+  const numCol = mix(C.W, C.YELLOW, sp(t,11.4,0.85));
+  [[tensPos,-DW/2],[ones,DW/2]].forEach(([pos,x],k)=>{
+    const dc=digitCols[k];
+    dc.g.setAttribute('transform',`translate(${x},${(-pos*DH).toFixed(2)})`);
+    dc.objs.forEach((o,d)=>{ write(o, numIn); recolor(o, numCol); o.g.setAttribute('visibility', Math.abs(d-pos)<1.05?'visible':'hidden'); });
+  });
+  setPose(ptsLbl.g, DW+20, 0, 1); write(ptsLbl, prog(t,11.0,0.5));
+  ptsLbl.spans.forEach(s=>{const c=mix(C.GREY,C.YELLOW,sp(t,11.4,0.85));s.setAttribute('fill',c);s.setAttribute('stroke',c);});
+  // final arrow from harness diagram to the score
+  create(arrow, sp(t,12.3,0.6)); arrowHead.setAttribute('opacity', sp(t,12.75,0.2).toFixed(3));
+
+  // ---- progress bar ----
+  const px = BX0 + BW*clamp(t/29);
+  barFill.setAttribute('x2',px.toFixed(2)); barDot.setAttribute('cx',px.toFixed(2));
+
+  // ---- caption ----
+  let cur=null; for(const c of CAPS){ if(t>=c[0]-0.08 && t<c[1]+0.25) cur=c; }
+  if(cur){ capEl.innerHTML=cur[2]; const o=Math.min(prog(t,cur[0]-0.08,0.15), 1-prog(t,cur[1]+0.1,0.15)); capBox.style.opacity=o.toFixed(3);
+    capBox.style.transform=`translateY(${(8*(1-smooth(prog(t,cur[0]-0.08,0.2)))).toFixed(1)}px)`; }
+  else { capBox.style.opacity=0; }
+
+  // ---- avatar ----
+  const f=Math.round(t*30); av.src=AV[Math.floor(f*24/30)%242];
+};
+S.appendChild(gBar);
+window.READY = (async()=>{
+  await Promise.all([
+    document.fonts.load("50px 'Latin Modern Roman'"), document.fonts.load("italic 50px 'Latin Modern Roman'"),
+    document.fonts.load("50px 'Latin Modern Math'"), document.fonts.load("600 50px 'Noto Serif CJK SC'"), document.fonts.load("400 50px 'Noto Serif CJK SC'")]);
+  await Promise.all(avLoads); await document.fonts.ready; seek(0); return true;
+})();
+</script></body></html>

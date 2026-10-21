@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Neo-brutal Hook</title>
+<link rel="stylesheet" href="../kit/fonts/fontsource-archivo-black-5.3.0/index.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-space-grotesk-5.3.0/500.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-space-grotesk-5.3.0/700.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-jetbrains-mono-5.3.0/500.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-jetbrains-mono-5.3.0/700.css">
+<style>
+:root{--bg:#FBFBF9;--cream:#FFF4D6;--ink:#111111;--y:#FDC800;--v:#432DD7;--p:#FF5C93;--m:#23D18B;--s:#5BC0FF;}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
+body{font-family:'Noto Sans CJK SC',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+.abs{position:absolute;left:0;top:0}
+.hx{font-weight:900}
+.ab{font-family:'Archivo Black','Noto Sans CJK SC',sans-serif}
+.sg{font-family:'Space Grotesk','Noto Sans CJK SC',sans-serif;font-weight:700}
+.mono{font-family:'JetBrains Mono',monospace;font-weight:700}
+.card{background:#fff;border:5px solid var(--ink);border-radius:14px;box-shadow:8px 8px 0 var(--ink)}
+.stk{border:4px solid var(--ink);border-radius:12px;box-shadow:6px 6px 0 var(--ink);white-space:nowrap}
+.scene{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden}
+.dots{background-image:radial-gradient(rgba(17,17,17,.16) 2.2px,transparent 2.6px);background-size:28px 28px}
+.grid{background-image:linear-gradient(rgba(17,17,17,.07) 2px,transparent 2px),linear-gradient(90deg,rgba(17,17,17,.07) 2px,transparent 2px);background-size:60px 60px}
+.tape{position:absolute;height:74px;background:var(--ink);border-top:4px solid var(--ink);border-bottom:4px solid var(--ink);overflow:hidden;white-space:nowrap}
+.tape .row{position:absolute;left:0;top:0;height:66px;line-height:66px;font-size:38px;letter-spacing:1px}
+/* progress bar */
+#bar{position:absolute;left:0;top:0;width:1920px;height:64px;background:var(--cream);border-bottom:4px solid var(--ink);z-index:50}
+.pill{position:absolute;top:10px;height:42px;border:3px solid var(--ink);border-radius:21px;background:#fff;overflow:hidden;white-space:nowrap}
+.pill .lab{position:absolute;left:0;top:0;width:100%;height:36px;line-height:36px;text-align:center;font-size:20px}
+.pill.act{background:#fff;box-shadow:4px 4px 0 var(--ink)}
+.pill .fill{position:absolute;left:0;top:0;height:100%;background:var(--y);border-right:3px solid var(--ink)}
+/* subtitle */
+#sub{position:absolute;left:960px;top:958px;height:76px;padding:0 34px;background:var(--ink);color:#fff;border:4px solid var(--ink);border-radius:38px;box-shadow:6px 6px 0 var(--y);font-size:46px;line-height:68px;font-weight:900;white-space:nowrap;z-index:60;transform-origin:50% 50%}
+#sub b{color:var(--y);font-weight:900}
+#avbase{position:absolute;left:1660px;top:936px;width:252px;height:170px;background:var(--s);border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 var(--ink);z-index:70}
+#avtag{position:absolute;left:1676px;top:1036px;z-index:72;font-size:22px;padding:2px 10px;background:var(--y);border:3px solid var(--ink);border-radius:8px}
+#av{position:absolute;left:1670px;top:860px;width:242px;height:220px;z-index:80}
+</style>
+</head>
+<body>
+
+<!-- ============ SCENE 1: paper tag ============ -->
+<div class="scene" id="sc1" style="background:var(--cream)">
+  <div class="abs dots" style="width:1920px;height:1080px"></div>
+  <div class="abs ab" id="s1big" style="top:120px;left:-40px;font-size:330px;line-height:1;color:transparent;-webkit-text-stroke:4px rgba(17,17,17,.13);white-space:nowrap">NEW PAPER</div>
+  <div class="tape" id="tape1" style="left:-100px;top:700px;width:2200px;transform:rotate(-3deg)"><div class="row ab" id="tape1r" style="color:var(--y)"></div></div>
+  <div class="tape" id="tape1b" style="left:-100px;top:740px;width:2200px;transform:rotate(4deg);background:var(--p)"><div class="row ab" id="tape1br" style="color:var(--ink)"></div></div>
+  <div class="abs stk sg" id="s1team" style="background:#fff;font-size:30px;padding:10px 22px;">Google Cloud AI × Northwestern</div>
+  <div class="abs stk ab" id="s1h2" style="background:var(--v);color:#fff;font-size:72px;padding:6px 30px 12px;">Harness²</div>
+  <div class="abs" id="s1star" style="width:150px;height:150px"><svg viewBox="0 0 100 100" width="150" height="150"><polygon points="50,2 61,30 92,22 72,46 98,64 66,68 70,98 50,76 30,98 34,68 2,64 28,46 8,22 39,30" fill="#FF5C93" stroke="#111" stroke-width="4" stroke-linejoin="round"/><text x="50" y="62" text-anchor="middle" font-family="Archivo Black" font-size="30" fill="#111">NEW</text></svg></div>
+</div>
+
+<!-- ============ SCENE 2/3: model + harness ============ -->
+<div class="scene grid" id="sc2" style="background-color:var(--bg)">
+  <div class="abs" id="ring" style="width:1000px;height:660px;border-radius:44px;border:30px solid var(--v);box-shadow:0 0 0 5px #111,inset 0 0 0 5px #111,14px 14px 0 5px #111"></div>
+  <div class="abs" id="ringdots" style="width:940px;height:600px;border-radius:24px" ></div>
+  <div class="abs card" id="model" style="width:520px;height:470px;transform-origin:50% 100%">
+    <div class="abs" style="left:0;top:0;width:510px;height:78px;background:var(--y);border-bottom:5px solid #111;border-radius:9px 9px 0 0"></div>
+    <div class="abs hx" style="left:28px;top:4px;font-size:52px;line-height:70px">模型</div>
+    <div class="abs mono" style="left:178px;top:24px;font-size:24px;line-height:30px">LLM · weights</div>
+    <div class="abs" id="wgrid" style="left:33px;top:104px;width:444px;height:330px"></div>
+  </div>
+  <div class="abs stk" id="lock" style="background:var(--p);padding:12px 22px 12px 18px;transform-origin:50% 50%">
+    <svg width="64" height="74" viewBox="0 0 64 74" style="vertical-align:middle"><path d="M14 34 V22 a18 18 0 0 1 36 0 V34" fill="none" stroke="#111" stroke-width="9"/><rect x="4" y="32" width="56" height="40" rx="8" fill="#FDC800" stroke="#111" stroke-width="5"/><circle cx="32" cy="50" r="6" fill="#111"/><rect x="29" y="52" width="6" height="12" fill="#111"/></svg>
+    <span class="hx" style="font-size:48px;vertical-align:middle;margin-left:10px">权重 0 改动</span>
+  </div>
+  <div class="abs mono" id="frozen" style="font-size:28px;padding:4px 14px;background:#111;color:var(--y);border-radius:8px">FROZEN · 一行没动</div>
+  <div class="abs card" id="diff" style="width:440px;padding:20px 26px 22px;background:#fff">
+    <div class="mono" style="font-size:24px;opacity:.6">$ git diff model/weights</div>
+    <div class="ab" style="font-size:96px;line-height:1.05;margin-top:6px">0<span class="hx" style="font-size:40px;margin-left:16px">行改动</span></div>
+    <div class="mono" style="font-size:24px;margin-top:6px;background:#23D18B;border:3px solid #111;border-radius:8px;display:inline-block;padding:2px 10px">0 files changed</div>
+  </div>
+  <div id="labels"></div>
+  <div class="abs stk ab" id="hname" style="background:var(--y);font-size:76px;padding:4px 34px 12px;border-width:5px;box-shadow:9px 9px 0 #111">HARNESS</div>
+  <div class="abs stk hx" id="hcn" style="background:#fff;font-size:34px;padding:6px 18px">模型外面那一层</div>
+</div>
+
+<!-- ============ SCENE 4: real task ============ -->
+<div class="scene" id="sc4" style="background:var(--s)">
+  <div class="abs dots" style="width:1920px;height:1080px;opacity:.7"></div>
+  <div class="abs" id="edge4" style="top:0;width:16px;height:1080px;background:#111"></div>
+  <div class="abs card hx" id="task" style="padding:18px 44px 26px;font-size:92px;line-height:1.1;white-space:nowrap;transform-origin:50% 50%">一个<span style="background:var(--y);padding:0 10px;border-radius:10px">真实</span>的职场任务</div>
+  <div class="abs stk ab" id="jb" style="background:var(--p);font-size:40px;padding:4px 22px 8px">JobBench</div>
+  <div class="abs stk hx" id="role" style="background:var(--m);font-size:36px;padding:6px 20px">角色：制片人</div>
+  <div id="sheets"></div>
+  <div id="links"></div>
+  <div class="abs" id="stamp4" style="width:330px;height:330px;transform-origin:50% 50%">
+    <div class="abs" style="width:330px;height:330px;border-radius:50%;background:var(--m);border:6px solid #111;box-shadow:10px 10px 0 #111"></div>
+    <div class="abs" style="left:22px;top:22px;width:286px;height:286px;border-radius:50%;border:4px dashed #111"></div>
+    <svg class="abs" style="left:95px;top:46px" width="140" height="120" viewBox="0 0 140 120"><path d="M14 64 L54 100 L126 18" fill="none" stroke="#111" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="abs hx" style="top:178px;width:330px;text-align:center;font-size:68px;line-height:80px">对上账</div>
+  </div>
+</div>
+
+<!-- ============ SCENE 5: score ============ -->
+<div class="scene" id="sc5" style="background:var(--v)">
+  <div class="abs" style="width:1920px;height:1080px;background-image:radial-gradient(rgba(255,255,255,.14) 2.4px,transparent 2.8px);background-size:30px 30px"></div>
+  <div class="abs" id="edge5" style="left:0;width:1920px;height:16px;background:#111"></div>
+  <div class="abs stk hx" id="sc_t" style="background:#fff;font-size:44px;padding:4px 24px 8px">事后打分</div>
+  <div class="abs stk mono" id="sc_m" style="background:var(--cream);font-size:28px;padding:6px 16px">单个案例 · 事后评分 · JobBench</div>
+  <div class="abs card" id="c43" style="width:470px;height:400px;transform-origin:50% 100%">
+    <div class="abs sg" style="left:26px;top:16px;font-size:30px">BEFORE · 原 Harness</div>
+    <div class="abs ab" id="n43" style="left:0;top:58px;width:460px;text-align:center;font-size:250px;line-height:300px">43</div>
+    <div class="abs" id="slash" style="left:30px;top:190px;width:400px;height:46px;background:var(--p);border:5px solid #111;border-radius:10px;transform-origin:0 50%"></div>
+  </div>
+  <div class="abs" id="arrow" style="width:150px;height:110px"><svg width="150" height="110" viewBox="0 0 150 110"><path d="M8 38 H86 V10 L142 55 L86 100 V72 H8 Z" fill="#fff" stroke="#111" stroke-width="6" stroke-linejoin="round"/></svg></div>
+  <div class="abs" id="c78" style="width:600px;height:470px;transform-origin:50% 50%">
+    <div class="abs" style="width:600px;height:470px;background:var(--y);border:6px solid #111;border-radius:16px;box-shadow:14px 14px 0 #111"></div>
+    <div class="abs" style="left:16px;top:16px;width:568px;height:438px;border:4px dashed #111;border-radius:10px"></div>
+    <div class="abs sg" style="left:36px;top:28px;font-size:32px">AFTER · Harness²</div>
+    <div class="abs ab" style="left:0;top:64px;width:600px;text-align:center;font-size:330px;line-height:380px">78</div>
+  </div>
+  <div class="abs stk ab" id="plus" style="background:var(--p);font-size:64px;padding:2px 24px 8px;border-width:5px">+35</div>
+  <div class="abs" id="sbar" style="left:150px;top:752px;width:1330px;height:74px;background:#fff;border:5px solid #111;border-radius:37px;box-shadow:8px 8px 0 #111"></div>
+  <div id="segs"></div>
+  <div class="abs mono" id="tk0" style="font-size:28px;color:#fff">0</div>
+  <div class="abs mono" id="tk100" style="font-size:28px;color:#fff">100</div>
+  <div class="tape" id="tape5" style="left:-100px;top:858px;width:2200px;height:66px;transform:rotate(-1.5deg);background:var(--y)"><div class="row ab" id="tape5r" style="color:#111;font-size:32px;height:58px;line-height:58px"></div></div>
+</div>
+
+<!-- ============ GLOBAL ============ -->
+<div class="abs stk hx" id="gtag" style="z-index:40;background:var(--y);transform-origin:0 0;padding:8px 40px 18px;border-width:5px;box-shadow:12px 12px 0 #111;font-size:132px;line-height:1.15">Google 新论文</div>
+<div id="bar"></div>
+<div id="sub"></div>
+<div id="avbase"></div>
+<div id="avtag" class="mono">刘铁柱 · ning.codes</div>
+<canvas id="av" width="242" height="220"></canvas>
+
+<script>
+// ---------------- helpers ----------------
+const $ = id => document.getElementById(id);
+const cl = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, u) => a + (b - a) * u;
+const eo = u => 1 - Math.pow(1 - cl(u), 3);
+const ei = u => Math.pow(cl(u), 3);
+const eio = u => { u = cl(u); return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+// damped spring 0->1 (with overshoot); dt in seconds
+const spr = (dt, w = 20, z = 9) => dt <= 0 ? 0 : 1 - Math.exp(-z * dt) * Math.cos(w * dt);
+const press = (dt, d = .24) => (dt <= 0 || dt >= d) ? 0 : Math.sin(Math.PI * dt / d);
+const vis = (el, on) => { el.style.display = on ? 'block' : 'none'; };
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+// drop from above with squash on landing. returns {y, sx, sy}
+function drop(dt, H = 900, fall = .17) {
+  if (dt <= 0) return { y: -H, sx: 1, sy: 1, on: false };
+  if (dt < fall) { const u = dt / fall; return { y: -H * (1 - u * u), sx: .94, sy: 1.08, on: true }; }
+  const d = dt - fall, k = Math.exp(-8 * d) * Math.cos(26 * d);
+  return { y: 0, sx: 1 + .13 * k, sy: 1 - .16 * k, on: true };
+}
+const shadow = (n, c = '#111') => `${n}px ${n}px 0 ${c}`;
+
+// ---------------- timeline ----------------
+const T = { tag: .15, team: .55, h2: .72, cut2: 1.33, model: 1.36, grid: 1.55, lock: 2.2, frozen: 2.5,
+  ring: 3.7, lab0: 3.92, hname: 4.55, cut4: 5.41, jb: 5.85, role: 6.1, sh: [7.45, 7.95, 8.45], align: 9.0, stamp: 9.3,
+  cut5: 10.1, s43: 10.6, slash: 11.3, s78: 11.8, plus: 12.25, tape5: 12.4 };
+
+window.DURATION = 13.6;
+window.CUES = [
+  { t: .12, type: 'whoosh', d: .4 }, { t: .32, type: 'pop' }, { t: .55, type: 'tick' }, { t: .72, type: 'pop', soft: true },
+  { t: 1.33, type: 'whoosh', d: .35, soft: true }, { t: 1.5, type: 'paper' }, { t: 2.2, type: 'pop' }, { t: 2.2, type: 'tick', key: true },
+  { t: 3.68, type: 'whoosh', d: .5 },
+  ...[0, 1, 2, 3, 4, 5].map(i => ({ t: 3.92 + i * .1, type: 'tick' })), { t: 4.55, type: 'pop' },
+  { t: 5.34, type: 'whoosh', d: .35 }, { t: 5.5, type: 'paper' }, { t: 5.85, type: 'pop', soft: true }, { t: 6.1, type: 'pop', soft: true },
+  { t: 7.4, type: 'whoosh', d: .3, soft: true }, { t: 7.9, type: 'whoosh', d: .3, soft: true }, { t: 8.4, type: 'whoosh', d: .3, soft: true },
+  { t: 9.0, type: 'tick', key: true }, { t: 9.3, type: 'pop' }, { t: 9.32, type: 'scratch', d: .25 },
+  { t: 10.04, type: 'whoosh', d: .4 }, { t: 10.6, type: 'pop' }, { t: 11.3, type: 'scratch', d: .3 },
+  { t: 11.74, type: 'whoosh', d: .3 }, { t: 11.8, type: 'pop' }, { t: 12.25, type: 'pop', soft: true }, { t: 12.4, type: 'tick' }
+];
+
+// ---------------- build DOM ----------------
+// tapes
+$('tape1r').textContent = ('NEW PAPER ✦ GOOGLE ✦ HARNESS² ✦ 权重不动 ✦ ').repeat(8);
+$('tape1br').textContent = ('JOBBENCH ✦ 43 → 78 ✦ 新论文 ✦ ').repeat(10);
+$('tape5r').textContent = ('权重 0 改动 ✦ 只改 HARNESS ✦ 43 → 78 ✦ GOOGLE 新论文 ✦ ').repeat(6);
+
+// weight grid 12x9
+const WG = []; { const r = rng(7), g = $('wgrid'), cols = ['#432DD7', '#5BC0FF', '#23D18B', '#FDC800', '#FF5C93', '#FFFFFF', '#432DD7', '#5BC0FF'];
+  const C = 12, R = 9, cw = 444 / C, ch = 330 / R;
+  for (let j = 0; j < R; j++) for (let i = 0; i < C; i++) {
+    const d = document.createElement('div'); d.className = 'abs';
+    d.style.cssText += `left:${i * cw + 2}px;top:${j * ch + 2}px;width:${cw - 6}px;height:${ch - 6}px;background:${cols[Math.floor(r() * cols.length)]};border:3px solid #111;border-radius:5px`;
+    g.appendChild(d); WG.push({ el: d, i, j, delay: (i + j) * .022 + r() * .05 });
+  } }
+
+// harness labels around ring. ring box: center (820,500), 1000x660
+const RC = { x: 820, y: 505, w: 1000, h: 660 };
+const LAB = [
+  { t: '提示词', c: '#FDC800', x: RC.x - 500, y: RC.y - 330 + 120, r: -5 },
+  { t: '护栏', c: '#FF5C93', x: RC.x + 500, y: RC.y - 330 + 120, r: 4 },
+  { t: '技能', c: '#23D18B', x: RC.x + 500, y: RC.y + 90, r: -3 },
+  { t: '工具说明', c: '#5BC0FF', x: RC.x + 300, y: RC.y + 330, r: 3 },
+  { t: '脚本', c: '#FFFFFF', x: RC.x - 300, y: RC.y + 330, r: -4 },
+  { t: '记忆', c: '#FDC800', x: RC.x - 500, y: RC.y + 90, r: 5 },
+];
+LAB.forEach((l, k) => {
+  const d = document.createElement('div'); d.className = 'abs stk hx';
+  d.style.cssText += `background:${l.c};font-size:42px;line-height:56px;padding:4px 22px 6px;transform-origin:50% 50%`;
+  d.innerHTML = `<span class="mono" style="font-size:22px;vertical-align:middle;margin-right:10px">0${k + 1}</span>${l.t}`;
+  $('labels').appendChild(d); l.el = d;
+});
+
+// sheets
+const SH = [
+  { t: '排期', f: 'schedule.xlsx', c: '#FDC800', x: 90, r: -4, cols: ['场次', '日期', '天数'] },
+  { t: '人员', f: 'crew.xlsx', c: '#FF5C93', x: 520, r: 3, cols: ['岗位', '人数', '天数'] },
+  { t: '预算', f: 'budget.xlsx', c: '#23D18B', x: 950, r: -2, cols: ['科目', '单价', '合计'] },
+];
+const SHY = 300, SHW = 400, SHH = 470, ROWS = 5, MATCH = [1, 3];
+SH.forEach((s, k) => {
+  const d = document.createElement('div'); d.className = 'abs card';
+  d.style.cssText += `width:${SHW}px;height:${SHH}px;transform-origin:50% 100%`;
+  let h = `<div class="abs" style="width:${SHW - 10}px;height:84px;background:${s.c};border-bottom:5px solid #111;border-radius:9px 9px 0 0"></div>
+    <div class="abs hx" style="left:26px;top:6px;font-size:52px;line-height:70px">${s.t}</div>
+    <div class="abs mono" style="left:auto;right:22px;top:28px;font-size:22px;line-height:30px">${s.f}</div>`;
+  const top = 104, rh = 62, cw = (SHW - 50) / 3;
+  for (let c = 0; c < 3; c++) h += `<div class="abs sg" style="left:${20 + c * cw + 8}px;top:${top}px;font-size:24px;line-height:40px;opacity:.6;font-weight:700">${s.cols[c]}</div>`;
+  const r = rng(31 + k);
+  for (let j = 0; j < ROWS; j++) {
+    const y = top + 46 + j * rh;
+    h += `<div class="abs hl" data-r="${j}" style="left:14px;top:${y - 4}px;width:${SHW - 38}px;height:${rh - 4}px;border-radius:8px;background:#FDC800;border:3px solid #111;opacity:0"></div>`;
+    h += `<div class="abs" style="left:20px;top:${y + rh - 6}px;width:${SHW - 50}px;height:2px;background:rgba(17,17,17,.15)"></div>`;
+    for (let c = 0; c < 3; c++) {
+      const w = c === 0 ? 50 + r() * 50 : 30 + r() * 60;
+      h += `<div class="abs" style="left:${20 + c * cw + 8}px;top:${y + 18}px;width:${Math.min(w, cw - 20)}px;height:18px;border-radius:9px;background:${c === 0 ? '#111' : 'rgba(17,17,17,.28)'}"></div>`;
+    }
+    h += `<div class="abs ck" data-r="${j}" style="left:${SHW - 62}px;top:${y + 6}px;width:40px;height:40px;border-radius:50%;background:#23D18B;border:3px solid #111;opacity:0"><svg width="34" height="34" viewBox="0 0 34 34"><path d="M8 18 L14 24 L26 10" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+  }
+  d.innerHTML = h; $('sheets').appendChild(d); s.el = d;
+  s.hl = [...d.querySelectorAll('.hl')]; s.ck = [...d.querySelectorAll('.ck')];
+});
+// links between sheets for matched rows
+const LK = [];
+MATCH.forEach(j => [0, 1].forEach(k => {
+  const d = document.createElement('div'); d.className = 'abs';
+  d.style.cssText += `height:14px;background:#111;border-radius:7px;transform-origin:0 50%`;
+  $('links').appendChild(d); LK.push({ el: d, j, k });
+}));
+
+// score segments: 20 pills inside sbar
+const SEG = []; { const n = 20, x0 = 166, w = (1330 - 32) / n;
+  for (let i = 0; i < n; i++) { const d = document.createElement('div'); d.className = 'abs';
+    d.style.cssText += `left:${x0 + i * w}px;top:768px;width:${w - 8}px;height:42px;border-radius:21px;border:3px solid #111;background:#fff`;
+    $('segs').appendChild(d); SEG.push(d); } }
+const segX = v => 166 + (1330 - 32) * v / 100;
+['n43l', 'n78l'].forEach(id => { const d = document.createElement('div'); d.id = id; d.className = 'abs stk ab';
+  d.style.cssText += 'font-size:30px;padding:0 12px 4px;border-width:3px;box-shadow:4px 4px 0 #111'; $('segs').appendChild(d); });
+$('n43l').textContent = '43'; $('n43l').style.background = '#fff';
+$('n78l').textContent = '78'; $('n78l').style.background = '#FDC800';
+$('tk0').style.left = '150px'; $('tk0').style.top = '700px';
+$('tk100').style.left = '1430px'; $('tk100').style.top = '700px';
+
+// progress bar
+const SECS = ['钩子', '背景', '核心思路', '走一遍例子', '自进化', '结果', '冷水', '收获'];
+const BAR = []; { const M = 16, G = 10, AW = 380, OW = (1920 - 2 * M - 7 * G - AW - 200) / 7; let x = M;
+  SECS.forEach((n, i) => { const d = document.createElement('div'); d.className = 'pill' + (i === 0 ? ' act' : '');
+    const w = i === 0 ? AW : OW; d.style.left = x + 'px'; d.style.width = w + 'px';
+    if (i === 0) d.innerHTML = `<div class="fill"></div><div class="lab"><span class="ab" style="font-size:20px">01</span><span class="hx" style="font-size:22px;margin-left:10px">钩子</span></div>`;
+    else d.innerHTML = `<div class="lab"><span class="mono" style="font-size:16px;opacity:.55">${String(i + 1).padStart(2, '0')}</span><span class="hx" style="font-size:18px;margin-left:8px;opacity:.75">${n}</span></div>`;
+    $('bar').appendChild(d); BAR.push(d); x += w + G; });
+  const tm = document.createElement('div'); tm.className = 'mono'; tm.id = 'btime';
+  tm.style.cssText = `position:absolute;left:${x + 4}px;top:12px;width:${1920 - M - x - 4}px;height:40px;line-height:34px;text-align:center;font-size:20px;background:#111;color:#FDC800;border-radius:10px;border:3px solid #111`;
+  $('bar').appendChild(tm); }
+
+// subtitles
+const SUBS = [[0.15, 'Google 新论文：'], [1.33, '模型一行<b>权重</b>都没动'], [3.19, '只改了模型外面那一层，叫 <b>Harness</b>'],
+  [5.41, '一个<b>真实</b>的职场任务'], [6.72, '帮制片人把排期、人员和预算几份表<b>对上账</b>'], [10.1, '事后打分从 <b>43</b> 分涨到 <b>78</b> 分']];
+
+// avatar frames
+const AV = []; const avc = $('av').getContext('2d');
+const avLoad = Promise.all(Array.from({ length: 242 }, (_, i) => new Promise(res => {
+  const im = new Image(); im.onload = () => res(); im.onerror = () => res(); im.src = `../kit/av/${String(i).padStart(3, '0')}.png`; AV[i] = im; })));
+
+window.READY = (async () => {
+  await Promise.all([document.fonts.load('900 40px "Noto Sans CJK SC"'), document.fonts.load('40px "Archivo Black"'),
+    document.fonts.load('700 40px "Space Grotesk"'), document.fonts.load('700 20px "JetBrains Mono"'), document.fonts.load('500 20px "JetBrains Mono"'), avLoad]);
+  await document.fonts.ready; seek(0); return true;
+})();
+
+// ---------------- seek ----------------
+function place(el, x, y, sx = 1, sy = sx, r = 0) { el.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${sx},${sy})`; }
+// place element so that its center is at cx,cy (uses offset size)
+function placeC(el, cx, cy, sx = 1, sy = sx, r = 0) { const w = el.offsetWidth, h = el.offsetHeight; el.style.transform = `translate(${cx - w / 2}px,${cy - h / 2}px) rotate(${r}deg) scale(${sx},${sy})`; }
+
+function seek(t) {
+  // ---- scene visibility (hard cuts + wipes)
+  const w4 = cl((t - (T.cut4 - .1)) / .16), w5 = cl((t - (T.cut5 - .1)) / .16);
+  vis($('sc1'), t < T.cut2); vis($('sc2'), t >= T.cut2 && w4 < 1); vis($('sc4'), w4 > 0 && w5 < 1); vis($('sc5'), w5 > 0);
+  $('sc4').style.clipPath = `inset(0 0 0 ${(1 - eo(w4)) * 100}%)`; $('edge4').style.left = ((1 - eo(w4)) * 1920 - 16) + 'px';
+  $('sc5').style.clipPath = `inset(${(1 - eo(w5)) * 100}% 0 0 0)`; $('edge5').style.top = ((1 - eo(w5)) * 1080 - 16) + 'px';
+
+  // ---- global tag: big in scene 1, flies to chip
+  { const g = $('gtag'); g.style.display = t < T.tag - .01 ? 'none' : 'block'; const d = drop(t - T.tag, 700), k = spr(t - T.cut2, 16, 11);
+    const W = g.offsetWidth, H = g.offsetHeight;
+    const bx = 820 - W / 2, by = 330 - H / 2, cs = .3; const cx = 40, cy = 84;
+    const x = lerp(bx, cx, k), y = lerp(by + d.y, cy, k), s = lerp(1, cs, k), r = lerp(-3, -2, k);
+    g.style.transformOrigin = '50% 100%';
+    if (t < T.cut2) { g.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${d.sx},${d.sy})`; }
+    else { g.style.transformOrigin = '0 0'; g.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`; }
+    const pr = press(t - (T.tag + .17), .22); g.style.boxShadow = shadow(Math.round(12 * (1 - pr)) + (t >= T.cut2 ? 6 : 0));
+    }
+
+  // ---- scene 1
+  if (t < T.cut2) {
+    $('tape1r').style.transform = `translateX(${-((t * 260) % 900)}px)`;
+    $('tape1br').style.transform = `translateX(${-900 + ((t * 200) % 900)}px)`;
+    $('s1big').style.transform = `translateX(${-t * 40}px)`;
+    { const k = spr(t - T.team, 22, 10); placeC($('s1team'), 700 + (1 - k) * -1400, 500, 1, 1, 2); }
+    { const k = spr(t - T.h2, 18, 7); const e = $('s1h2'); e.style.display = t > T.h2 ? 'block' : 'none'; placeC(e, 1170, 520, k, k, 6); e.style.transformOrigin = '50% 50%'; }
+    { const k = spr(t - .9, 16, 6); const e = $('s1star'); place(e, 1250, 120, k, k, -12 + t * 30); e.style.transformOrigin = '75px 75px'; }
+  }
+
+  // ---- scene 2/3
+  if (t >= T.cut2 && t < T.cut4 + .1) {
+    const ringK = spr(t - T.ring, 15, 8);
+    // model card: drop at center, then shrink into ring
+    const md = drop(t - T.model, 1000, .2), mshrink = eio((t - T.ring) / .4);
+    const ms = lerp(1, .78, mshrink);
+    const mx = 820 - 260, my = 515 - 235 + 10 + mshrink * 10;
+    $('model').style.transformOrigin = '50% 50%';
+    $('model').style.transform = `translate(${mx}px,${my + md.y}px) scale(${md.sx * ms},${md.sy * ms}) rotate(${lerp(-2, 0, mshrink)}deg)`;
+    const lp = press(t - T.lock - .05, .26);
+    $('model').style.boxShadow = shadow(Math.round(8 * (1 - lp)));
+    WG.forEach(c => { const k = spr(t - T.grid - c.delay, 26, 9); c.el.style.transform = `scale(${cl(k, 0, 1.4)})`;
+      c.el.style.filter = t > T.lock + .05 + (c.i + c.j) * .012 ? 'saturate(.35) brightness(1.08)' : 'none'; });
+    // lock
+    { const e = $('lock'); const dt = t - T.lock; e.style.display = dt > 0 ? 'block' : 'none';
+      const s = dt < .1 ? lerp(2.4, 1, ei(dt / .1)) : 1 + .06 * Math.exp(-12 * (dt - .1)) * Math.cos(30 * (dt - .1));
+      const cx = lerp(820 + 250, 820 + 215, mshrink), cy = lerp(262, 292, mshrink);
+      placeC(e, cx, cy, s * lerp(1, .82, mshrink), s * lerp(1, .82, mshrink), -6);
+      e.style.opacity = cl(dt / .06); e.style.boxShadow = shadow(dt < .1 ? 0 : 6); }
+    { const e = $('frozen'), k = spr(t - T.frozen, 18, 13); e.style.display = t > T.frozen ? 'block' : 'none';
+      placeC(e, 820 + (1 - k) * 1200 - lerp(0, 0, mshrink), lerp(790, 760, mshrink), 1, 1, 0); e.style.opacity = 1 - eo((t - T.ring) / .25); }
+    // ring
+    { const e = $('ring'); e.style.display = t > T.ring ? 'block' : 'none'; e.style.transformOrigin = '50% 50%';
+      const s = lerp(.55, 1, ringK); place(e, RC.x - RC.w / 2, RC.y - RC.h / 2, s, s, lerp(-8, 0, ringK)); }
+    LAB.forEach((l, k) => { const dt = t - (T.lab0 + k * .1); const e = l.el; e.style.display = dt > 0 ? 'block' : 'none';
+      const s = spr(dt, 24, 8); // snap from ring center outward
+      const fx = lerp(RC.x, l.x, cl(spr(dt, 20, 10), 0, 1.15)), fy = lerp(RC.y, l.y, cl(spr(dt, 20, 10), 0, 1.15));
+      placeC(e, fx, fy, s, s, l.r + (1 - cl(s)) * 30); });
+    { const e = $('hname'), dt = t - T.hname; e.style.display = dt > 0 ? 'block' : 'none'; e.style.transformOrigin = '50% 50%';
+      const d = drop(dt, 500, .14); placeC(e, RC.x, RC.y - RC.h / 2 + d.y, d.sx, d.sy, -2);
+      e.style.boxShadow = shadow(Math.round(9 * (1 - press(dt - .14, .2)))); }
+    { const e = $('hcn'), k = spr(t - (T.hname + .2), 20, 9); e.style.display = t > T.hname + .2 ? 'block' : 'none';
+      placeC(e, RC.x, RC.y + RC.h / 2 + (1 - k) * 300, 1, 1, -2); }
+    { const e = $('diff'), k = spr(t - T.frozen - .15, 18, 12), out = ei((t - T.ring + .1) / .25); e.style.display = (t > T.frozen + .15 && out < 1) ? 'block' : 'none';
+      placeC(e, 1330 + (1 - k) * 700 + out * 900, 560, 1, 1, 4); e.style.boxShadow = shadow(Math.round(8 * (1 - press(t - T.frozen - .4, .22)))); }
+  }
+
+  // ---- scene 4
+  if (w4 > 0 && w5 < 1) {
+    const up = eio((t - (T.sh[0] - .2)) / .35);
+    { const e = $('task'), d = spr(t - (T.cut4 + .02), 18, 8); e.style.transformOrigin = '50% 50%';
+      const s = lerp(1, .58, up), r = lerp(-2, -1.5, up);
+      placeC(e, lerp(820, 600, up) + (1 - cl(d)) * 900, lerp(440, 168, up), s, s, r);
+      e.style.boxShadow = shadow(Math.round(lerp(10, 8, up))); }
+    { const e = $('jb'), k = spr(t - T.jb, 22, 8); e.style.display = t > T.jb ? 'block' : 'none';
+      placeC(e, lerp(420, 1060, up), lerp(600, 150, up), k * lerp(1, .9, up), k * lerp(1, .9, up), -6); }
+    { const e = $('role'), k = spr(t - T.role, 22, 8); e.style.display = t > T.role ? 'block' : 'none';
+      placeC(e, lerp(1170, 1340, up), lerp(600, 165, up), k * lerp(1, .9, up), k * lerp(1, .9, up), 5); }
+    const al = eio((t - T.align) / .3);
+    SH.forEach((s, k) => { const dt = t - T.sh[k]; const e = s.el; e.style.display = dt > 0 ? 'block' : 'none';
+      const yk = spr(dt, 19, 8.5); const y = SHY + (1 - yk) * 900;
+      const sq = dt > .14 ? Math.exp(-9 * (dt - .14)) * Math.cos(26 * (dt - .14)) * .08 : 0;
+      e.style.transform = `translate(${s.x}px,${y + lerp(k === 1 ? 18 : 0, 0, al)}px) rotate(${lerp(s.r, 0, al)}deg) scale(${1 + sq},${1 - sq})`;
+      e.style.boxShadow = shadow(Math.round(8 * (1 - press(t - T.align - .25, .22))));
+      s.hl.forEach(h => { const j = +h.dataset.r; h.style.opacity = MATCH.includes(j) ? cl((t - T.align - .1 - k * .06) / .08) : 0; });
+      s.ck.forEach(c => { const j = +c.dataset.r; const dd = t - (T.stamp + .1 + j * .05 + k * .04); c.style.opacity = dd > 0 ? 1 : 0; c.style.transform = `scale(${cl(spr(dd, 26, 8), 0, 1.4)})`; }); });
+    LK.forEach(l => { const dt = t - (T.align + .15 + l.k * .07); l.el.style.display = dt > 0 ? 'block' : 'none';
+      const x0 = SH[l.k].x + SHW - 10, x1 = SH[l.k + 1].x + 10, y = SHY + 104 + 46 + l.j * 62 + 22;
+      l.el.style.left = x0 + 'px'; l.el.style.top = y + 'px'; l.el.style.width = (x1 - x0) + 'px';
+      l.el.style.transform = `scaleX(${eo(dt / .16)})`; });
+    { const e = $('stamp4'), dt = t - T.stamp; e.style.display = dt > 0 ? 'block' : 'none';
+      const s = dt < .11 ? lerp(2.6, 1, ei(dt / .11)) : 1 + .07 * Math.exp(-11 * (dt - .11)) * Math.cos(32 * (dt - .11));
+      placeC(e, 1490, 560, s * .92, s * .92, -10); e.style.opacity = cl(dt / .05); }
+  }
+
+  // ---- scene 5
+  if (w5 > 0) {
+    { const k = spr(t - (T.cut5 + .05), 20, 9); placeC($('sc_t'), 150 + $('sc_t').offsetWidth / 2 - (1 - k) * 600, 196, 1, 1, -2);
+      const k2 = spr(t - (T.cut5 + .18), 20, 9); placeC($('sc_m'), 450 + $('sc_m').offsetWidth / 2 + (1 - k2) * 1500, 198, 1, 1, 1); }
+    { const e = $('c43'), d = drop(t - (T.s43 - .17), 900, .17); e.style.display = t > T.s43 - .17 ? 'block' : 'none';
+      const sm = eio((t - T.s78 + .05) / .3); const s = lerp(1, .86, sm);
+      e.style.transform = `translate(${150 + sm * -10}px,${270 + d.y + sm * 30}px) rotate(${lerp(-3, -5, sm)}deg) scale(${d.sx * s},${d.sy * s})`;
+      e.style.boxShadow = shadow(Math.round(8 * (1 - press(t - T.slash, .2))));
+      $('slash').style.transform = `rotate(-14deg) scaleX(${eo((t - T.slash) / .14)})`; $('n43').style.opacity = lerp(1, .45, cl((t - T.slash) / .2)); }
+    { const e = $('arrow'), k = spr(t - (T.slash + .2), 22, 8); e.style.display = t > T.slash + .2 ? 'block' : 'none'; placeC(e, 700 - (1 - k) * 80, 470, cl(k, 0, 1.3), cl(k, 0, 1.3)); }
+    { const e = $('c78'), dt = t - T.s78; e.style.display = dt > 0 ? 'block' : 'none';
+      const s = dt < .12 ? lerp(2.8, 1, ei(dt / .12)) : 1 + .07 * Math.exp(-10 * (dt - .12)) * Math.cos(30 * (dt - .12));
+      placeC(e, 1100, 450, s, s, lerp(-14, -4, cl(dt / .12))); e.style.opacity = cl(dt / .05);
+      // screen shake on stamp
+      const sh = dt > .12 && dt < .45 ? Math.exp(-14 * (dt - .12)) * Math.sin(70 * dt) * 10 : 0; $('sc5').style.transform = `translate(${sh}px,${sh * .6}px)`; }
+    { const e = $('plus'), k = spr(t - T.plus, 24, 7); e.style.display = t > T.plus ? 'block' : 'none'; placeC(e, 1420, 262, k, k, 8); }
+    // bar: fill to 43, then to 78
+    const v = lerp(0, 43, eo((t - T.s43) / .5)) + lerp(0, 35, eio((t - T.s78 - .05) / .55));
+    SEG.forEach((d, i) => { const lo = i * 5; const on = v >= lo + 2.5;
+      d.style.background = on ? (lo >= 40 ? '#FDC800' : '#5BC0FF') : '#fff';
+      if (lo >= 40 && lo < 45) d.style.background = on ? (v > 45 ? '#FDC800' : '#5BC0FF') : '#fff'; });
+    { const e = $('n43l'); e.style.display = t > T.s43 + .3 ? 'block' : 'none'; placeC(e, segX(43), 712, 1, 1, -3); }
+    { const e = $('n78l'), k = spr(t - T.s78 - .5, 24, 8); e.style.display = t > T.s78 + .5 ? 'block' : 'none'; placeC(e, segX(78), 712, k, k, 3); }
+    { const e = $('tape5'); const k = eo((t - T.tape5) / .25); e.style.display = t > T.tape5 ? 'block' : 'none';
+      e.style.transform = `translateX(${(1 - k) * -2200}px) rotate(-1.5deg)`; $('tape5r').style.transform = `translateX(${-((t * 180) % 1000)}px)`; }
+  }
+
+  // ---- progress bar
+  { const p = cl(t / 29); const a = BAR[0]; a.querySelector('.fill').style.width = (p * 100) + '%';
+    const g = t + 0; const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+    $('btime').textContent = `${fmt(g)} / 05:48`; }
+
+  // ---- subtitle
+  { let cur = null, st = 0; SUBS.forEach(s => { if (t >= s[0] - .02) { cur = s[1]; st = s[0]; } });
+    const e = $('sub'); if (!cur) { e.style.display = 'none'; } else { e.style.display = 'block'; if (e._c !== cur) { e.innerHTML = cur; e._c = cur; }
+      const k = spr(t - st + .02, 26, 11); const w = e.offsetWidth; e.style.transform = `translate(${-w / 2}px,${(1 - cl(k)) * 20}px) scale(${lerp(.92, 1, cl(k, 0, 1.06))})`; } }
+
+  // ---- avatar
+  { const f = Math.round(t * 30); const im = AV[Math.floor(f * 24 / 30) % 242]; avc.clearRect(0, 0, 242, 220); if (im && im.complete) avc.drawImage(im, 0, 0, 242, 220); }
+}
+window.seek = seek;
+</script>
+</body>
+</html>

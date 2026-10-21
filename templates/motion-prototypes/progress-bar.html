@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Section Progress Bar</title>
+<!--
+  Section progress bar for 16:9 paper-explainer videos (1920 x BAR_H).
+  Deterministic: window.seek(t, opts) is a pure function of t (no CSS transitions/animations/timers).
+
+  Usage (headless render):
+    progress-bar.html?variant=1|2|3            (or set window.BAR_CONFIG before load)
+    await window.barReady;            // fonts measured, DOM built
+    window.seek(tSeconds, {animScale: 1, teaser: true});
+      animScale : multiplies transition + teaser durations (use playback-rate when previewing a sped-up video)
+      teaser    : show the "下一节" teaser in the last cfg.teaserSec of a section
+  Config:
+    { variant, total, sections:[{num:'01', name:'钩子', start:0}, ...], margin, anim (s), teaserSec (s) }
+-->
+<style>
+  :root{
+    --paper:#FAFAF5; --ink:#24231F; --accent:#D4552A; --stan:#8C1515; --slate:#3E6A8A;
+  }
+  html,body{margin:0;padding:0;background:var(--paper);}
+  #bar{position:relative;width:1920px;height:64px;background:var(--paper);overflow:hidden;
+       font-family:'Noto Sans CJK SC','Noto Sans SC',sans-serif;color:var(--ink);
+       -webkit-font-smoothing:antialiased;}
+  #bar *{box-sizing:border-box;}
+  .a{position:absolute;left:0;top:0;white-space:nowrap;}
+  .num{font-family:'Inter',sans-serif;font-feature-settings:'tnum' 1,'lnum' 1;}
+  .serifnum{font-family:'Latin Modern Roman','Noto Serif CJK SC',serif;font-feature-settings:'lnum' 1;}
+  .serif{font-family:'Noto Serif CJK SC','Noto Serif SC',serif;}
+  #measure{position:absolute;left:-9999px;top:-9999px;visibility:hidden;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="measure"></div>
+<script>
+(function(){
+'use strict';
+const DEFAULT = {
+  variant: 3,
+  total: 311.77,
+  margin: 96,
+  anim: 0.42,        // section-change transition (s)
+  teaserSec: 2.0,    // "下一节" teaser window (s)
+  v3Accordion: false,
+  sections: [
+    {num:'01', name:'钩子',     start:0},
+    {num:'02', name:'背景',     start:26},
+    {num:'03', name:'核心思路', start:63},
+    {num:'04', name:'拆解架构', start:76},
+    {num:'05', name:'走一遍例子', start:93},
+    {num:'06', name:'结果',     start:198},
+    {num:'07', name:'冷水',     start:231},
+    {num:'08', name:'收获',     start:271},
+  ],
+};
+const q = new URLSearchParams(location.search);
+const cfg = Object.assign({}, DEFAULT, window.BAR_CONFIG || {});
+if (q.get('variant')) cfg.variant = +q.get('variant');
+if (q.get('total')) cfg.total = +q.get('total');
+const W = 1920, H = 64, M = cfg.margin, S = cfg.sections, N = S.length;
+
+// ---------- math ----------
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,e)=>a+(b-a)*e;
+const easeOutCubic=x=>{x=clamp(x,0,1);return 1-Math.pow(1-x,3);};
+const easeOutBack=(x,s=1.25)=>{x=clamp(x,0,1);const c=s+1;return 1+c*Math.pow(x-1,3)+s*Math.pow(x-1,2);};
+const smooth=x=>{x=clamp(x,0,1);return x*x*(3-2*x);};
+function hex(c){c=c.replace('#','');return[parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];}
+function mix(a,b,e){const A=hex(a),B=hex(b);e=clamp(e,0,1);return`rgb(${A.map((v,i)=>Math.round(lerp(v,B[i],e))).join(',')})`;}
+const PAPER='#FAFAF5', INK='#24231F', ACC='#D4552A', STAN='#8C1515';
+// ink at alpha a over paper, as hex
+function inkA(a){const P=hex(PAPER),I=hex(INK);return'#'+P.map((v,i)=>Math.round(lerp(v,I[i],a)).toString(16).padStart(2,'0')).join('');}
+
+// state of the timeline at t
+function state(t, opts){
+  opts = opts||{};
+  const sc = opts.animScale||1;
+  t = clamp(t,0,cfg.total);
+  let k=0; for(let i=0;i<N;i++) if(t>=S[i].start) k=i;
+  const s0=S[k].start, s1=(k+1<N)?S[k+1].start:cfg.total;
+  const prog=clamp((t-s0)/(s1-s0),0,1);
+  const tp = k===0 ? 1 : (t-s0)/(cfg.anim*sc);   // raw transition progress (>=1 when settled)
+  let tz = 0;
+  if (opts.teaser!==false && k+1<N){
+    const win = cfg.teaserSec*sc;
+    tz = smooth((t-(s1-win))/(0.35*sc)) * (1-smooth((t-(s1-0.12*sc))/(0.12*sc)));
+  }
+  return {t,k,prev:Math.max(0,k-1),prog,tp,tz};
+}
+
+function el(tag, cls, parent, html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;(parent||root).appendChild(e);return e;}
+const root=document.getElementById('bar');
+const meas=document.getElementById('measure');
+function measure(html, style){meas.innerHTML='';const s=document.createElement('span');s.style.cssText=style;s.innerHTML=html;meas.appendChild(s);return s.getBoundingClientRect().width;}
+const tr=(e,x,y,s)=>{e.style.transform=`translate(${x}px,${y}px)`+(s!=null?` scale(${s})`:'');};
+
+// =====================================================================
+// V1 · 分段胶囊条  (capsule segments + sliding ink pill + glowing head)
+// =====================================================================
+const V1 = {
+  build(){
+    const gap=6, L=W-2*M-gap*(N-1);
+    this.TY=47; this.TH=6;
+    this.segs=[]; let x=M;
+    for(let i=0;i<N;i++){
+      const s1=(i+1<N)?S[i+1].start:cfg.total, w=(s1-S[i].start)/cfg.total*L;
+      const base=el('div','a'); base.style.cssText+=`height:${this.TH}px;width:${w}px;border-radius:3px;background:${inkA(.10)};`;
+      tr(base,x,this.TY);
+      const fill=el('div','a'); fill.style.cssText+=`height:${this.TH}px;width:${w}px;border-radius:3px;background:${ACC};transform-origin:0 0;`;
+      this.segs.push({x,w,base,fill}); x+=w+gap;
+    }
+    // glowing head
+    this.head=el('div','a'); this.head.style.cssText+=`width:14px;height:14px;border-radius:7px;background:${ACC};
+      box-shadow:0 0 0 3px rgba(212,85,42,.16),0 0 14px 3px rgba(212,85,42,.45);`;
+    this.headCore=el('div','a',this.head); this.headCore.style.cssText+=`left:4px;top:4px;width:6px;height:6px;border-radius:3px;background:#FFF4EE;`;
+    // pill (two stacked labels for crossfade)
+    this.pill=el('div','a'); this.pill.style.cssText+=`height:36px;border-radius:18px;background:${INK};overflow:hidden;`;
+    this.ptr=el('div','a'); this.ptr.style.cssText+=`width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid ${INK};`;
+    const lab=(i)=>`<span class="num" style="font-size:20px;font-weight:600;color:#F2B49B;letter-spacing:.02em">${S[i].num}</span><span style="display:inline-block;width:10px"></span><span style="font-size:26px;font-weight:700;color:#fff;letter-spacing:.04em">${S[i].name}</span>`;
+    this.labW=S.map((s,i)=>measure(lab(i),'')+36);
+    this.labA=el('div','a',this.pill); this.labB=el('div','a',this.pill);
+    for(const l of [this.labA,this.labB]) l.style.cssText+=`height:36px;line-height:36px;padding:0 18px;`;
+    this.lab=lab;
+    // teaser ghost
+    this.ghost=el('div','a'); this.ghost.style.cssText+=`height:36px;line-height:36px;font-size:20px;color:${inkA(.58)};letter-spacing:.03em;`;
+    this.ghostW=S.map((s,i)=> i+1<N ? measure(this.ghostHtml(i+1),'font-size:20px;letter-spacing:.03em') : 0);
+  },
+  ghostHtml(j){return `<span style="color:${inkA(.40)}">下一节</span><span style="display:inline-block;width:8px"></span><span class="num" style="color:${ACC};font-weight:600">${S[j].num}</span><span style="display:inline-block;width:6px"></span><span style="font-weight:600;color:${inkA(.72)}">${S[j].name}</span><span style="display:inline-block;width:6px"></span>→`;},
+  seek(t,opts){
+    const st=state(t,opts), {k,prev,prog,tp,tz}=st;
+    for(let i=0;i<N;i++){
+      const s=this.segs[i]; const f = i<k?1:(i===k?prog:0);
+      s.fill.style.transform=`translate(${s.x}px,${this.TY}px) scaleX(${f})`;
+      s.fill.style.opacity = f>0?1:0;
+      // next segment warms during teaser
+      s.base.style.background = (i===k+1&&tz>0) ? mix(inkA(.10),'#F3CDBE',tz) : inkA(.10);
+    }
+    const seg=this.segs[k], hx=seg.x+prog*seg.w;
+    tr(this.head,hx-7,this.TY+this.TH/2-7);
+    // pill: width morph with overshoot, follows head
+    const e=easeOutBack(tp,1.3), ef=easeOutCubic(tp*1.5);
+    const pw=lerp(this.labW[prev],this.labW[k],k===0?1:e);
+    const px=clamp(hx-pw/2, M-4, W-M+4-pw);
+    const pop = k===0?1: 1+0.06*Math.sin(Math.PI*clamp(tp,0,1))*(1-clamp(tp,0,1)); // tiny pop
+    this.pill.style.width=pw+'px'; this.pill.style.transformOrigin=`${clamp(hx-px,0,pw)}px 40px`;
+    tr(this.pill,px,3,pop);
+    tr(this.ptr,clamp(hx,px+16,px+pw-16)-6,39);
+    if(this._a!==prev){this.labA.innerHTML=this.lab(prev);this._a=prev;}
+    if(this._b!==k){this.labB.innerHTML=this.lab(k);this._b=k;}
+    const settled = k===0||tp>=1;
+    const eo=easeOutCubic(tp/0.4), ei=easeOutCubic((tp-0.3)/0.7);
+    this.labA.style.opacity= settled?0:1-eo; tr(this.labA,0,settled?0:-12*eo);
+    this.labB.style.opacity= settled?1:ei;   tr(this.labB,0,settled?0:12*(1-ei));
+    // teaser ghost beside the pill
+    if(tz>0.001 && k+1<N){
+      if(this._g!==k+1){this.ghost.innerHTML=this.ghostHtml(k+1);this._g=k+1;}
+      const gw=this.ghostW[k]; let gx=px+pw+14; if(gx+gw>W-M) gx=px-14-gw;
+      this.ghost.style.opacity=tz; tr(this.ghost,gx+(1-tz)*-10,3);
+    } else this.ghost.style.opacity=0;
+  }
+};
+
+// =====================================================================
+// V2 · 章节标签条  (label row + magic-move ink pill + hairline)
+// =====================================================================
+const V2 = {
+  build(){
+    this.cw=(W-2*M)/N; this.PT=3; this.PH=40; this.LY=55;
+    const lab=(i)=>`<span class="num nm" style="font-size:20px;font-weight:600;letter-spacing:.02em">${S[i].num}</span><span style="display:inline-block;width:9px"></span><span class="nn" style="font-size:26px;font-weight:600;letter-spacing:.04em">${S[i].name}</span>`;
+    // dashed teaser outline (under labels)
+    this.dash=el('div','a'); this.dash.style.cssText+=`height:${this.PH}px;border-radius:20px;border:1.5px dashed ${inkA(.38)};`;
+    this.pill=el('div','a'); this.pill.style.cssText+=`height:${this.PH}px;border-radius:20px;background:${INK};`;
+    this.labs=[]; this.lw=[];
+    for(let i=0;i<N;i++){
+      const w=measure(lab(i),''); this.lw.push(w);
+      const e=el('div','a',null,lab(i)); e.style.cssText+=`height:${this.PH}px;line-height:${this.PH}px;`;
+      const cx=M+(i+.5)*this.cw; tr(e,cx-w/2,this.PT);
+      this.labs.push({e,cx,x0:cx-w/2,x1:cx+w/2,nm:e.querySelector('.nm'),nn:e.querySelector('.nn')});
+    }
+    // white copy of every label, clipped to the pill rect -> text inverts exactly where the pill is
+    this.inv=el('div','a'); this.inv.style.cssText+=`width:${W}px;height:${H}px;`;
+    for(let i=0;i<N;i++){const L=this.labs[i];const e=el('div','a',this.inv,lab(i));e.style.cssText+=`height:${this.PH}px;line-height:${this.PH}px;color:#fff;`;
+      e.querySelector('.nm').style.color='#F2B49B';tr(e,L.x0,this.PT);}
+    this.track=el('div','a'); this.track.style.cssText+=`height:2px;width:${W-2*M}px;background:${inkA(.10)};border-radius:1px;`; tr(this.track,M,this.LY);
+    this.ticks=[]; for(let i=1;i<N;i++){const d=el('div','a');d.style.cssText+=`width:2px;height:6px;background:${inkA(.18)};`;tr(d,M+i*this.cw-1,this.LY-2);this.ticks.push(d);}
+    this.fill=el('div','a'); this.fill.style.cssText+=`height:2px;width:1px;background:${ACC};border-radius:1px;transform-origin:0 0;`;
+    this.dot=el('div','a'); this.dot.style.cssText+=`width:8px;height:8px;border-radius:4px;background:${ACC};box-shadow:0 0 0 3px rgba(212,85,42,.15);`;
+    this.pad=18;
+  },
+  rect(i){const L=this.labs[i];return[L.x0-this.pad,L.x1+this.pad];},
+  seek(t,opts){
+    const {k,prev,prog,tp,tz}=state(t,opts);
+    const [a0,a1]=this.rect(prev),[b0,b1]=this.rect(k);
+    let x0,x1;
+    if(k===0||tp>=1){x0=b0;x1=b1;}
+    else{ // leading edge moves first, trailing edge follows → gooey magic move
+      const lead=easeOutBack(tp*1.25,1.35), trail=easeOutBack(tp*0.92,1.1);
+      if(b0>=a0){x1=lerp(a1,b1,lead);x0=lerp(a0,b0,trail);} else {x0=lerp(a0,b0,lead);x1=lerp(a1,b1,trail);}
+    }
+    this.pill.style.width=(x1-x0)+'px'; tr(this.pill,x0,this.PT);
+    this.inv.style.clipPath=`inset(${this.PT}px ${W-x1}px ${H-this.PT-this.PH}px ${x0}px round 20px)`;
+    for(let i=0;i<N;i++){
+      const L=this.labs[i];
+      const ov=clamp((Math.min(x1,L.x1)-Math.max(x0,L.x0))/(L.x1-L.x0),0,1);
+      const baseN = i<k?inkA(.62):(i===k?inkA(.62):inkA(.36));
+      const baseNum = i<k?ACC:inkA(.32);
+      let nn=baseN, nm=baseNum;
+      if(i===k+1&&tz>0){nn=mix(inkA(.36),INK,tz*0.8);nm=mix(inkA(.32),ACC,tz);}
+      L.nn.style.color=nn; L.nm.style.color=nm;
+    }
+    if(tz>0.001&&k+1<N){const [c0,c1]=this.rect(k+1);this.dash.style.width=(c1-c0)+'px';tr(this.dash,c0,this.PT);this.dash.style.opacity=tz;}
+    else this.dash.style.opacity=0;
+    const fx=M+(k+prog)*this.cw;
+    this.fill.style.transform=`translate(${M}px,${this.LY}px) scaleX(${fx-M})`;
+    tr(this.dot,fx-4,this.LY-3);
+    this.ticks.forEach((d,j)=>{d.style.background = (j+1)<=k ? ACC : inkA(.18);});
+  }
+};
+
+// =====================================================================
+// V3 · 编辑感目录尺  (serif numerals on a ruler, accordion reveal, playhead)
+// =====================================================================
+const V3 = {
+  build(){
+    this.BY=52; // ruler baseline
+    // paper texture (deterministic SVG noise), fades out toward the bottom so no seam with the video
+    const tex=el('div','a'); tex.style.cssText+=`width:${W}px;height:${H}px;opacity:.55;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .50  0 0 0 0 .42  0 0 0 .16 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      -webkit-mask-image:linear-gradient(#000 0%,#000 55%,transparent 100%);`;
+    this.base=el('div','a'); this.base.style.cssText+=`height:1px;width:${W-2*M}px;background:${inkA(.30)};`; tr(this.base,M,this.BY);
+    this.played=el('div','a'); this.played.style.cssText+=`height:2px;width:1px;background:${STAN};transform-origin:0 0;`;
+    this.minor=[]; this.major=[]; this.nums=[]; this.names=[];
+    this.numW=[]; this.nameW=[];
+    for(let i=0;i<N;i++){
+      const s1=(i+1<N)?S[i+1].start:cfg.total, nm=Math.max(2,Math.round((s1-S[i].start)/6));
+      const arr=[]; for(let j=1;j<nm;j++){const d=el('div','a');d.style.cssText+=`width:1px;height:${j%5===0?8:5}px;background:${inkA(.26)};`;arr.push(d);} this.minor.push(arr);
+      const mj=el('div','a'); mj.style.cssText+=`width:1px;height:22px;background:${inkA(.45)};`; this.major.push(mj);
+      const n=el('div','a serifnum',null,S[i].num); n.style.cssText+=`font-family:'Latin Modern Roman Demi','Latin Modern Roman',serif;font-size:24px;line-height:24px;transform-origin:0 100%;`; this.nums.push(n);
+      this.numW.push(measure(S[i].num,`font-family:'Latin Modern Roman Demi';font-size:24px`));
+      const wrap=el('div','a'); wrap.style.cssText+=`overflow:hidden;height:40px;`;
+      const nmEl=el('div','a serif',wrap,S[i].name); nmEl.style.cssText+=`font-size:27px;font-weight:700;line-height:40px;color:${INK};letter-spacing:.06em;`;
+      this.names.push({wrap,nmEl}); this.nameW.push(measure(S[i].name,`font-family:'Noto Serif CJK SC';font-size:27px;font-weight:700;letter-spacing:.06em`));
+    }
+    const endTick=el('div','a'); endTick.style.cssText+=`width:1px;height:22px;background:${inkA(.45)};`; tr(endTick,W-M,this.BY-21);
+    this.ring=el('div','a'); this.ring.style.cssText+=`width:16px;height:16px;border-radius:8px;border:1.5px solid ${STAN};`;
+    this.head=el('div','a'); this.head.style.cssText+=`width:11px;height:11px;border-radius:6px;background:${STAN};box-shadow:0 0 0 3px ${PAPER},0 0 0 4px rgba(140,21,21,.25);`;
+    this.stem=el('div','a'); this.stem.style.cssText+=`width:1.5px;height:14px;background:${STAN};`;
+  },
+  seek(t,opts){
+    const {k,prev,prog,tp,tz}=state(t,opts);
+    const e = k===0?1:easeOutBack(tp,1.2);
+    const act=new Array(N).fill(0); act[k]=e; if(k!==prev) act[prev]=1-e;
+    // v3Accordion=true: active slot widens (others reflow) -> playhead hops back by the old name width on change.
+    // default false: equal slots, the name reveals inside its own slot -> playhead is monotonic.
+    const extra=i=>cfg.v3Accordion?this.nameW[i]+16:0;
+    const L=W-2*M; let sumE=0; for(let i=0;i<N;i++) sumE+=act[i]*extra(i);
+    const baseW=(L-sumE)/N;
+    let x=M; const xs=[],ws=[];
+    for(let i=0;i<N;i++){const w=baseW+act[i]*extra(i);xs.push(x);ws.push(w);x+=w;}
+    for(let i=0;i<N;i++){
+      tr(this.major[i],xs[i],this.BY-21);
+      const arr=this.minor[i]; arr.forEach((d,j)=>{const h=parseFloat(d.style.height);tr(d,xs[i]+(j+1)/(arr.length+1)*ws[i],this.BY-h+1);});
+      const a=clamp(act[i],0,1.2);
+      const isNext=(i===k+1);
+      let col = i<k?inkA(.62):(i===k?inkA(.62):inkA(.40));
+      col = mix(col,STAN,clamp(a,0,1)); if(isNext&&tz>0) col=mix(inkA(.34),STAN,tz*0.75);
+      this.nums[i].style.color=col;
+      const sc=1+0.25*clamp(a,0,1.1);
+      tr(this.nums[i],xs[i]+8,this.BY-30-0,sc);  // baseline-ish anchored
+      const nw=this.numW[i]*sc;
+      const nmx=xs[i]+8+nw+9;
+      const {wrap,nmEl}=this.names[i];
+      wrap.style.width=Math.max(0,a*this.nameW[i]+4)+'px'; tr(wrap,nmx,this.BY-38);
+      wrap.style.opacity=clamp(a*1.4-0.2,0,1);
+      tr(nmEl,(1-clamp(a,0,1))*-12,0);
+    }
+    const hx=xs[k]+prog*ws[k];
+    this.played.style.transform=`translate(${M}px,${this.BY-0.5}px) scaleX(${hx-M})`;
+    tr(this.head,hx-5.5,this.BY-5);
+    tr(this.stem,hx-0.75,this.BY-16); this.stem.style.opacity=.0;
+    if(tz>0.001&&k+1<N){const nx=xs[k+1];this.ring.style.opacity=tz*(0.5+0.5*Math.cos((t*2*Math.PI)/(0.9*(opts&&opts.animScale||1))));tr(this.ring,nx-8,this.BY-8);}
+    else this.ring.style.opacity=0;
+  }
+};
+
+const VARS={1:V1,2:V2,3:V3};
+const V=VARS[cfg.variant]||V1;
+window.barReady = document.fonts.ready.then(()=>{
+  // force-load fonts used
+  return Promise.all(["600 26px 'Noto Sans CJK SC'","700 26px 'Noto Sans CJK SC'","600 20px Inter","24px 'Latin Modern Roman Demi'","700 27px 'Noto Serif CJK SC'"].map(f=>document.fonts.load(f,'钩子背景核心思路拆解架构走一遍例子结果冷水收获下一节0123456789'))).catch(()=>{});
+}).then(()=>{ V.build(); window.seek=(t,o)=>V.seek(t,o||{}); window.seek(0); return true; });
+window.BAR_CFG=cfg;
+})();
+</script>
+</body>
+</html>

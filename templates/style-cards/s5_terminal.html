@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>S5 Terminal Launch</title>
+<link rel="stylesheet" href="../kit/fonts/fontsource-jetbrains-mono-5.3.0/400.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-jetbrains-mono-5.3.0/500.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-jetbrains-mono-5.3.0/700.css">
+<style>
+:root{
+  --bg:#0A0A0B; --grid:#16161A; --panel:#111114; --line:#26262C;
+  --tx:#EDEDED; --mu:#8A8A93; --dim:#55555D;
+  --g:#3DF5A6; --c:#4CC9F0; --a:#FFB547; --m:#FF4FD8; --r:#FF5C6C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
+body{font-family:'Noto Sans CJK SC',sans-serif;color:var(--tx);-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono',monospace}
+.disp{font-family:'Inter Display','Inter',sans-serif;font-weight:700}
+.abs{position:absolute}
+#root{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden}
+#bg{position:absolute;inset:0;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:48px 48px;background-position:-1px 15px}
+#glow{position:absolute;left:0;top:0;width:1920px;height:1080px}
+#vig{position:absolute;inset:0;background:radial-gradient(ellipse 75% 70% at 50% 50%,transparent 55%,rgba(5,5,6,.85) 100%)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.panel{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 30px 60px -20px rgba(0,0,0,.8),0 0 0 1px rgba(0,0,0,.4)}
+.tb{height:44px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--mu);background:rgba(255,255,255,.015);border-radius:12px 12px 0 0}
+.dot{width:12px;height:12px;border-radius:50%;background:#2E2E35}
+.tb .ttl{flex:1;text-align:center;margin-right:52px}
+.code{font-family:'JetBrains Mono',monospace;font-size:30px;line-height:48px;white-space:pre}
+.cur{display:inline-block;width:.6em;height:1.05em;vertical-align:-.17em;background:var(--g);box-shadow:0 0 12px rgba(61,245,166,.6)}
+.c-g{color:var(--g)} .c-c{color:var(--c)} .c-a{color:var(--a)} .c-m{color:var(--m)} .c-mu{color:var(--mu)} .c-d{color:var(--dim)} .c-t{color:var(--tx)} .c-r{color:var(--r)}
+/* top bar */
+#bar{position:absolute;left:0;top:0;width:1920px;height:64px;background:linear-gradient(#0E0E11,#0B0B0D);border-bottom:1px solid #1E1E23}
+.tab{position:absolute;top:11px;height:42px;border-radius:8px;border:1px solid #202026;background:#0F0F12;overflow:hidden;
+  font-family:'JetBrains Mono',monospace;font-size:22px;color:#5C5C66;display:flex;align-items:center;padding:0 14px;gap:10px;white-space:nowrap}
+.tab .n{color:#4A4A52}
+.tab.on{border-color:rgba(61,245,166,.55);color:var(--tx);font-size:26px;
+  box-shadow:0 0 0 1px rgba(61,245,166,.12),0 0 18px rgba(61,245,166,.18),0 0 2px rgba(61,245,166,.5) inset}
+.tab.on .n{color:var(--g)}
+.tab .zh{font-family:'Noto Sans CJK SC';font-weight:500}
+#tabfill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(61,245,166,.02),rgba(61,245,166,.10))}#tabline{position:absolute;left:0;bottom:0;height:3px;background:var(--g);box-shadow:0 0 10px var(--g);border-radius:0 2px 2px 0}
+#gprog{position:absolute;left:0;bottom:-1px;height:2px;background:var(--g);box-shadow:0 0 8px var(--g)}
+/* subtitle */
+#sub{position:absolute;top:966px;left:0;width:1640px;display:flex;justify-content:center}
+#subp{display:flex;align-items:center;gap:18px;padding:10px 34px 12px 26px;border-radius:14px;background:rgba(14,14,17,.86);
+  border:1px solid #2C2C33;box-shadow:0 0 0 1px rgba(0,0,0,.5),0 12px 30px rgba(0,0,0,.5);font-size:44px;font-weight:500;letter-spacing:.02em;white-space:nowrap}
+#subp .pr{font-family:'JetBrains Mono';font-weight:700;color:var(--g);font-size:36px}
+#subp .hl{font-family:'JetBrains Mono';font-weight:700}
+/* chips */
+.chip{position:absolute;width:300px;height:104px;border-radius:12px;background:#111114;border:1px solid var(--line);padding:14px 20px 0 52px}
+.chip .zh{font-size:32px;font-weight:700;line-height:40px}
+.chip .fn{font-family:'JetBrains Mono';font-size:24px;color:var(--mu);line-height:34px}
+.chip .led{position:absolute;left:22px;top:26px;width:12px;height:12px;border-radius:50%}
+/* tables */
+.tbl{position:absolute;left:0;top:44px;width:100%}
+.row{display:flex;height:72px;align-items:center;border-bottom:1px solid #1C1C21;padding:0 24px;position:relative}
+.row.h{height:58px;font-size:28px;color:var(--mu);font-weight:500}
+.cell{font-family:'JetBrains Mono';font-size:31px;position:relative;white-space:nowrap}
+.cell .bgc{position:absolute;left:-10px;right:-10px;top:-6px;bottom:-6px;border-radius:6px}
+.tag{font-family:'Noto Sans CJK SC';font-weight:700;font-size:28px;color:var(--tx);padding:0 12px;border-radius:6px;border:1px solid #30303A;line-height:36px;margin-left:auto}
+#slices div{position:absolute;left:0;width:1920px}
+#scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px)}
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="bg"></div>
+  <canvas id="glow" width="1920" height="1080"></canvas>
+  <div id="stage"></div>
+  <div id="vig"></div>
+  <div id="scan"></div>
+  <div id="slices"></div>
+  <div id="flash" class="abs" style="inset:0;background:#fff;opacity:0"></div>
+  <div id="sub"><div id="subp"></div></div>
+  <div id="plinth" class="abs" style="left:1650px;top:1050px;width:282px;height:40px;border-radius:50%;background:radial-gradient(ellipse at center,rgba(61,245,166,.28),rgba(61,245,166,0) 70%)"></div>
+  <div class="abs" style="left:1672px;top:1077px;width:238px;height:1px;background:linear-gradient(90deg,transparent,rgba(61,245,166,.7),transparent)"></div>
+  <canvas id="av" width="242" height="220" style="position:absolute;left:1670px;top:860px"></canvas>
+  <div id="bar"></div>
+</div>
+<script>
+'use strict';
+// ---------- utils ----------
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,e)=>a+(b-a)*e;
+const P=(t,a,d)=>clamp((t-a)/d);
+const eo=x=>1-Math.pow(1-clamp(x),3);
+const eo5=x=>1-Math.pow(1-clamp(x),5);
+const eio=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const eb=(x,s=1.6)=>{x=clamp(x);const c=s+1;return 1+c*Math.pow(x-1,3)+s*Math.pow(x-1,2)};
+function rng(seed){let s=seed>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const $=id=>document.getElementById(id);
+const ST=$('stage');
+function el(html){const d=document.createElement('div');d.innerHTML=html.trim();const e=d.firstChild;ST.appendChild(e);return e}
+function show(e,o,tf){e.style.opacity=o;e.style.visibility=o<=0.001?'hidden':'visible';if(tf!==undefined)e.style.transform=tf}
+function pop(t,a,d=.42){const k=P(t,a,d);return{o:clamp(k*3),s:lerp(.9,1,eb(k)),y:lerp(24,0,eo(k))}}
+function hexmix(c1,c2,k){const h=c=>[1,3,5].map(i=>parseInt(c.substr(i,2),16));const A=h(c1),B=h(c2);return'rgb('+A.map((v,i)=>Math.round(lerp(v,B[i],k))).join(',')+')'}
+// typed code line: segs [[text,cls]], n chars
+function typed(segs,n,cursor){let out='',left=n;for(const[s,c]of segs){if(left<=0)break;const p=s.slice(0,left);left-=p.length;out+=`<span class="${c}">${esc(p)}</span>`}if(cursor)out+='<span class="cur"></span>';return out}
+const segLen=segs=>segs.reduce((a,s)=>a+s[0].length,0);
+const blink=t=>Math.floor(t*2.4)%2===0;
+
+window.DURATION=13.6;
+const CUTS=[1.25,5.28,9.95];
+
+// ---------- top bar ----------
+const SECS=['钩子','背景','核心思路','走一遍例子','自进化','结果','冷水','收获'];
+const BAR=$('bar');
+(function(){
+  let x=20;const widths=[300,190,236,276,214,180,180,180];const gap=8;
+  const tot=widths.reduce((a,b)=>a+b,0)+gap*7;const sc=(1920-40)/tot;
+  SECS.forEach((n,i)=>{const w=widths[i]*sc;const d=document.createElement('div');d.className='tab'+(i===0?' on':'');d.style.left=x+'px';d.style.width=w+'px';
+    d.innerHTML=(i===0?'<div id="tabfill"></div><div id="tabline"></div>':'')+`<span class="n" style="position:relative">${String(i+1).padStart(2,'0')}</span><span class="zh" style="position:relative">${n}</span>`+(i===0?'<span id="tc" style="position:relative;margin-left:auto;font-size:20px;color:#8A8A93">00:00</span>':'');
+    BAR.appendChild(d);x+=w+gap});
+  const g=document.createElement('div');g.id='gprog';BAR.appendChild(g);
+})();
+function drawBar(t){
+  $('tabfill').style.width=(clamp(t/29)*100)+'%';$('tabline').style.width=(clamp(t/29)*100)+'%';
+  $('gprog').style.width=(1920*t/348.8)+'px';
+  const s=Math.floor(t);$('tc').textContent='00:'+String(s).padStart(2,'0')+' / 00:29';
+}
+
+// ---------- background glow (canvas, cheap) ----------
+const GC=$('glow').getContext('2d');
+function drawGlow(t){
+  GC.clearRect(0,0,1920,1080);
+  // scene-dependent focus point and colour
+  let x=960,y=520,col=[76,201,240],a=.13,r=820;
+  if(t>=1.25&&t<3.2){x=600;y=450;col=[76,201,240]}
+  else if(t>=3.2&&t<5.28){x=lerp(600,820,eio(P(t,3.2,.55)));y=lerp(450,520,eio(P(t,3.2,.55)));col=[61,245,166];a=.11+.05*eo(P(t,4.45,.4))}
+  else if(t>=5.28&&t<9.95){x=820;y=520;col=[76,201,240];a=.09+.05*eo(P(t,9.25,.4))}
+  else if(t>=9.95){x=1090;y=470;const k=P(t,11.55,.6);col=[Math.round(lerp(255,61,k)),Math.round(lerp(181,245,k)),Math.round(lerp(71,166,k))];a=.10+.06*eo(P(t,12.15,.3))}
+  const g=GC.createRadialGradient(x,y,0,x,y,r);
+  g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(.45,`rgba(${col},${a*.35})`);g.addColorStop(1,`rgba(${col},0)`);
+  GC.fillStyle=g;GC.fillRect(0,0,1920,1080);
+}
+
+// ======================= SCENE 1 : cat paper.txt =======================
+const s1term=el(`<div class="panel" style="left:400px;top:150px;width:1120px;height:292px">
+ <div class="tb"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ttl">zsh — ~/papers</span></div>
+ <div id="s1code" class="code" style="padding:20px 32px"></div></div>`);
+const S1L=[
+ [['~/papers','c-c'],[' ❯ ','c-g'],['cat paper.txt','c-t']],
+ [['title   ','c-mu'],['Harness²','c-t']],
+ [['from    ','c-mu'],['Google Cloud AI','c-c'],[' × ','c-mu'],['Northwestern','c-t']],
+ [['status  ','c-mu'],['● new paper','c-g']],
+];
+const s1head=el(`<div class="abs" style="left:0;top:500px;width:1920px;text-align:center;white-space:nowrap">
+ <span id="h1a" class="disp" style="display:inline-block;font-size:168px;letter-spacing:-.045em;line-height:1">Google</span><span style="display:inline-block;width:40px"></span><span id="h1b" style="display:inline-block;font-size:156px;font-weight:700;letter-spacing:-.02em;line-height:1">新论文</span>
+ <div id="h1u" style="margin:34px auto 0;height:2px;width:760px;background:linear-gradient(90deg,transparent,var(--g),transparent);box-shadow:0 0 16px rgba(61,245,166,.7)"></div>
+ <div id="h1s" class="mono" style="margin-top:26px;font-size:30px;color:var(--mu);letter-spacing:.06em">Google Cloud AI <span class="c-d">×</span> Northwestern <span class="c-d">·</span> <span class="c-g">Harness²</span></div>
+</div>`);
+function scene1(t){
+  const on=t<1.25;show(s1term,on?1:0);show(s1head,on?1:0);if(!on)return;
+  const k=eo(P(t,0,.35));s1term.style.transform=`translateY(${lerp(14,0,k)}px) scale(${lerp(.975,1,k)})`;
+  // typing
+  const n0=segLen(S1L[0]);const n=Math.floor(clamp((t-0.06)/0.42)*n0);
+  let h='';const outT=[.6,.7,.8];
+  const typingDone=t>=0.5;
+  h+=typed(S1L[0],typingDone?n0:n,!typingDone||t<.6)+'\n';
+  for(let i=1;i<4;i++){const k2=P(t,outT[i-1],.12);if(k2>0)h+=`<span style="opacity:${k2}">${typed(S1L[i],Math.ceil(segLen(S1L[i])*k2*1.0),false)}</span>`;h+='\n'}
+  if(t>=0.9&&blink(t))h=h.replace(/\n$/,'<span class="cur"></span>\n');
+  $('s1code').innerHTML=h;
+  const a=pop(t,.15,.45),b=pop(t,.42,.45);
+  $('h1a').style.opacity=a.o;$('h1a').style.transform=`translateY(${a.y*2}px) scale(${a.s})`;
+  $('h1b').style.opacity=b.o;$('h1b').style.transform=`translateY(${b.y*2}px) scale(${b.s})`;
+  const u=eo5(P(t,.55,.45));$('h1u').style.width=(760*u)+'px';$('h1u').style.opacity=u;
+  const sk=P(t,.75,.25);$('h1s').style.opacity=sk;$('h1s').style.transform=`translateY(${lerp(10,0,eo(sk))}px)`;
+}
+
+// ======================= SCENE 2/3 : frozen model → harness =======================
+const GR={cols:16,rows:9,cs:36,gap:6};
+let cellsHtml='';const R=rng(7);const CV=[];
+for(let j=0;j<GR.rows;j++)for(let i=0;i<GR.cols;i++){const v=R();CV.push(v);cellsHtml+=`<div class="abs wc" style="left:${i*(GR.cs+GR.gap)}px;top:${j*(GR.cs+GR.gap)}px;width:${GR.cs}px;height:${GR.cs}px;border-radius:5px"></div>`}
+const model=el(`<div class="panel" style="left:200px;top:150px;width:760px;height:600px;transform-origin:50% 50%">
+ <div class="tb"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ttl" style="margin-right:0">base_model / weights.safetensors</span><span id="frz" class="mono" style="font-size:18px;color:var(--c);border:1px solid rgba(76,201,240,.5);padding:2px 10px;border-radius:999px">FROZEN</span></div>
+ <div class="mono" style="position:absolute;left:44px;top:62px;font-size:24px;color:var(--mu)">W ∈ ℝ<sup style="font-size:16px">16×9</sup> <span class="c-d">·</span> <span id="pcount">params</span></div>
+ <div id="grid" class="abs" style="left:44px;top:106px;width:672px;height:378px">${cellsHtml}</div>
+ <div id="lockb" class="abs" style="left:310px;top:225px;width:140px;height:140px;border-radius:28px;background:#0F1114;border:1px solid rgba(76,201,240,.6);
+   box-shadow:0 0 0 6px rgba(10,10,11,.7),0 0 30px rgba(76,201,240,.35),0 0 80px rgba(76,201,240,.18)">
+   <svg width="140" height="140" viewBox="0 0 140 140"><path d="M48 64 V50 a22 22 0 0 1 44 0 V64" fill="none" stroke="#4CC9F0" stroke-width="8" stroke-linecap="round"/>
+   <rect x="38" y="62" width="64" height="50" rx="10" fill="#4CC9F0"/><circle cx="70" cy="82" r="7" fill="#0F1114"/><rect x="66" y="84" width="8" height="14" rx="3" fill="#0F1114"/></svg></div>
+ <div id="rg" class="code abs" style="left:44px;top:510px;font-size:32px"></div>
+</div>`);
+const CELLS=[...model.querySelectorAll('.wc')];
+const diff=el(`<div class="panel" style="left:1010px;top:150px;width:620px;height:300px">
+ <div class="tb"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ttl">zsh — diff</span></div>
+ <div id="dcode" class="code" style="padding:18px 28px;font-size:27px;line-height:46px"></div></div>`);
+const stat=el(`<div class="panel" style="left:1010px;top:476px;width:620px;height:274px;overflow:hidden">
+  <div class="abs mono" style="left:30px;top:22px;font-size:24px;color:var(--mu)">// weights changed</div>
+  <div class="abs mono" id="zero" style="left:26px;top:52px;font-size:190px;font-weight:700;line-height:1;color:var(--g);letter-spacing:-.04em">0</div>
+  <div class="abs mono" style="left:182px;top:96px;font-size:44px;font-weight:700;line-height:1.1">lines<br>changed</div>
+  <div class="abs" style="left:182px;top:206px;font-size:30px;color:var(--mu);font-weight:500">一行都没动</div>
+</div>`);
+// ring + chips
+const RING={x:300,y:118,w:1040,h:770,r:28};
+const per=2*(RING.w+RING.h)-8*RING.r+2*Math.PI*RING.r;
+const ring=el(`<svg class="abs" style="left:0;top:0" width="1920" height="1080">
+ <defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#3DF5A6"/><stop offset=".5" stop-color="#4CC9F0"/><stop offset="1" stop-color="#3DF5A6"/></linearGradient></defs>
+ <rect id="rfill" x="${RING.x}" y="${RING.y}" width="${RING.w}" height="${RING.h}" rx="${RING.r}" fill="rgba(61,245,166,0.025)"/>
+ <rect id="rglow" x="${RING.x}" y="${RING.y}" width="${RING.w}" height="${RING.h}" rx="${RING.r}" fill="none" stroke="#3DF5A6" stroke-opacity=".16" stroke-width="12"/>
+ <rect id="rline" x="${RING.x}" y="${RING.y}" width="${RING.w}" height="${RING.h}" rx="${RING.r}" fill="none" stroke="url(#lg)" stroke-width="2"/>
+ <g id="wires"></g></svg>`);
+const ringTab=el(`<div class="abs mono" style="left:${RING.x+28}px;top:${RING.y-22}px;height:44px;padding:0 16px;border-radius:8px;background:#0C1310;border:1px solid rgba(61,245,166,.6);
+  font-size:26px;line-height:42px;color:var(--g);box-shadow:0 0 18px rgba(61,245,166,.25)">▸ harness/ <span class="c-mu">· 外层文件</span></div>`);
+const ringTab2=el(`<div class="abs mono" style="left:${RING.x+RING.w-360}px;top:${RING.y-22}px;height:44px;padding:0 16px;border-radius:8px;background:#0E0E11;border:1px solid #2C2C33;
+  font-size:24px;line-height:42px;color:var(--mu)">weights <span class="c-c">🔒 0 Δ</span> · files <span class="c-g">edited</span></div>`);
+const CH=[['提示词','prompt.md',0,300],['护栏','guardrails.md',0,500],['技能','skills/',0,700],['工具说明','tools.md',1,300],['脚本','scripts/',1,500],['记忆','memory.md',1,700]];
+const chips=CH.map(([zh,fn,side,cy])=>el(`<div class="chip" style="left:${side?1190:150}px;top:${cy-52}px"><span class="led"></span><div class="zh">${zh}</div><div class="fn">${fn}</div></div>`));
+const wires=$('wires');
+CH.forEach(([zh,fn,side,cy],k)=>{const x1=side?1190:450,x2=side?1052:588;const ty=lerp(cy,560,.55);
+  wires.innerHTML+=`<path id="w${k}" d="M${x1} ${cy} C ${(x1+x2)/2} ${cy}, ${(x1+x2)/2} ${ty}, ${x2} ${ty}" fill="none" stroke="#3DF5A6" stroke-width="2" stroke-opacity=".0"/><circle id="wd${k}" r="5" fill="#3DF5A6"/>`});
+const harnessT=el(`<div class="abs" style="left:420px;top:170px;width:800px;text-align:center;white-space:nowrap">
+  <span id="hT" class="disp" style="display:inline-block;font-size:150px;letter-spacing:-.05em;line-height:1">${'Harness'.split('').map(c=>`<span style="display:inline-block">${c}</span>`).join('')}</span></div>`);
+const HTL=[...$('hT').children];
+
+function scene23(t){
+  const on=t>=1.25&&t<5.28;
+  [model,diff,stat].forEach(e=>show(e,on?1:0));
+  const s3=on&&t>=3.2;
+  [ring,ringTab,ringTab2,harnessT,...chips].forEach(e=>show(e,s3?1:0));
+  if(!on)return;
+  // model panel enter + morph
+  const ke=eo(P(t,1.25,.35));
+  const km=eio(P(t,3.2,.6));
+  const sc=lerp(lerp(.96,1,ke),.58,km);
+  const dx=lerp(0,820-580,km),dy=lerp(lerp(18,0,ke),560-450,km);
+  model.style.transform=`translate(${dx}px,${dy}px) scale(${sc})`;
+  // grid cells
+  const lockK=eo(P(t,2.45,.35));
+  for(let idx=0;idx<CELLS.length;idx++){const i=idx%GR.cols,j=(idx/GR.cols)|0;const d=1.32+(i+j)*0.022;const k=P(t,d,.22);
+    const v=CV[idx];const a=(.18+.72*v)*(1-.45*lockK);
+    const c=CELLS[idx];
+    c.style.opacity=clamp(k*2);c.style.transform=`scale(${lerp(.4,1,eb(k,1.2))})`;
+    c.style.background=`rgba(${Math.round(lerp(76,120,lockK))},${Math.round(lerp(201,170,lockK))},${Math.round(lerp(240,200,lockK))},${a})`;
+    c.style.boxShadow=lockK>0?`inset 0 0 0 1px rgba(160,220,255,${.12*lockK})`:'none';}
+  const pc=Math.round(lerp(0,144,eo(P(t,1.35,.5))));$('pcount').innerHTML=`<span class="c-t">${pc}</span> params`;
+  const lb=pop(t,2.45,.45);$('lockb').style.opacity=lb.o;$('lockb').style.transform=`scale(${lerp(.6,1,eb(P(t,2.45,.45),2))})`;
+  $('frz').style.opacity=P(t,2.55,.2);
+  const RG=[['requires_grad','c-t'],[' = ','c-mu'],['False','c-m']];
+  const rn=Math.floor(segLen(RG)*P(t,2.0,.4));$('rg').innerHTML=rn>0?typed(RG,rn,t<2.6||blink(t)&&t<3.2)+(t>2.6?'<span class="c-d">  # 🔒 frozen</span>':''):'';
+  // diff terminal
+  const DL0=[['❯ ','c-g'],['git diff --stat ','c-t'],['base_model/','c-c']];
+  const dn=Math.floor(segLen(DL0)*P(t,1.3,.36));
+  let h=typed(DL0,dn,t<1.7)+'\n';
+  const o1=P(t,1.68,.12),o2=P(t,1.78,.12);
+  h+=`<span style="opacity:${o1}"><span class="c-g">0</span><span class="c-mu"> files changed</span></span>\n`;
+  h+=`<span style="opacity:${o2}"><span class="c-g">0</span><span class="c-mu"> insertions(+), </span><span class="c-r">0</span><span class="c-mu"> deletions(−)</span></span>\n`;
+  if(t>1.9&&blink(t))h+=`<span class="c-g">❯ </span><span class="cur"></span>`;else if(t>1.9)h+=`<span class="c-g">❯ </span>`;
+  $('dcode').innerHTML=h;
+  const de=eo(P(t,1.25,.35)),dx2=eio(P(t,3.15,.35));
+  diff.style.transform=`translate(${lerp(30,0,de)+dx2*420}px,0) scale(${lerp(.97,1,de)})`;diff.style.opacity=1-dx2;
+  const sp=pop(t,1.75,.45);const sx=eio(P(t,3.2,.35));
+  stat.style.opacity=sp.o*(1-sx);stat.style.transform=`translate(${sx*420}px,${sp.y}px) scale(${sp.s})`;
+  $('zero').style.textShadow=`0 0 ${lerp(0,30,P(t,1.85,.3))}px rgba(61,245,166,.6)`;
+  if(!s3)return;
+  // ring draw
+  const rk=eo5(P(t,3.42,.75));
+  ['rline','rglow'].forEach(id=>{const e=$(id);e.setAttribute('stroke-dasharray',per);e.setAttribute('stroke-dashoffset',per*(1-rk))});
+  $('rfill').setAttribute('fill',`rgba(61,245,166,${.03*rk})`);
+  const tb=pop(t,3.6,.4);ringTab.style.opacity=tb.o;ringTab.style.transform=`translateY(${tb.y}px)`;
+  const tb2=pop(t,4.75,.4);ringTab2.style.opacity=tb2.o;ringTab2.style.transform=`translateY(${tb2.y}px)`;
+  chips.forEach((c,k)=>{const st=3.75+k*0.09;const p=pop(t,st,.42);const lit=P(t,st+.12,.2);
+    c.style.opacity=p.o;c.style.transform=`translate(${(CH[k][2]?1:-1)*lerp(40,0,eo(P(t,st,.42)))}px,0) scale(${p.s})`;
+    c.style.borderColor=hexmix('#26262C','#2F8F67',lit);
+    c.style.boxShadow=`0 0 0 1px rgba(61,245,166,${.08*lit}),0 0 24px rgba(61,245,166,${.12*lit}),0 20px 40px -20px rgba(0,0,0,.8)`;
+    const led=c.querySelector('.led');led.style.background=lit>.5?'#3DF5A6':'#33333A';led.style.boxShadow=lit>.5?'0 0 10px #3DF5A6':'none';
+    const w=$('w'+k);const L=w.getTotalLength();const wk=eo(P(t,st+.05,.35));
+    w.setAttribute('stroke-dasharray',L);w.setAttribute('stroke-dashoffset',L*(1-wk));w.setAttribute('stroke-opacity',.55*wk);
+    const ph=((t*0.9+k*0.17)%1);const pt=w.getPointAtLength(L*ph);const wd=$('wd'+k);
+    wd.setAttribute('cx',pt.x);wd.setAttribute('cy',pt.y);wd.setAttribute('opacity',wk>=1?.9:0);});
+  HTL.forEach((c,i)=>{const p=pop(t,4.45+i*0.04,.4);c.style.opacity=p.o;c.style.transform=`translateY(${p.y*1.6}px) scale(${p.s})`});
+  const hg=P(t,4.6,.4);$('hT').style.textShadow=`0 0 ${30*hg}px rgba(61,245,166,${.45*hg}),0 0 2px rgba(255,255,255,.3)`;
+}
+
+// ======================= SCENE 4/5 : task + three tables =======================
+const cmd=el(`<div class="panel" style="left:80px;top:100px;width:1480px;height:76px">
+  <div id="cmdc" class="code abs" style="left:28px;top:13px;font-size:30px"></div>
+  <div id="cmds" class="abs mono" style="right:26px;top:20px;font-size:26px"></div></div>`);
+const task=el(`<div class="panel" style="left:330px;top:290px;width:980px;height:420px;overflow:hidden">
+  <div class="abs" style="left:0;top:0;width:6px;height:100%;background:var(--c);box-shadow:0 0 20px var(--c)"></div>
+  <div class="abs mono" style="left:64px;top:52px;font-size:28px;color:var(--c);letter-spacing:.08em">TASK · JobBench / producer</div>
+  <div id="tkT" class="abs" style="left:60px;top:110px;font-size:110px;font-weight:700;letter-spacing:-.01em;line-height:1.1">真实职场任务</div>
+  <div class="abs" style="left:64px;top:276px;font-size:34px;color:var(--mu);font-weight:500">角色 <span class="c-t">制片人</span> <span class="c-d mono">·</span> 输入 <span class="mono c-t">3 × .csv</span> <span class="c-d mono">·</span> 目标 <span class="c-g">对上账</span></div>
+  <div class="abs mono" style="left:64px;top:340px;font-size:24px;color:var(--dim)">difficulty: real-world · no toy data</div>
+</div>`);
+const TB=[
+ {fn:'schedule.csv',zh:'排期',cols:['日期','场次','人数'],w:[150,130,110],rows:[['10/03','S12','6'],['10/04','S14','8'],['10/05','S15','5'],['10/06','S17','7'],['10/07','S19','6']],fix:{}},
+ {fn:'crew.csv',zh:'人员',cols:['日期','到岗','岗位'],w:[150,120,140],rows:[['10/03','6','摄影'],['10/04','7','灯光'],['10/05','5','录音'],['10/06','7','场务'],['10/07','6','美术']],fix:{'1,1':'8'}},
+ {fn:'budget.csv',zh:'预算',cols:['日期','人力 ¥'],w:[150,220],rows:[['10/03','4,800'],['10/04','6,400'],['10/05','3,200'],['10/06','4,800'],['10/07','4,800']],fix:{'2,1':'4,000','3,1':'5,600'}},
+];
+const tbls=TB.map((T,ti)=>{
+  let rows=`<div class="row h">${T.cols.map((c,i)=>`<div style="width:${T.w[i]}px">${c}</div>`).join('')}</div>`;
+  T.rows.forEach((r,ri)=>{rows+=`<div class="row" data-r="${ri}">${r.map((v,ci)=>`<div class="cell" style="width:${T.w[ci]}px"><span class="bgc"></span><span class="v" style="position:relative">${v}</span></div>`).join('')}</div>`});
+  return el(`<div class="panel" style="left:${80+ti*505}px;top:222px;width:470px;height:540px;overflow:hidden">
+   <div class="tb" style="justify-content:flex-start"><span class="dot"></span><span class="mono" style="color:var(--tx);font-size:22px">${T.fn}</span><span class="tag">${T.zh}</span></div>
+   <div class="tbl">${rows}</div>
+   <div class="abs mono foot" style="left:24px;bottom:16px;font-size:22px;color:var(--dim)">5 rows · utf-8</div></div>`)});
+const links=el(`<svg class="abs" style="left:0;top:0" width="1920" height="1080"><g id="lk"></g></svg>`);
+(function(){let h='';for(let r=0;r<5;r++){const y=222+44+58+r*72+36;h+=`<line id="l0_${r}" x1="550" y1="${y}" x2="585" y2="${y}" stroke="#3DF5A6" stroke-width="3"/><line id="l1_${r}" x1="1055" y1="${y}" x2="1090" y2="${y}" stroke="#3DF5A6" stroke-width="3"/>`}$('lk').innerHTML=h})();
+const beam=el(`<div class="abs" style="top:222px;height:540px;width:2px;background:var(--c);box-shadow:0 0 14px var(--c),0 0 40px rgba(76,201,240,.5)"></div>`);
+const recon=el(`<div class="abs mono" style="left:80px;top:790px;font-size:30px;white-space:nowrap"></div>`);
+function scene45(t){
+  const on=t>=5.28&&t<9.95;[cmd,task,links,beam,recon,...tbls].forEach(e=>show(e,on?1:0));if(!on)return;
+  const ce=eo(P(t,5.28,.3));cmd.style.transform=`translateY(${lerp(-14,0,ce)}px)`;
+  const C=[['❯ ','c-g'],['harness run ','c-t'],['--task ','c-mu'],['jobbench/producer-reconcile','c-c']];
+  const cn=Math.floor(segLen(C)*P(t,5.34,.5));$('cmdc').innerHTML=typed(C,cn,t<5.95||(t<9.4&&blink(t)));
+  const st=$('cmds');
+  if(t<5.95)st.innerHTML='';else if(t<9.4){const sp='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'[Math.floor(t*12)%10];st.innerHTML=`<span class="c-a">${sp} running</span> <span class="c-mu">${(t-5.95).toFixed(1)}s</span>`}
+  else st.innerHTML=`<span class="c-g">✔ reconciled</span> <span class="c-mu">3.4s</span>`;
+  // task card
+  const tp=pop(t,5.42,.45),tx=eio(P(t,6.66,.3));
+  task.style.opacity=tp.o*(1-tx);task.style.transform=`translateY(${tp.y-tx*140}px) scale(${tp.s*lerp(1,.86,tx)})`;
+  const tw=P(t,5.6,.4);$('tkT').style.clipPath=`inset(0 ${100-tw*100}% 0 0)`;
+  // tables
+  const pops=[6.82,6.92,7.02],fills=[7.5,7.98,8.44];
+  tbls.forEach((pn,ti)=>{const p=pop(t,pops[ti],.42);pn.style.opacity=p.o;pn.style.transform=`translateY(${p.y*2}px) scale(${p.s})`;
+    const tagL=P(t,fills[ti],.2);const tag=pn.querySelector('.tag');tag.style.borderColor=hexmix('#30303A','#4CC9F0',tagL);tag.style.color=hexmix('#8A8A93','#EDEDED',tagL);tag.style.boxShadow=`0 0 14px rgba(76,201,240,${.35*tagL})`;
+    pn.style.borderColor=hexmix('#26262C','#2D5566',tagL*(1-P(t,9.3,.3)));
+    const rows=pn.querySelectorAll('.row[data-r]');
+    rows.forEach((rw,ri)=>{const rk=P(t,fills[ti]+ri*0.06,.18);rw.style.opacity=rk;rw.style.transform=`translateX(${lerp(-16,0,eo(rk))}px)`;
+      rw.querySelectorAll('.cell').forEach((c,ci)=>{const key=ri+','+ci;const fx=TB[ti].fix[key];const bg=c.querySelector('.bgc');const v=c.querySelector('.v');
+        if(fx){const order=Object.keys(TB[ti].fix).indexOf(key)+(ti===2?1:0);const fT=9.22+order*0.1;
+          const warn=P(t,8.95,.15),fix=P(t,fT,.18);
+          if(t<fT){v.textContent=TB[ti].rows[ri][ci];v.style.color=warn>0?'#FFB547':'';bg.style.background=`rgba(255,181,71,${.14*warn})`;bg.style.boxShadow=`inset 0 0 0 1px rgba(255,181,71,${.6*warn})`;
+            v.style.transform='none';v.innerHTML=esc(TB[ti].rows[ri][ci])+(warn>0?` <span style="font-size:24px">≠</span>`:'');}
+          else{v.innerHTML=esc(fx)+' <span style="font-size:24px">✓</span>';v.style.color='#3DF5A6';bg.style.background=`rgba(61,245,166,${lerp(.3,.12,fix)})`;bg.style.boxShadow=`inset 0 0 0 1px rgba(61,245,166,.6),0 0 ${lerp(26,10,fix)}px rgba(61,245,166,.35)`;
+            v.style.display='inline-block';v.style.transform=`scale(${lerp(1.25,1,eb(fix))})`;}
+        }});});});
+  // scan beam
+  const bk=P(t,8.85,.42);beam.style.left=lerp(80,1560,eio(bk))+'px';beam.style.opacity=bk>0&&bk<1?1:0;
+  // link lines
+  for(let r=0;r<5;r++)for(let g=0;g<2;g++){const ln=$(`l${g}_${r}`);const k=eo(P(t,9.4+r*0.06+g*.03,.2));ln.setAttribute('x2',(g?1055:550)+35*k);ln.setAttribute('opacity',k);ln.style.filter='';}
+  const rc=P(t,9.5,.2);recon.style.opacity=rc;recon.style.transform=`translateY(${lerp(10,0,eo(rc))}px)`;
+  recon.innerHTML=`<span class="c-mu">reconcile</span>  <span class="c-a">3 conflicts</span> <span class="c-mu">→</span> <span class="c-g">0</span>   <span class="c-g">✔ 3 张表全部对上</span>`;
+  // conflicts counter during scan
+  if(t>8.95&&t<9.5){const left=3-[9.22,9.32,9.42].filter(x=>t>=x).length;recon.style.opacity=1;recon.innerHTML=`<span class="c-mu">reconcile</span>  <span class="c-a">${3} conflicts</span> <span class="c-mu">→ fixing…</span> <span class="c-a">${left}</span>`;recon.style.transform='none'}
+}
+
+// ======================= SCENE 6/7 : score =======================
+const ecmd=el(`<div class="panel" style="left:80px;top:100px;width:1480px;height:76px">
+  <div id="ecmdc" class="code abs" style="left:28px;top:13px;font-size:30px"></div>
+  <div id="ecase" class="abs" style="right:26px;top:16px;font-size:28px;color:var(--mu);font-weight:500">单个案例 · 事后评分</div></div>`);
+const runner=el(`<div class="panel" style="left:80px;top:212px;width:500px;height:560px">
+  <div class="tb" style="justify-content:flex-start"><span class="dot"></span><span class="mono" style="color:var(--tx);font-size:22px">eval.log</span></div>
+  <div id="rlog" class="code" style="padding:22px 28px;font-size:28px;line-height:58px"></div></div>`);
+const big=el(`<div class="abs" style="left:620px;top:212px;width:940px;height:560px">
+  <div class="abs mono" style="left:4px;top:0;font-size:28px;color:var(--mu);letter-spacing:.08em">SCORE <span class="c-d">/ 100</span></div>
+  <div id="bn" class="abs mono" style="left:-12px;top:22px;font-size:400px;font-weight:700;line-height:1;letter-spacing:-.06em"></div>
+  <div id="ghost" class="abs mono" style="left:520px;top:120px;font-size:88px;font-weight:700;color:#FFB547;opacity:0;letter-spacing:-.03em"><span style="text-decoration:line-through;text-decoration-thickness:6px">43</span></div>
+  <div id="delta" class="abs mono" style="left:520px;top:250px;height:84px;padding:0 26px;border-radius:14px;font-size:56px;line-height:82px;font-weight:700;color:#0A0A0B;background:var(--g);
+     box-shadow:0 0 0 1px rgba(61,245,166,.6),0 0 36px rgba(61,245,166,.55)">✔ +34.7</div>
+  <div class="abs" style="left:0;top:470px;width:940px;height:22px;border-radius:11px;background:#141418;border:1px solid #26262C;overflow:hidden">
+     <div id="mf" style="height:100%;border-radius:11px"></div></div>
+  <div id="m43" class="abs" style="top:458px;width:3px;height:46px;background:#FFB547;box-shadow:0 0 10px #FFB547"></div>
+  <div id="m43l" class="abs mono" style="top:510px;font-size:28px;color:#FFB547">43.1</div>
+  <div id="m78l" class="abs mono" style="top:510px;font-size:28px;color:#3DF5A6">77.8</div>
+  ${[0,25,50,75,100].map(v=>`<div class="abs mono" style="left:${v*9.4-10}px;top:430px;font-size:18px;color:#45454D">${v}</div>`).join('')}
+</div>`);
+const poster=el(`<div class="abs" style="left:80px;top:800px;width:1480px;height:110px;white-space:nowrap">
+  <div class="abs" style="left:0;top:0;width:1480px;height:1px;background:linear-gradient(90deg,var(--g),rgba(61,245,166,.0) 80%)"></div>
+  <div class="abs disp" style="left:0;top:22px;font-size:56px;letter-spacing:-.04em">Harness<span class="c-g">²</span></div>
+  <div class="abs" style="left:250px;top:28px;font-size:36px;font-weight:700">权重 <span class="mono c-c">0</span> 改动，分数 <span class="mono c-a">43</span><span class="c-mu"> → </span><span class="mono c-g">78</span></div>
+  <div class="abs mono" style="left:910px;top:36px;font-size:24px;color:var(--mu)">Google Cloud AI × Northwestern · JobBench</div>
+</div>`);
+function scene67(t){
+  const on=t>=9.95;[ecmd,runner,big,poster].forEach(e=>show(e,on?1:0));if(!on)return;
+  const C=[['❯ ','c-g'],['eval ','c-t'],['--judge ','c-mu'],['post-hoc ','c-c'],['--case ','c-mu'],['producer','c-c']];
+  const cn=Math.floor(segLen(C)*P(t,10.0,.45));$('ecmdc').innerHTML=typed(C,cn,t<10.5||blink(t));
+  $('ecase').style.opacity=P(t,10.5,.25);
+  const rp=pop(t,9.98,.4);runner.style.opacity=rp.o;runner.style.transform=`translateX(${-rp.y}px) scale(${rp.s})`;
+  // log lines
+  const L=[
+    [10.3,`<span class="c-mu">weights Δ</span>      <span class="c-c">0</span>`],
+    [10.55,`<span class="c-mu">harness  </span>      <span class="c-g">edited</span>`],
+    [10.85,`<span class="c-mu">baseline </span>      <span class="c-a">43.1</span>`],
+    [12.0,`<span class="c-mu">harness² </span>      <span class="c-g">77.8</span>`],
+    [12.2,`<span class="c-d">────────────────</span>`],
+    [12.25,`<span class="c-g">✔ PASS</span>        <span class="c-g">+34.7</span>`],
+  ];
+  $('rlog').innerHTML=L.map(([a,h])=>{const k=P(t,a,.15);return k>0?`<div style="opacity:${k};transform:translateX(${lerp(-10,0,eo(k))}px)">${h}</div>`:'<div>&nbsp;</div>'}).join('');
+  // big number
+  const bnE=$('bn');const ap=P(t,10.85,.4);
+  let val,col;
+  if(t<10.85){val='--';col='#33333A'}
+  else{const ck=eio(P(t,11.55,.6));val=String(Math.round(lerp(43,78,ck)));col=hexmix('#FFB547','#3DF5A6',P(t,11.55,.6))}
+  if(t<10.85){bnE.style.opacity=P(t,10.1,.3)}else bnE.style.opacity=1;
+  bnE.textContent=val;bnE.style.color=col;
+  const gk=eo(P(t,12.15,.35));
+  bnE.style.transform=`scale(${t<10.85?1:lerp(.86,1,eb(ap,1.8))})`;bnE.style.transformOrigin='0 60%';
+  bnE.style.textShadow=t>=10.85?`0 0 ${20+30*gk}px ${col.replace('rgb','rgba').replace(')',','+(0.25+.35*gk)+')')}`:'none';
+  const gh=pop(t,12.15,.4);$('ghost').style.opacity=gh.o*.9;$('ghost').style.transform=`translateY(${gh.y}px)`;
+  const dl=pop(t,12.25,.45);$('delta').style.opacity=dl.o;$('delta').style.transform=`translateY(${dl.y}px) scale(${dl.s})`;
+  // meter
+  const mv=t<10.85?0:lerp(0,43.1,eo(P(t,10.85,.5)))+(77.8-43.1)*eio(P(t,11.55,.6));
+  const mf=$('mf');mf.style.width=(mv)+'%';
+  const mk=P(t,11.55,.6);
+  mf.style.background=`linear-gradient(90deg,#FFB547,${hexmix('#FFB547','#3DF5A6',mk)})`;mf.style.boxShadow=`0 0 16px ${hexmix('#FFB547','#3DF5A6',mk)}`;
+  const m43=$('m43');m43.style.left=(43.1*9.4-1)+'px';m43.style.opacity=P(t,11.5,.2);
+  $('m43l').style.left=(43.1*9.4-34)+'px';$('m43l').style.opacity=P(t,11.5,.2);
+  $('m78l').style.left=(77.8*9.4-34)+'px';$('m78l').style.opacity=P(t,12.1,.2);
+  // poster footer
+  const pp=P(t,12.6,.4);poster.style.opacity=clamp(pp*2);poster.style.transform=`translateY(${lerp(30,0,eo(pp))}px)`;
+  [...poster.children].forEach((c,i)=>{const k=P(t,12.6+i*.07,.35);c.style.opacity=k;c.style.transform=`translateY(${lerp(16,0,eo(k))}px)`});
+}
+
+// ---------- camera ----------
+const CAM=[[0,1,960,600,0],[0.55,1.1,960,600,.25],[1.25,1,580,450,0],[2.45,1.1,580,420,.25],[3.15,1,580,420,.45],[3.8,1,820,260,0],[4.45,1.08,820,250,.25],
+  [5.28,1,820,490,0],[9.25,1.05,820,490,.3],[9.95,1,1090,450,0],[12.15,1.08,1090,450,.25],[12.6,1,1090,450,.5]];
+function cam(t){let s=1,ox=960,oy=540,prev=1;
+  for(const[k,ss,x,y,d]of CAM){if(t<k)break;const e=d?eo5(P(t,k,d)):1;s=lerp(prev,ss,e);prev=s;ox=x;oy=y}
+  // gentle drift per shot
+  const cuts=[0,...CUTS,99];let a=0;for(const c of cuts)if(t>=c)a=c;s*=1+0.012*(t-a);
+  return{s,ox,oy}}
+
+// ---------- glitch at hard cuts ----------
+const SL=$('slices');
+function glitch(t){let g=-1;for(const c of CUTS){if(t>=c-0.001&&t<c+0.067)g=c}
+  if(g<0){SL.innerHTML='';$('flash').style.opacity=0;return 0}
+  const fr=Math.round((t-g)*30);const R2=rng(Math.round(g*100)+fr*13);
+  let h='';for(let i=0;i<5;i++){const y=R2()*1000+60,hh=6+R2()*40,c=R2()<.5?'76,201,240':(R2()<.6?'61,245,166':'255,79,216');
+    h+=`<div style="top:${y}px;height:${hh}px;background:rgba(${c},${.16+R2()*.2});transform:translateX(${(R2()-.5)*80}px)"></div>`}
+  SL.innerHTML=h;$('flash').style.opacity=fr===0?.10:.04;return(fr===0?18:-10)}
+
+// ---------- subtitles ----------
+const SUBS=[[0.15,1.04,'Google 新论文：'],[1.33,2.81,'模型一行权重都没动'],[3.19,5.09,'只改了模型外面那一层，叫 Harness'],[5.41,6.60,'一个真实的职场任务'],[6.72,9.72,'帮制片人把排期、人员和预算几份表对上账'],[10.10,12.59,'事后打分从 43 分涨到 78 分']];
+function fmtSub(s){return esc(s).replace('Harness','<span class="hl c-c">Harness</span>').replace('43','<span class="hl c-a">43</span>').replace('78','<span class="hl c-g">78</span>')}
+let lastSub=-2;
+function drawSub(t){const sp=$('subp');let idx=-1;for(let i=0;i<SUBS.length;i++){const[a,b]=SUBS[i];if(t>=a-0.05&&t<b+0.25)idx=i}
+  if(idx<0){sp.style.opacity=0;return}
+  const[a]=SUBS[idx];const k=P(t,a-0.05,.18);
+  if(idx!==lastSub){sp.innerHTML=`<span class="pr">›</span><span>${fmtSub(SUBS[idx][2])}</span>`;lastSub=idx}
+  sp.style.opacity=clamp(k*1.5);sp.style.transform=`translateY(${lerp(10,0,eo(k))}px)`}
+
+// ---------- avatar ----------
+const AV=$('av').getContext('2d');const IM=[];
+const loads=[];for(let i=0;i<242;i++){const im=new Image();loads.push(new Promise(r=>{im.onload=r;im.onerror=r}));im.src=`../kit/av/${String(i).padStart(3,'0')}.png`;IM.push(im)}
+
+// ---------- seek ----------
+window.seek=function(t){
+  drawBar(t);drawGlow(t);
+  scene1(t);scene23(t);scene45(t);scene67(t);
+  const c=cam(t);const jx=glitch(t);
+  ST.style.transformOrigin=`${c.ox}px ${c.oy}px`;ST.style.transform=`translateX(${jx}px) scale(${c.s})`;
+  drawSub(t);
+  const f=Math.round(t*30);AV.clearRect(0,0,242,220);AV.drawImage(IM[Math.floor(f*24/30)%242],0,0);
+};
+// ---------- cues ----------
+const CUES=[];
+for(let i=0;i<7;i++)CUES.push({t:+(0.08+i*0.06).toFixed(2),type:'tick',key:true});
+CUES.push({t:0.15,type:'pop'},{t:0.42,type:'pop',soft:true},{t:0.62,type:'paper'});
+CUES.push({t:1.22,type:'whoosh',d:.35});
+for(let i=0;i<5;i++)CUES.push({t:+(1.32+i*0.07).toFixed(2),type:'tick',key:true});
+CUES.push({t:1.75,type:'pop'},{t:2.45,type:'pop'},{t:3.18,type:'whoosh',d:.6,soft:true});
+for(let i=0;i<6;i++)CUES.push({t:+(3.75+i*0.09).toFixed(2),type:'pop',soft:true});
+CUES.push({t:4.45,type:'whoosh',d:.4,soft:true},{t:5.25,type:'whoosh',d:.35});
+for(let i=0;i<6;i++)CUES.push({t:+(5.36+i*0.08).toFixed(2),type:'tick',key:true});
+CUES.push({t:5.42,type:'pop',soft:true},{t:6.82,type:'pop',soft:true},{t:6.92,type:'pop',soft:true},{t:7.02,type:'pop',soft:true});
+CUES.push({t:7.5,type:'tick'},{t:7.98,type:'tick'},{t:8.44,type:'tick'},{t:8.85,type:'whoosh',d:.45,soft:true});
+CUES.push({t:9.22,type:'tick',key:true},{t:9.32,type:'tick',key:true},{t:9.42,type:'tick',key:true},{t:9.5,type:'pop'});
+CUES.push({t:9.92,type:'whoosh',d:.35});
+for(let i=0;i<6;i++)CUES.push({t:+(10.02+i*0.07).toFixed(2),type:'tick',key:true});
+CUES.push({t:10.85,type:'pop'});
+for(let i=0;i<9;i++)CUES.push({t:+(11.56+i*0.065).toFixed(3),type:'tick'});
+CUES.push({t:12.15,type:'pop'},{t:12.25,type:'pop',soft:true},{t:12.6,type:'whoosh',d:.8,soft:true});
+window.CUES=CUES;
+window.READY=Promise.all([...loads,
+  document.fonts.load('400 30px "JetBrains Mono"'),document.fonts.load('500 30px "JetBrains Mono"'),document.fonts.load('700 30px "JetBrains Mono"'),
+  document.fonts.load('700 60px "Inter Display"'),document.fonts.load('500 40px "Noto Sans CJK SC"'),document.fonts.load('700 40px "Noto Sans CJK SC"')
+]).then(()=>document.fonts.ready).then(()=>{window.seek(0);return true});
+</script>
+</body>
+</html>

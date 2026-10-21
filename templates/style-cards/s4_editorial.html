@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Harness² · FT Graphics</title>
+<style>
+:root{--paper:#FFF1E5;--ink:#33302E;--sec:#66605C;--rule:#CCC1B7;--claret:#990F3D;--oxford:#0F5499;--teal:#0D7680;--wheat:#F2DFCE;}
+html,body{margin:0;padding:0;background:var(--paper);}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--paper);color:var(--ink);
+  font-family:'Noto Sans CJK SC',sans-serif;-webkit-font-smoothing:antialiased;}
+.a{position:absolute;white-space:nowrap;}
+.serif{font-family:'Noto Serif CJK SC',serif;}
+.num{font-family:'Inter',sans-serif;font-feature-settings:'tnum' 1,'lnum' 1;}
+.ln{overflow:hidden;display:block;}
+.ln>span{display:inline-block;will-change:transform;}
+.kick{font-family:'Inter','Noto Sans CJK SC',sans-serif;font-weight:700;font-size:28px;letter-spacing:.14em;color:var(--ink);}
+.krule{position:absolute;height:5px;background:var(--claret);}
+#strip{position:absolute;left:0;top:0;width:5760px;height:1080px;}
+.panel{position:absolute;top:0;width:1920px;height:1080px;}
+/* bar */
+#bar{position:absolute;left:0;top:0;width:1920px;height:64px;background:var(--paper);}
+.slot{position:absolute;top:0;height:62px;}
+.slot .n{position:absolute;top:19px;font-family:'Inter';font-weight:600;font-size:22px;font-feature-settings:'tnum' 1;color:var(--sec);letter-spacing:.04em;}
+.slot .nm{position:absolute;top:16px;font-size:24px;color:var(--sec);}
+.slot.on .n{color:var(--claret);font-weight:700;}
+.slot.on .nm{font-family:'Noto Serif CJK SC',serif;font-weight:700;font-size:28px;top:12px;color:var(--claret);}
+/* tables */
+.tbl{position:absolute;width:440px;}
+.tbl .hd{position:absolute;left:0;top:0;width:440px;height:72px;}
+.tbl .row{position:absolute;left:0;width:440px;height:66px;}
+.cell{position:absolute;top:0;line-height:66px;font-size:30px;}
+#cap{position:absolute;left:0;top:958px;width:1660px;height:92px;}
+#capt{position:absolute;left:0;width:1660px;top:18px;text-align:center;font-family:'Noto Serif CJK SC',serif;font-weight:700;font-size:44px;line-height:56px;color:var(--ink);}
+</style></head>
+<body><div id="stage">
+  <div id="strip">
+    <!-- PANEL A -->
+    <div class="panel" id="pA" style="left:0">
+      <div class="krule" id="aKr" style="left:120px;top:100px;width:56px"></div>
+      <div class="a kick" id="aK" style="left:120px;top:116px">论文速读 · AI AGENTS</div>
+      <div class="a serif" id="aSrc" style="left:120px;top:176px;font-size:44px;font-weight:600;color:var(--sec)"><span class="ln"><span>Google 新论文 <span style="color:var(--teal)">·</span> <span style="color:var(--ink)">Harness²</span></span></span></div>
+      <div class="a" id="aHl" style="left:510px;top:488px;width:270px;height:56px;background:rgba(153,15,61,.16);transform-origin:0 0"></div>
+      <div class="a serif" id="aH" style="left:116px;top:262px;font-size:132px;font-weight:900;line-height:150px;letter-spacing:-.01em">
+        <span class="ln" id="aH1"><span>模型一行</span></span><span class="ln" id="aH2"><span>权重都没动</span></span>
+      </div>
+      <div class="a" id="aRule" style="left:120px;top:590px;height:1px;width:780px;background:var(--ink)"></div>
+      <div class="a" id="aDek" style="left:120px;top:614px;font-size:40px;line-height:56px;font-weight:500"><span class="ln"><span>只改了模型外面那一层，叫 <span id="hlH" style="position:relative;font-family:Inter;font-weight:700;color:var(--claret)">Harness<span id="hlU" style="position:absolute;left:0;bottom:2px;height:4px;width:100%;background:var(--claret);transform-origin:0 50%"></span></span></span></span></div>
+      <div class="a" id="aNote" style="left:120px;top:704px;font-size:28px;line-height:44px;color:var(--sec);white-space:normal;width:760px">
+        <span class="ln"><span>Harness＝模型之外的一切：提示词、护栏、技能、</span></span><span class="ln"><span>工具说明、脚本、记忆。权重不碰，只调这一层。</span></span>
+      </div>
+      <svg id="aSvg" class="a" style="left:0;top:0" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+    </div>
+    <!-- PANEL B -->
+    <div class="panel" id="pB" style="left:1920px">
+      <div class="krule" style="left:120px;top:100px;width:56px"></div>
+      <div class="a kick" style="left:120px;top:116px">案例 · JOBBENCH 制片人任务</div>
+      <div class="a serif" id="bH" style="left:118px;top:158px;font-size:92px;font-weight:900;line-height:120px"><span class="ln"><span>一个真实的职场任务</span></span></div>
+      <div class="a" id="bDek" style="left:120px;top:290px;font-size:38px;font-weight:500;color:var(--ink)">帮制片人把<b id="kw1">排期</b>、<b id="kw2">人员</b>和<b id="kw3">预算</b>几份表对上账</div>
+      <div id="tbls"></div>
+      <svg id="bSvg" class="a" style="left:0;top:0" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+      <div class="a" id="bStat" style="left:120px;top:786px;font-size:32px;font-weight:700;color:var(--teal)"><span class="ln"><span>✓ 三份表逐场对上 <span style="color:var(--sec);font-weight:400">· 这就是要打分的任务</span></span></span></div>
+    </div>
+    <!-- PANEL C -->
+    <div class="panel" id="pC" style="left:3840px">
+      <div class="krule" style="left:120px;top:100px;width:56px"></div>
+      <div class="a kick" style="left:120px;top:116px">结果 · 事后评分（满分 100）</div>
+      <div class="a serif" id="cH" style="left:118px;top:158px;font-size:84px;font-weight:900;line-height:112px"><span class="ln"><span>同一个模型，只换了外层</span></span></div>
+      <svg id="cSvg" class="a" style="left:0;top:0;transform-origin:900px 600px" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+    </div>
+  </div>
+  <!-- footer source -->
+  <div class="a" id="fRule" style="left:120px;top:888px;width:1480px;height:1px;background:var(--rule)"></div>
+  <div class="a" id="fSrc" style="left:120px;top:898px;font-size:26px;color:var(--sec)">来源：Harness² 论文（Google 云 AI 团队、西北大学），单个案例，事后评分</div>
+  <!-- caption lower third -->
+  <div id="cap"><div style="position:absolute;left:0;top:0;width:1660px;height:1px;background:var(--ink)"></div>
+    <div style="position:absolute;left:0;top:1px;width:1660px;height:91px;background:var(--wheat);opacity:.55"></div>
+    <div id="capt"></div></div>
+  <div id="bar"></div>
+  <img id="av" class="a" style="left:1670px;top:860px;height:220px;width:242px">
+</div>
+<script>
+'use strict';
+const NS='http://www.w3.org/2000/svg';
+const C={paper:'#FFF1E5',ink:'#33302E',sec:'#66605C',rule:'#CCC1B7',claret:'#990F3D',oxford:'#0F5499',teal:'#0D7680',wheat:'#F2DFCE'};
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,e)=>a+(b-a)*e;
+const eIO=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;};
+const eQ=x=>{x=clamp(x);return 1-Math.pow(1-x,4);};
+const p=(t,t0,d)=>clamp((t-t0)/d);
+const $=id=>document.getElementById(id);
+function S(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+function mixHex(a,b,e){const pa=[1,3,5].map(i=>parseInt(a.substr(i,2),16)),pb=[1,3,5].map(i=>parseInt(b.substr(i,2),16));return 'rgb('+pa.map((v,i)=>Math.round(lerp(v,pb[i],e))).join(',')+')';}
+// line mask reveal: .ln > span
+function lineRev(el,t,t0,d=0.55){const s=el.classList.contains('ln')?el.children[0]:el.querySelector('.ln>span');const e=eQ(p(t,t0,d));s.style.transform=`translateY(${(1-e)*105}%)`;}
+function wipe(el,t,t0,d){const e=eIO(p(t,t0,d));el.style.clipPath=`inset(-20px ${(1-e)*100}% -20px 0)`;}
+
+window.DURATION=13.6;
+window.CUES=[
+ {t:0.12,type:'paper'},{t:1.33,type:'tick'},{t:2.05,type:'tick'},{t:3.25,type:'whoosh',d:1.1,soft:true},
+ {t:4.5,type:'pop',soft:true},{t:5.2,type:'paper'},{t:5.2,type:'whoosh',d:0.6,soft:true},
+ {t:7.3,type:'tick'},{t:7.8,type:'tick'},{t:8.3,type:'tick'},{t:9.3,type:'pop',soft:true},{t:9.45,type:'pop',soft:true},{t:9.6,type:'pop',soft:true},
+ {t:9.8,type:'paper'},{t:9.82,type:'whoosh',d:0.6,soft:true},{t:10.95,type:'pop',soft:true},{t:11.4,type:'scratch',d:0.9},{t:12.3,type:'tick',key:true},{t:12.45,type:'pop'}
+];
+const CAPS=[[0.15,'Google 新论文：'],[1.33,'模型一行权重都没动'],[3.19,'只改了模型外面那一层，叫 Harness'],[5.41,'一个真实的职场任务'],[6.72,'帮制片人把排期、人员和预算几份表对上账'],[10.10,'事后打分从 43 分涨到 78 分']];
+
+/* ---------------- BAR ---------------- */
+const SECS=[['01','钩子',0,29],['02','背景',29,70],['03','核心思路',70,105],['04','走一遍例子',105,170],['05','自进化',170,225],['06','结果',225,270],['07','冷水',270,312],['08','收获',312,348.8]];
+const bar=$('bar');
+const mast=document.createElement('div');mast.className='a serif';mast.style.cssText='left:40px;top:12px;font-size:28px;font-weight:900;color:var(--ink);letter-spacing:.02em';mast.textContent='论文速读';bar.appendChild(mast);
+const mast2=document.createElement('div');mast2.className='a';mast2.style.cssText='left:40px;top:0;height:64px;';bar.appendChild(mast2);
+const vr=document.createElement('div');vr.className='a';vr.style.cssText='left:176px;top:16px;width:1px;height:32px;background:var(--rule)';bar.appendChild(vr);
+const slotX=[],slotW=176;const slots=[];let sx=208;
+SECS.forEach((s,i)=>{const d=document.createElement('div');d.className='slot'+(i==0?' on':'');const x=sx;sx+=36+s[1].length*(i==0?28:24)+(i==0?64:46);d.style.left=x+'px';d.style.width=slotW+'px';
+ d.innerHTML=`<span class="n" style="left:0">${s[0]}</span><span class="nm" style="left:36px">${s[1]}</span>`;bar.appendChild(d);slots.push(d);slotX.push(x);});
+const barBase=document.createElement('div');barBase.className='a';barBase.style.cssText='left:0;top:63px;width:1920px;height:1px;background:var(--ink)';bar.appendChild(barBase);
+const secU=document.createElement('div');secU.className='a';secU.style.cssText=`left:${208+36}px;top:50px;height:3px;background:var(--claret)`;bar.appendChild(secU);
+const secUbg=document.createElement('div');secUbg.className='a';secUbg.style.cssText=`left:${208+36}px;top:51px;height:1px;width:${56+30}px;background:var(--rule)`;bar.insertBefore(secUbg,secU);
+const glob=document.createElement('div');glob.className='a';glob.style.cssText='left:0;top:61px;height:3px;background:var(--claret)';bar.appendChild(glob);
+const tc=document.createElement('div');tc.className='a num';tc.style.cssText='left:1636px;top:17px;font-size:24px;font-weight:500;color:var(--sec);width:244px;text-align:right';bar.appendChild(tc);
+const fmt=s=>{s=Math.floor(s);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+function seekBar(t){const T=348.8;glob.style.width=(1920*t/T)+'px';secU.style.width=((56+30)*t/29)+'px';tc.innerHTML=`<span style="color:var(--ink);font-weight:700">${fmt(t)}</span> / ${fmt(T)}`;}
+
+/* ---------------- PANEL A diagram ---------------- */
+const aS=$('aSvg');
+const gA=S('g',{},aS);
+const BX=1110,BY=310,BW=320,BH=330;
+const box=S('rect',{x:BX,y:BY,width:BW,height:BH,fill:C.paper,stroke:C.ink,'stroke-width':2},gA);
+const boxHd=S('rect',{x:BX,y:BY,width:BW,height:52,fill:C.wheat},gA);
+const boxT=S('text',{x:BX+20,y:BY+37,'font-family':'Noto Serif CJK SC','font-weight':700,'font-size':30,fill:C.ink},gA);boxT.textContent='模型';
+const boxT2=S('text',{x:BX+BW-46,y:BY+36,'text-anchor':'end','font-family':'Inter','font-weight':700,'font-size':22,'letter-spacing':'2',fill:C.sec},gA);boxT2.textContent='WEIGHTS';
+const cells=[];const N=8,CS=26,CG=6,GX=BX+(BW-(N*CS+(N-1)*CG))/2,GY=BY+52+(BH-52-(N*CS+(N-1)*CG))/2;
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){const v=rnd();const el=S('rect',{x:GX+c*(CS+CG),y:GY+r*(CS+CG),width:CS,height:CS},gA);cells.push({el,r,c,v,col:v<.5?mixHex(C.wheat,C.oxford,0.25+v*1.2):mixHex(C.wheat,C.teal,0.15+(v-.5)*1.4)});}
+// lock badge
+const lockG=S('g',{},gA);
+S('circle',{cx:BX+BW,cy:BY,r:30,fill:C.oxford},lockG);
+S('rect',{x:BX+BW-11,y:BY-4,width:22,height:17,rx:2,fill:C.paper},lockG);
+S('path',{d:`M${BX+BW-7} ${BY-4} v-6 a7 7 0 0 1 14 0 v6`,fill:'none',stroke:C.paper,'stroke-width':3.5},lockG);
+// callout under box
+const callT=S('text',{x:BX+BW/2,y:BY+BH+52,'text-anchor':'middle','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':28,fill:C.oxford},gA);callT.innerHTML='权重冻结 · <tspan font-family="Inter" font-feature-settings="tnum">0</tspan> 行改动';
+// harness frame
+const FX=980,FY=200,FW=580,FH=560,FCX=FX+FW/2;
+const framePath=`M${FCX} ${FY} H${FX+FW} V${FY+FH} H${FX} V${FY} H${FCX}`;const PER=2*(FW+FH);
+const frameBg=S('rect',{x:FX,y:FY,width:FW,height:FH,fill:C.wheat,opacity:0},gA);
+gA.insertBefore(frameBg,box);
+const frame=S('path',{d:framePath,fill:'none',stroke:C.claret,'stroke-width':3,'stroke-dasharray':PER,'stroke-dashoffset':PER},gA);
+const PARTS=[['技能',FX+FW,330,420],['工具说明',FX+FW,560,650],['记忆',1420,FY+FH,990],['脚本',1120,FY+FH,1290],['护栏',FX,560,1630],['提示词',FX,330,1860]];
+const NUMS={'提示词':1,'护栏':2,'技能':3,'工具说明':4,'脚本':5,'记忆':6};
+const FR0=3.25,FRD=1.25;
+function crossT(frac){let lo=0,hi=1;for(let i=0;i<30;i++){const m=(lo+hi)/2;if(eIO(m)<frac)lo=m;else hi=m;}return FR0+lo*FRD;}
+const tabs=PARTS.map(([name,x,y,d])=>{const g=S('g',{},gA);const w=name.length*28+62;const rect=S('rect',{x:x-w/2,y:y-24,width:w,height:48,fill:C.paper,stroke:C.claret,'stroke-width':1.5},g);
+ S('text',{x:x-w/2+20,y:y+9,'font-family':'Inter','font-weight':800,'font-size':24,fill:C.claret},g).textContent=NUMS[name];
+ S('text',{x:x-w/2+44,y:y+10,'font-family':'Noto Sans CJK SC','font-weight':500,'font-size':28,fill:C.ink},g).textContent=name;
+ return {g,t:crossT(d/PER),x,y};});
+const hG=S('g',{},gA);
+S('rect',{x:FCX-110,y:FY-30,width:220,height:60,fill:C.claret},hG);
+S('text',{x:FCX,y:FY+12,'text-anchor':'middle','font-family':'Inter','font-weight':800,'font-size':32,'letter-spacing':'5',fill:C.paper},hG).textContent='HARNESS';
+const hSub=S('text',{x:FX+FW-14,y:FY+FH-18,'text-anchor':'end','font-family':'Noto Sans CJK SC','font-size':24,fill:C.claret},gA);hSub.textContent='';
+
+function seekA(t){
+  // kicker
+  $('aKr').style.width=(56*eQ(p(t,-0.3,0.5)))+'px';
+  wipe($('aK'),t,-0.5,0.6);
+  lineRev($('aSrc'),t,0.12,0.6);
+  lineRev($('aH1'),t,1.3,0.6);lineRev($('aH2'),t,1.85,0.6);
+  $('aRule').style.transform=`scaleX(${eIO(p(t,2.6,0.6))})`;$('aRule').style.transformOrigin='0 0';
+  lineRev($('aDek'),t,3.15,0.6);$('aHl').style.transform=`scaleX(${eIO(p(t,2.35,0.45))})`;
+  $('hlU').style.transform=`scaleX(${eIO(p(t,4.45,0.45))})`;
+  const nl=$('aNote').querySelectorAll('.ln');lineRev(nl[0],t,4.6,0.5);lineRev(nl[1],t,4.7,0.5);
+  // diagram: box draw-in from 0
+  const be=eQ(p(t,-0.6,0.7));gA.setAttribute('opacity',1);
+  box.setAttribute('opacity',be);boxHd.setAttribute('opacity',be);boxT.setAttribute('opacity',be);boxT2.setAttribute('opacity',be);
+  box.setAttribute('transform',`translate(0 ${(1-be)*16})`);
+  cells.forEach(o=>{const st=-0.45+(o.r+o.c)*0.03;const e=eQ(p(t,st,0.4));
+    // freeze sweep left->right at 1.9..2.7
+    const fz=eIO(p(t,1.75+o.c*0.08,0.35));
+    o.el.setAttribute('fill',fz>0?blend(o.col,fz):o.col);
+    o.el.setAttribute('opacity',e);
+    o.el.setAttribute('transform',`translate(0 ${(1-e)*10})`);
+  });
+  const le=eQ(p(t,2.45,0.4));lockG.setAttribute('opacity',le);lockG.setAttribute('transform',`translate(${BX+BW} ${BY}) scale(${0.6+0.4*le}) translate(${-(BX+BW)} ${-BY})`);
+  callT.setAttribute('opacity',eQ(p(t,2.55,0.4)));callT.setAttribute('transform',`translate(0 ${(1-eQ(p(t,2.55,0.4)))*12})`);
+  // frame
+  frame.setAttribute('stroke-dashoffset',PER*(1-eIO(p(t,FR0,FRD))));
+  frameBg.setAttribute('opacity',0.45*eQ(p(t,4.3,0.6)));
+  tabs.forEach(o=>{const e=eQ(p(t,o.t-0.04,0.32));o.g.setAttribute('opacity',e);o.g.setAttribute('transform',`translate(${o.x} ${o.y}) scale(${0.85+0.15*e}) translate(${-o.x} ${-o.y})`);});
+  const he=eQ(p(t,4.45,0.4));hG.setAttribute('opacity',he);hG.setAttribute('transform',`translate(0 ${(1-he)*-14})`);
+  // camera push on diagram
+  const cp=1+0.03*eIO(p(t,0,5.2));gA.setAttribute('transform',`translate(1270 480) scale(${cp}) translate(-1270 -480)`);
+}
+function blend(col,fz){const m=col.match(/\d+/g).map(Number);const tg=[0x9F,0xAE,0xBD];return 'rgb('+m.map((v,i)=>Math.round(lerp(v,lerp(tg[i],v,0.25),fz))).join(',')+')';}
+
+/* ---------------- PANEL B tables ---------------- */
+const TB=[{t:'排期',en:'SCHEDULE',cols:['场次','地点'],rows:[['第 1 场','外景'],['第 2 场','棚内'],['第 3 场','外景']],t0:7.3},
+          {t:'人员',en:'CREW',cols:['场次','班组'],rows:[['第 1 场','摄影组'],['第 2 场','灯光组'],['第 3 场','美术组']],t0:7.8},
+          {t:'预算',en:'BUDGET',cols:['场次','科目'],rows:[['第 1 场','场租'],['第 2 场','器材'],['第 3 场','人工']],t0:8.3}];
+const TX=[120,640,1160],TY=372;const tblEls=[];
+const ghosts=[];TB.forEach((d,i)=>{const gb=document.createElement('div');gb.className='a';gb.style.cssText=`left:${TX[i]-20}px;top:${TY-16}px;width:480px;height:356px;background:var(--wheat)`;$('tbls').appendChild(gb);
+  const gh=document.createElement('div');gh.className='a';gh.style.cssText=`left:${TX[i]}px;top:${TY}px;width:440px;height:340px`;let gs=`<div class=a style='left:0;top:0;width:440px;height:4px;background:var(--rule)'></div><div class=a style='left:0;top:22px;width:90px;height:30px;background:var(--rule)'></div>`;for(let j=0;j<3;j++)gs+=`<div class=a style='left:0;top:${142+j*66}px;width:110px;height:22px;background:var(--rule)'></div><div class=a style='left:200px;top:${142+j*66}px;width:${80+((i*3+j)*37)%90}px;height:22px;background:var(--rule)'></div>`;gh.innerHTML=gs;$('tbls').appendChild(gh);ghosts.push({gb,gh,i});});
+TB.forEach((d,i)=>{const w=document.createElement('div');w.className='tbl';w.style.left=TX[i]+'px';w.style.top=TY+'px';w.style.height='340px';
+  let h=`<div class="hd"><div class="a" style="left:0;top:0;height:4px;width:440px;background:var(--ink)" data-r></div>
+   <div class="a serif" style="left:0;top:12px;font-size:40px;font-weight:900">${d.t}</div>
+   <div class="a" style="left:96px;top:26px;font-family:Inter;font-weight:700;font-size:22px;letter-spacing:.14em;color:var(--sec)">${d.en}</div></div>
+   <div class="row" style="top:72px;height:48px"><div class="cell" style="left:0;line-height:48px;font-size:26px;color:var(--sec)">${d.cols[0]}</div><div class="cell" style="left:200px;line-height:48px;font-size:26px;color:var(--sec)">${d.cols[1]}</div>
+   <div class="a" style="left:0;top:47px;width:440px;height:1px;background:var(--ink)"></div></div>`;
+  d.rows.forEach((r,j)=>{h+=`<div class="row" data-row style="top:${120+j*66}px"><div class="cell num" style="left:0;font-weight:600">${r[0]}</div><div class="cell" style="left:200px">${r[1]}</div><div class="a" style="left:0;top:65px;width:440px;height:1px;background:var(--rule)"></div></div>`;});
+  w.innerHTML=h;$('tbls').appendChild(w);tblEls.push({w,rows:[...w.querySelectorAll('[data-row]')],hd:w.querySelector('.hd'),rule:w.querySelector('[data-r]'),t0:d.t0});});
+const bS=$('bSvg');const links=[];const checks=[];
+for(let j=0;j<3;j++){const y=TY+120+j*66+33;
+  for(let k=0;k<2;k++){const x1=TX[k]+330,x2=TX[k+1]+8;
+    // connect value col end to next key col start: short bracket line
+    const l=S('path',{d:`M${TX[k]+440-6} ${y} H${TX[k+1]-6}`,stroke:C.teal,'stroke-width':3,fill:'none'},bS);
+    const d1=S('circle',{cx:TX[k]+440-6,cy:y,r:5,fill:C.teal},bS);const d2=S('circle',{cx:TX[k+1]-6,cy:y,r:5,fill:C.teal},bS);
+    links.push({l,d1,d2,len:TX[k+1]-TX[k]-440,t:9.0+j*0.15+k*0.08});}
+  const cg=S('g',{},bS);const cx=TX[2]+410,cy=y;
+  S('circle',{cx,cy,r:17,fill:C.teal},cg);S('path',{d:`M${cx-8} ${cy} l6 6 l10 -12`,stroke:C.paper,'stroke-width':3.5,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'},cg);
+  checks.push({g:cg,cx,cy,t:9.3+j*0.15});}
+// row highlight band behind matched rows
+const kws=[['kw1',7.3],['kw2',7.8],['kw3',8.3]];
+function seekB(t){
+  lineRev($('bH'),t,5.55,0.6);
+  ghosts.forEach(o=>{const e=eQ(p(t,5.75+o.i*0.1,0.5));o.gb.style.opacity=e;o.gb.style.transform=`translateY(${(1-e)*20}px)`;o.gh.style.opacity=e*(1-eQ(p(t,TB[o.i].t0-0.15,0.3)));o.gh.style.transform=o.gb.style.transform;});
+  wipe($('bDek'),t,6.7,1.0);
+  kws.forEach(([id,t0])=>{const e=eQ(p(t,t0-0.1,0.3));$(id).style.color=mixHex('#33302E','#990F3D',e);$(id).style.boxShadow=`inset 0 -${Math.round(10*e)}px 0 rgba(153,15,61,.14)`;});
+  tblEls.forEach(o=>{const e=eQ(p(t,o.t0-0.12,0.5));o.rule.style.transform=`scaleX(${eIO(p(t,o.t0-0.15,0.5))})`;o.rule.style.transformOrigin='0 0';
+    o.hd.style.opacity=e;o.hd.style.transform=`translateY(${(1-e)*14}px)`;
+    const ch=o.w.children[1];const ce=eQ(p(t,o.t0,0.4));ch.style.opacity=ce;
+    o.rows.forEach((r,j)=>{const re=eQ(p(t,o.t0+0.08+j*0.08,0.45));r.style.opacity=re;r.style.transform=`translateY(${(1-re)*16}px)`;
+      const hl=eQ(p(t,9.0+j*0.15,0.35));r.style.background=hl>0?`rgba(13,118,128,${0.10*hl})`:'transparent';});});
+  links.forEach(o=>{const e=eIO(p(t,o.t,0.3));o.l.setAttribute('stroke-dasharray',o.len);o.l.setAttribute('stroke-dashoffset',o.len*(1-e));o.d1.setAttribute('opacity',e>0?1:0);o.d2.setAttribute('opacity',e>=1?1:0);});
+  checks.forEach(o=>{const e=eQ(p(t,o.t,0.3));o.g.setAttribute('opacity',e);o.g.setAttribute('transform',`translate(${o.cx} ${o.cy}) scale(${0.5+0.5*e}) translate(${-o.cx} ${-o.cy})`);});
+  lineRev($('bStat'),t,9.55,0.5);
+}
+
+/* ---------------- PANEL C chart ---------------- */
+const cS=$('cSvg');const yv=v=>840-v*4.6;const LX=420,RX=900;
+[0,25,50,75,100].forEach(v=>{S('line',{x1:170,x2:1120,y1:yv(v),y2:yv(v),stroke:v==0?C.ink:C.rule,'stroke-width':v==0?2:1.2,class:'grid'},cS);
+  const tx=S('text',{x:150,y:yv(v)+9,'text-anchor':'end','font-family':'Inter','font-size':26,'font-feature-settings':'tnum',fill:C.sec,class:'grid'},cS);tx.textContent=v;});
+const colL=S('text',{x:LX,y:340,'text-anchor':'middle','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':28,fill:C.sec},cS);colL.textContent='原来的 Harness';
+const colR=S('text',{x:RX,y:340,'text-anchor':'middle','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':28,fill:C.sec},cS);colR.innerHTML='Harness² 改完后';
+const tickL=S('line',{x1:LX,x2:LX,y1:356,y2:840,stroke:C.rule,'stroke-width':1.2,'stroke-dasharray':'4 6'},cS);
+const tickR=S('line',{x1:RX,x2:RX,y1:356,y2:840,stroke:C.rule,'stroke-width':1.2,'stroke-dasharray':'4 6'},cS);
+const defs=S('defs',{},cS);const lg=S('linearGradient',{id:'lg',x1:LX,x2:RX,y1:0,y2:0,gradientUnits:'userSpaceOnUse'},defs);
+S('stop',{offset:'0','stop-color':C.oxford},lg);S('stop',{offset:'1','stop-color':C.claret},lg);
+const slope=S('line',{x1:LX,y1:yv(43),x2:LX,y2:yv(43),stroke:'url(#lg)','stroke-width':6,'stroke-linecap':'round'},cS);
+const dL=S('circle',{cx:LX,cy:yv(43),r:13,fill:C.oxford,stroke:C.paper,'stroke-width':4},cS);
+const dR=S('circle',{cx:LX,cy:yv(43),r:15,fill:C.claret,stroke:C.paper,'stroke-width':4},cS);
+const n43=S('text',{x:LX-36,y:yv(43)+40,'text-anchor':'end','font-family':'Inter','font-weight':800,'font-size':116,'font-feature-settings':'tnum',fill:C.oxford,'letter-spacing':'-3'},cS);n43.textContent='43';
+const nR=S('text',{x:LX+30,y:yv(43)+54,'font-family':'Inter','font-weight':800,'font-size':156,'font-feature-settings':'tnum',fill:C.claret,'letter-spacing':'-4',stroke:C.paper,'stroke-width':10,'paint-order':'stroke'},cS);nR.textContent='43';
+// annotation bracket
+const BRX=1170;const br=S('path',{d:`M${BRX-14} ${yv(78)} H${BRX} V${yv(43)} H${BRX-14}`,stroke:C.claret,'stroke-width':2.5,fill:'none'},cS);
+const brLen=14*2+(yv(43)-yv(78));
+const plus=S('text',{x:BRX+30,y:yv(60.5)+30,'font-family':'Noto Serif CJK SC','font-weight':900,'font-size':92,fill:C.claret},cS);plus.innerHTML='<tspan font-family="Inter" font-weight="800" font-feature-settings="tnum">+35</tspan> 分';
+const leadr=S('path',{d:`M${BRX+40} ${yv(43)+28} V${yv(43)+70} H${BRX+56}`,stroke:C.sec,'stroke-width':1.2,fill:'none'},cS);
+const note1=S('text',{x:BRX+70,y:yv(43)+80,'font-family':'Noto Sans CJK SC','font-weight':700,'font-size':30,fill:C.ink},cS);note1.innerHTML='单个案例<tspan fill="#66605C" font-weight="400"> · 论文挑出来展示</tspan>';
+const note2=S('text',{x:BRX+70,y:yv(43)+124,'font-family':'Noto Sans CJK SC','font-weight':700,'font-size':30,fill:C.ink},cS);note2.innerHTML='平均提升没这么大';const note3=S('text',{x:BRX+70,y:yv(43)+168,'font-family':'Noto Sans CJK SC','font-size':28,fill:C.sec},cS);note3.innerHTML='原文数值 <tspan font-family="Inter" font-feature-settings="tnum">43.1 → 77.8</tspan>';
+const headU=document.createElement('div');headU.className='a';headU.style.cssText='left:120px;top:280px;height:6px;width:930px;background:var(--claret);transform-origin:0 0';$('pC').appendChild(headU);
+const gridEls=[...cS.querySelectorAll('.grid')];
+function seekC(t){
+  lineRev($('cH'),t,10.12,0.6);
+  headU.style.transform=`scaleX(${eIO(p(t,12.6,0.5))})`;
+  gridEls.forEach((g,i)=>{const e=eQ(p(t,10.2+(i>>1)*0.05,0.5));g.setAttribute('opacity',e);});
+  [colL,tickL].forEach(e=>e.setAttribute('opacity',eQ(p(t,10.5,0.4))));
+  [colR,tickR].forEach(e=>e.setAttribute('opacity',eQ(p(t,11.35,0.4))));
+  const e43=eQ(p(t,10.85,0.4));dL.setAttribute('opacity',e43);dL.setAttribute('r',13*(0.4+0.6*e43));
+  n43.setAttribute('opacity',e43);n43.setAttribute('transform',`translate(${(1-e43)*-18} 0)`);
+  const k=eIO(p(t,11.4,0.95));const x=lerp(LX,RX,k),v=lerp(43,78,k),y=yv(v);
+  slope.setAttribute('x2',x);slope.setAttribute('y2',y);
+  dR.setAttribute('cx',x);dR.setAttribute('cy',y);dR.setAttribute('opacity',k>0?1:0);
+  nR.setAttribute('x',x+30);nR.setAttribute('y',y+54);nR.textContent=String(Math.round(v));nR.setAttribute('opacity',k>0?clamp(k*6):0);
+  const lk=eQ(p(t,12.3,0.3));dR.setAttribute('r',15+6*Math.sin(Math.PI*lk)*(1-lk*0.0));
+  br.setAttribute('stroke-dasharray',brLen);br.setAttribute('stroke-dashoffset',brLen*(1-eIO(p(t,12.3,0.4))));
+  const pe=eQ(p(t,12.4,0.45));plus.setAttribute('opacity',pe);plus.setAttribute('transform',`translate(${(1-pe)*-20} 0)`);
+  const ne=eQ(p(t,12.65,0.45));[leadr,note1].forEach(e=>e.setAttribute('opacity',ne));note2.setAttribute('opacity',eQ(p(t,12.75,0.45)));note3.setAttribute('opacity',eQ(p(t,12.9,0.45)));
+  const cp=1+0.035*eIO(p(t,10.3,3.3));cS.style.transform=`scale(${cp})`;
+}
+
+/* ---------------- master ---------------- */
+const av=$('av');const avImgs=[];
+const capt=$('capt');
+function seek(t){
+  seekBar(t);
+  const s1=eIO(p(t,5.18,0.62)),s2=eIO(p(t,9.78,0.62));
+  $('strip').style.transform=`translateX(${-1920*(s1+s2)}px)`;
+  seekA(t);seekB(t);seekC(t);
+  // caption
+  let ci=-1;CAPS.forEach((c,i)=>{if(t>=c[0]-0.06)ci=i;});
+  if(ci<0){capt.textContent='';}else{const c=CAPS[ci];if(capt.dataset.i!=ci){capt.textContent=c[1];capt.dataset.i=ci;}
+    const e=eQ(p(t,c[0]-0.06,0.22));capt.style.opacity=e;capt.style.transform=`translateY(${(1-e)*8}px)`;capt.style.clipPath=`inset(0 0 ${(1-e)*30}% 0)`;}
+  const f=Math.round(t*30);const idx=Math.floor(f*24/30)%242;av.src=avImgs[idx].src;
+}
+window.seek=seek;
+window.READY=(async()=>{
+  const ps=[];for(let i=0;i<242;i++){const im=new Image();im.src=`../kit/av/${String(i).padStart(3,'0')}.png`;avImgs.push(im);ps.push(im.decode().catch(()=>{}));}
+  await Promise.all(ps);
+  await document.fonts.load('900 40px "Noto Serif CJK SC"');await document.fonts.load('700 40px Inter');await document.fonts.ready;
+  seek(0);return true;})();
+</script></body></html>

@@ -1,0 +1,200 @@
+<!doctype html><html><head><meta charset="utf-8"><title>clipD</title>
+<link rel="stylesheet" href="../h2proto/build/common.css">
+<style>
+html,body{background:#FAFAF5}
+#barF{position:absolute;left:0;top:0;width:1920px;height:64px;border:0}
+#frame{position:absolute;left:57px;top:64px;width:1920px;height:1080px;transform:scale(0.940625);transform-origin:0 0;overflow:hidden;background:#F7F5F0}
+.a{position:absolute;white-space:nowrap}
+.num{font-family:Inter,sans-serif;font-feature-settings:'tnum' 1}
+.hc{position:absolute;top:34px;width:250px;height:58px;border-radius:30px;border:2.5px solid #cfc9bd;color:#9a958c;font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#F7F5F0;white-space:nowrap}
+.sign{position:absolute;display:flex;align-items:center;gap:22px;white-space:nowrap}
+.disc{width:84px;height:84px;border-radius:50%;background:#D9502E;color:#fff;font-size:50px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.signT{font-size:64px;font-weight:700;color:#D9502E}
+.h2{position:absolute;font-size:44px;font-weight:500;color:#6d6860;white-space:nowrap}
+.qc{position:absolute;background:#fff;border:3px solid #cfc9bd;border-radius:12px;overflow:hidden}
+.bdg{display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:40px;font-weight:700;padding:4px 22px;border-radius:6px}
+.lg{position:absolute;font-size:30px;color:#444;white-space:nowrap;display:flex;align-items:center;gap:12px}
+.sw{width:26px;height:26px;border-radius:4px}
+</style></head><body>
+<iframe id="barF" src="progress-bar.html?variant=3"></iframe>
+<div id="frame">
+  <!-- question cards (scene 1) — they morph into the HUD chips -->
+  <div id="qh" class="a" style="left:120px;top:150px;font-size:64px;font-weight:700;color:#222">效果怎么样？看三个问题</div>
+  <div id="cards"></div>
+  <div id="hud"></div>
+  <!-- Q1 -->
+  <div id="q1" class="a" style="left:0;top:0;width:1920px;height:1080px;display:none">
+    <div id="sg1" class="sign" style="left:120px;top:128px"><div class="disc">1</div><div class="signT">只改一轮，有没有用？</div></div>
+    <div id="q1s" class="h2" style="left:226px;top:232px">3 个职业评测 × 4 种模型 / harness 组合 · 柱子 = 比原版多拿的分</div>
+    <div id="legend"></div>
+    <svg id="chart" class="a" width="1920" height="1080" style="left:0;top:0;overflow:visible"></svg>
+    <div id="tags"></div>
+    <div id="call" class="a" style="opacity:0">
+      <div id="callN" class="num" style="font-size:120px;font-weight:700;color:#D9502E;line-height:1;transform-origin:0 0">+11.8</div>
+      <div id="callL" class="a" style="left:6px;top:132px;font-size:30px;color:#6d6860">GLM-5 · OpenCode<br>LAB 评测</div>
+      <div id="callS" class="a" style="left:6px;top:222px;font-size:42px;font-weight:700;color:#222">将近 12 个点</div>
+    </div>
+  </div>
+  <!-- Q2 -->
+  <div id="q2" class="a" style="left:0;top:0;width:1920px;height:1080px;display:none">
+    <div id="sg2" class="sign" style="left:120px;top:128px"><div class="disc">2</div><div class="signT">弱模型能追上强模型吗？</div></div>
+    <div id="q2s" class="h2" style="left:226px;top:232px">WorkBuddy-Bench 平均分 · OpenCode · 横轴从 60 分起</div>
+    <svg id="race" class="a" width="1920" height="1080" style="left:0;top:0;overflow:visible"></svg>
+    <div id="rtags"></div>
+    <div id="call3" class="a" style="left:1440px;top:250px;opacity:0">
+      <div class="a" style="left:4px;top:0;font-size:34px;font-weight:700;color:#D9502E">反超</div>
+      <div class="a num" style="left:0;top:40px;font-size:130px;font-weight:700;color:#D9502E;line-height:1">+3.3</div>
+      <div class="a" style="left:6px;top:180px;font-size:30px;color:#6d6860">改完的 GLM-5 75.7<br>原版 Gemini 72.4</div>
+    </div>
+  </div>
+  <div id="tag" class="tag"></div>
+  <div id="cap" class="cap"><span id="capT"></span></div>
+</div>
+<script src="../h2proto/build/common.js"></script>
+<script>
+// t = clip time. Voice starts at LEAD (silence while the bar jumps and the cards build).
+const LEAD = 0.5, VT0 = 198.35, DURATION = 19.6 + LEAD;
+const M2 = 2.19, CUT2 = 10.55;          // voice-time: morph cards→chips on 只改一轮 ; hard cut on 第二
+const CAPS = [[0, .69, '效果怎么样？'], [.92, 2.04, '看三个问题。第一'], [2.19, 3.2, '只改一轮有没有用？'], [3.61, 4.95, '三个职业场景的评测'], [5.0, 6.45, '四种模型和 harness 组合'], [6.62, 7.61, '全部比原版高'], [7.69, 9.57, '最多的一组涨了将近 12 个百分点'], [10.6, 13.45, '第二，弱模型能不能靠 harness 追上强模型？'], [13.99, 16.21, 'GLM-5 改完 harness 的 75.7'], [16.47, 19.16, '超过了没改的 Gemini 3.5 Flash 的 72.4']].map(c => [c[0] + LEAD, c[1] + LEAD, c[2]]);
+// ---------- question cards → chips
+const Q = [['Q1', '只改一轮，有没有用？', 'Q1 一轮改进'], ['Q2', '弱模型能不能追上强模型？', 'Q2 弱追强'], ['Q3', '经验库有没有用？', 'Q3 经验库']];
+const CARD = i => ({ x: 120 + i * 570, y: 290, w: 530, h: 480 }), CHIP = i => ({ x: 567 + i * 268, y: 34, w: 250, h: 58 });
+$('cards').innerHTML = Q.map((q, i) => `<div id="qc${i}" class="qc"><div id="qcA${i}" class="a" style="left:0;top:0;width:530px;height:480px">
+  <div class="a" style="left:36px;top:36px"><span id="qb${i}" class="bdg" style="background:#cfc9bd">${q[0]}</span></div>
+  <div id="qt${i}" class="a" style="left:36px;top:150px;width:460px;font-size:54px;font-weight:700;line-height:1.35;white-space:normal;clip-path:inset(0 0 100% 0)">${q[1]}</div></div>
+  <div id="qcB${i}" class="a" style="left:0;top:0;width:250px;height:58px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;opacity:0;transform-origin:0 0">${q[2]}</div></div>`).join('');
+// ---------- Q1 chart (style A palette)
+const COMBO = [['Gemini · OpenCode', '#3E6A8A'], ['Gemini · Codex', '#93AEC4'], ['GLM-5 · OpenCode', '#D9502E'], ['GLM-5 · Codex', '#EBA286']];
+const GROUPS = [['WorkBuddy-Bench', [5.1, 3.0, 11.5, 10.9]], ['JobBench', [4.5, 1.4, 3.6, 1.2]], ['LAB', [2.0, 4.0, 11.8, 7.8]]];
+const BASE = 870, PX = 40, BW = 64, BG = 16, GG = 120, GW = 4 * BW + 3 * BG, X0 = 330;
+$('legend').innerHTML = COMBO.map((c, i) => `<div id="lg${i}" class="lg" style="left:${226 + i * 390}px;top:292px"><span class="sw" style="background:${c[1]}"></span>${c[0]}</div>`).join('');
+let sv = '';
+[4, 8, 12].forEach(v => { sv += `<line id="gl${v}" x1="${X0 - 20}" x2="${X0 + 3 * GW + 2 * GG + 20}" y1="${BASE - v * PX}" y2="${BASE - v * PX}" stroke="#E4E1D8" stroke-width="2" stroke-dasharray="6 8"/><text id="gt${v}" x="${X0 - 34}" y="${BASE - v * PX + 9}" fill="#9a958c" font-size="26" font-family="Inter" text-anchor="end">+${v}</text>`; });
+sv += `<line id="base" x1="${X0 - 20}" y1="${BASE}" x2="${X0 - 20}" y2="${BASE}" stroke="#2A2925" stroke-width="3"/><text id="baseT" x="${X0 - 34}" y="${BASE + 10}" fill="#2A2925" font-size="30" font-weight="700" font-family="Noto Sans CJK SC" text-anchor="end">原版</text>`;
+const BARS = []; let tg = '';
+GROUPS.forEach((g, gi) => {
+  const gx = X0 + gi * (GW + GG);
+  sv += `<text id="gn${gi}" x="${gx + GW / 2}" y="${BASE + 50}" fill="#444" font-size="32" font-weight="700" font-family="Noto Sans CJK SC" text-anchor="middle">${g[0]}</text>`;
+  g[1].forEach((v, ci) => {
+    const x = gx + ci * (BW + BG), id = `b${gi}${ci}`;
+    sv += `<rect id="${id}r" x="${x - 7}" width="${BW + 14}" fill="none" stroke="#D9502E" stroke-width="4" rx="6" opacity="0"/><rect id="${id}" x="${x}" width="${BW}" fill="${COMBO[ci][1]}" rx="4"/>`;
+    tg += `<div id="${id}t" class="a num" style="font-size:28px;font-weight:700;color:#444;transform:translateX(-50%)">+0.0</div>`;
+    BARS.push({ id, x, v, gi, ci });
+  });
+});
+sv += `<path id="lead" fill="none" stroke="#D9502E" stroke-width="3" stroke-dasharray="7 8"/>`;
+$('chart').innerHTML = sv; $('tags').innerHTML = tg;
+const MAX = BARS.find(b => b.v === 11.8);
+// ---------- Q2 race
+const RX0 = 560, RPX = 54, xs = v => RX0 + (v - 60) * RPX, LY = [430, 640], AXY = 820, BH = 84;
+(function () {
+  let s = '';
+  [60, 65, 70, 75, 80].forEach(v => { s += `<line id="ax${v}" x1="${xs(v)}" x2="${xs(v)}" y1="${AXY}" y2="${AXY + 14}" stroke="#2A2925" stroke-width="2.5"/><text id="axt${v}" x="${xs(v)}" y="${AXY + 52}" fill="#6d6860" font-size="30" font-family="Inter" text-anchor="middle">${v}</text>`; });
+  s += `<line id="axl" x1="${xs(60)}" x2="${xs(60)}" y1="${AXY}" y2="${AXY}" stroke="#2A2925" stroke-width="2.5"/>`;
+  s += `<text id="ln0" x="${xs(60) - 24}" y="${LY[0] + 36}" fill="#222" font-size="34" font-weight="700" font-family="Noto Sans CJK SC" text-anchor="end">Gemini 3.5 Flash</text><text id="ln0b" x="${xs(60) - 24}" y="${LY[0] + 74}" fill="#6d6860" font-size="28" font-family="Noto Sans CJK SC" text-anchor="end">强模型 · 原版</text>`;
+  s += `<text id="ln1" x="${xs(60) - 24}" y="${LY[1] + 36}" fill="#222" font-size="34" font-weight="700" font-family="Noto Sans CJK SC" text-anchor="end">GLM-5</text><text id="ln1b" x="${xs(60) - 24}" y="${LY[1] + 74}" fill="#6d6860" font-size="28" font-family="Noto Sans CJK SC" text-anchor="end">弱模型</text>`;
+  s += `<rect id="rb0" x="${xs(60)}" y="${LY[0]}" height="${BH}" fill="#3E6A8A" rx="4"/><rect id="rb1" x="${xs(60)}" y="${LY[1]}" height="${BH}" fill="#B9B5AA" rx="4"/><rect id="rb1x" x="${xs(64.2)}" y="${LY[1]}" height="${BH}" fill="#D9502E" rx="4"/>`;
+  s += `<line id="gline" x1="${xs(72.4)}" x2="${xs(72.4)}" y1="${LY[0] - 10}" y2="${LY[0] - 10}" stroke="#3E6A8A" stroke-width="3" stroke-dasharray="8 8"/>`;
+  s += `<circle id="xring" cx="${xs(72.4)}" cy="${LY[1] + BH / 2}" r="10" fill="none" stroke="#D9502E" stroke-width="4" opacity="0"/>`;
+  $('race').innerHTML = s;
+  $('rtags').innerHTML = `<div id="rt0" class="a num" style="font-size:40px;font-weight:700;color:#3E6A8A">72.4</div><div id="rt1" class="a num" style="font-size:40px;font-weight:700;color:#444">64.2</div>
+   <div id="hpill" class="a" style="font-size:28px;color:#fff;background:#D9502E;border-radius:22px;padding:4px 18px;font-weight:700;transform-origin:0 50%">+ Harness²</div>`;
+})();
+// ---------- helpers
+const op = (id, v) => { $(id).style.opacity = v; };
+const rise = (id, t, a, d = .45, dy = 26) => { const p = eout(P(t, a, d)); $(id).style.opacity = p; $(id).style.transform = `translateY(${(1 - p) * dy}px)`; };
+function chipStyle(el, state, pp) {
+  if (state === 2) { el.style.background = '#F7F5F0'; el.style.color = '#D9502E'; el.style.borderColor = '#D9502E'; }
+  else if (state === 1) { el.style.background = '#D9502E'; el.style.color = '#fff'; el.style.borderColor = '#D9502E'; }
+  else { el.style.background = '#F7F5F0'; el.style.color = '#9a958c'; el.style.borderColor = '#cfc9bd'; }
+}
+function seek(t) {
+  $('barF').contentWindow.seek(198.0 + t, { animScale: 1, teaser: true });
+  const u = t - LEAD;                       // voice time
+  caption(CAPS, t, $('cap'), $('capT'));
+  const s2 = u >= CUT2;
+  $('q1').style.display = (u >= M2 + .3 && !s2) ? 'block' : 'none';
+  $('q2').style.display = s2 ? 'block' : 'none';
+  $('tag').textContent = s2 ? 'Table 1 · p8' : (u >= M2 ? 'Table 1–2 · p8–9' : '§3.2 · p8');
+  // ---- cards build (from the cut, before the voice) then morph into chips on 只改一轮
+  const m = eio(P(u, M2, .75));
+  $('qh').style.opacity = P(t, .25, .35) * (1 - P(u, M2, .3)); $('qh').style.transform = `translateY(${(1 - eout(P(t, .25, .45))) * 20}px)`;
+  Q.forEach((q, i) => {
+    const el = $('qc' + i), A = CARD(i), B = CHIP(i);
+    const b = eout(P(t, .05 + i * .1, .45));               // build: outline grows
+    const x = lerp(A.x, B.x, m), y = lerp(A.y, B.y, m), w = lerp(A.w, B.w, m), h = lerp(A.h, B.h, m) * (m > 0 ? 1 : b);
+    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = h + 'px';
+    el.style.borderRadius = lerp(12, 30, m) + 'px'; el.style.opacity = P(t, .05 + i * .1, .15);
+    $('qcA' + i).style.opacity = 1 - P(u, M2, .3);
+    $('qcB' + i).style.opacity = P(u, M2 + .35, .3);
+    $('qt' + i).style.clipPath = `inset(0 0 ${100 * (1 - eout(P(u, .95 + i * .17, .4)))}% 0)`;
+    const foc = P(u, 1.58, .22);
+    const bd = $('qb' + i); bd.style.transform = `scale(${back(P(t, .3 + i * .1, .35))})`;
+    bd.style.background = i === 0 ? (foc > .5 ? '#D9502E' : '#cfc9bd') : '#cfc9bd';
+    if (m <= 0) { el.style.borderColor = i === 0 && foc > .5 ? '#D9502E' : '#cfc9bd'; el.style.opacity = (+el.style.opacity) * (i === 0 ? 1 : 1 - .5 * foc); el.style.background = '#fff'; el.style.color = '#222'; }
+    else { const st = s2 ? (i === 0 ? 2 : i === 1 ? 1 : 0) : (i === 0 ? 1 : 0); if (m >= 1) chipStyle(el, st); else { el.style.borderColor = i === 0 ? '#D9502E' : '#cfc9bd'; el.style.background = lerp(0, 1, m) > .5 && i === 0 ? '#D9502E' : (m > .5 ? '#F7F5F0' : '#fff'); el.style.color = i === 0 && m > .5 ? '#fff' : '#9a958c'; } }
+  });
+  if (s2) { scene2(u); return; }
+  if (u < M2 + .3) return;
+  // ---- Q1 (continuous from the chips): heading, then chart grows on the words
+  rise('sg1', u, M2 + .35, .45, 30); rise('q1s', u, M2 + .5, .45, 16);
+  const bl = eio(P(u, 2.55, .5));
+  $('base').setAttribute('x2', lerp(X0 - 20, X0 + 3 * GW + 2 * GG + 20, bl)); op('baseT', P(u, 2.7, .3));
+  [4, 8, 12].forEach((v, k) => { op(`gl${v}`, P(u, 2.8 + k * .08, .35)); op(`gt${v}`, P(u, 2.85 + k * .08, .35)); });
+  GROUPS.forEach((g, gi) => { const p = back(P(u, 3.7 + gi * .38, .4)); const e = $(`gn${gi}`); e.style.opacity = clamp(p); e.setAttribute('transform', `translate(0 ${(1 - p) * 16})`); });
+  COMBO.forEach((c, ci) => rise(`lg${ci}`, u, 5.05 + ci * .3, .35, 12));
+  const f = P(u, 7.69, .3);
+  BARS.forEach((b, k) => {
+    const seed = eout(P(u, 5.05 + b.ci * .3, .3)) * 8;
+    const g = back(P(u, 6.62 + k * .055, .75), 1.1);
+    const h = Math.max(seed, b.v * PX * g);
+    const r = $(b.id); r.setAttribute('y', BASE - h); r.setAttribute('height', h);
+    const isM = b === MAX;
+    r.style.opacity = isM ? 1 : 1 - .65 * f;
+    const ring = $(b.id + 'r'); ring.setAttribute('y', BASE - h - 7); ring.setAttribute('height', h + 7); ring.setAttribute('opacity', isM ? f : 0);
+    const te = $(b.id + 't'); te.textContent = '+' + (b.v * clamp(g, 0, 1)).toFixed(1);
+    te.style.left = (b.x + BW / 2) + 'px'; te.style.top = (BASE - h - 40) + 'px';
+    te.style.opacity = P(u, 6.62 + k * .055, .15) * (isM ? 1 - P(u, 7.75, .2) : 1 - .65 * f);
+  });
+  // max tag → big number (morph), then leader line back to the bar
+  const mx = MAX.x + BW / 2, my = BASE - MAX.v * PX - 40, cx = 1525, cy = 420, mm = eio(P(u, 7.75, .6)), s = lerp(28 / 120, 1, mm);
+  const call = $('call'); call.style.opacity = P(u, 7.75, .12);
+  call.style.left = lerp(mx - 150 * s, cx, mm) + 'px'; call.style.top = lerp(my, cy, mm) + 'px';
+  $('callN').style.transform = `scale(${s})`;
+  rise('callL', u, 8.3, .35, 10); rise('callS', u, 8.62, .4, 14);
+  const lp = eio(P(u, 8.35, .5)), ax = cx - 12, ay = cy + 62, bx = mx + BW / 2 + 10, by = my + 40;
+  $('lead').setAttribute('d', `M${ax} ${ay} L${lerp(ax, bx, lp)} ${lerp(ay, by, lp)}`); $('lead').style.opacity = lp > 0 ? 1 : 0;
+}
+function scene2(u) {
+  const ax = eio(P(u, 10.6, .45));
+  $('axl').setAttribute('x2', lerp(xs(60), xs(80), ax));
+  [60, 65, 70, 75, 80].forEach((v, k) => { const o = P(u, 10.68 + k * .06, .25); $('ax' + v).style.opacity = o; $('axt' + v).style.opacity = o; });
+  const g0 = eout(P(u, 10.9, .7)), g1 = eout(P(u, 11.1, .7));
+  const v0 = lerp(60, 72.4, g0), v1b = lerp(60, 64.2, g1);
+  $('rb0').setAttribute('width', xs(v0) - xs(60)); $('rb1').setAttribute('width', xs(v1b) - xs(60));
+  ['ln0', 'ln0b'].forEach(i => op(i, P(u, 10.95, .3))); ['ln1', 'ln1b'].forEach(i => op(i, P(u, 11.15, .3)));
+  rise('sg2', u, 11.0, .45, 30); rise('q2s', u, 11.2, .45, 16);
+  const ge = eio(P(u, 14.0, 1.8)), v1 = lerp(64.2, 75.7, ge), crossed = v1 >= 72.4;
+  $('rb1x').setAttribute('width', Math.max(0, xs(v1) - xs(64.2)));
+  $('rt0').textContent = v0.toFixed(1); $('rt0').style.left = (xs(v0) + 18) + 'px'; $('rt0').style.top = (LY[0] + 16) + 'px'; op('rt0', P(u, 10.9, .15));
+  const vv = ge > 0 ? v1 : v1b;
+  $('rt1').textContent = vv.toFixed(1); $('rt1').style.left = (xs(vv) + 18) + 'px'; $('rt1').style.top = (LY[1] + 16) + 'px'; op('rt1', P(u, 11.1, .15));
+  $('rt1').style.color = crossed ? '#D9502E' : '#444';
+  const hp = back(P(u, 14.0, .35)); const pe = $('hpill'); pe.style.left = (xs(64.2) + 10) + 'px'; pe.style.top = (LY[1] + BH + 16) + 'px'; pe.style.opacity = clamp(hp); pe.style.transform = `scale(${.6 + .4 * hp})`;
+  const gl = eio(P(u, 12.55, .6)); $('gline').setAttribute('y2', lerp(LY[0] - 10, LY[1] + BH + 10, gl)); $('gline').setAttribute('stroke', crossed ? '#D9502E' : '#3E6A8A');
+  const pr = P(u, 14.0 + 1.8 * .6, .5); $('xring').setAttribute('r', 10 + 56 * eout(pr)); $('xring').setAttribute('opacity', pr > 0 && pr < 1 ? 1 - pr : 0);
+  const c = P(u, 16.5, .35); $('call3').style.opacity = c; $('call3').style.transform = `translateY(${(1 - eout(c)) * 24}px)`;
+}
+const CUES = [
+  { t: .05, type: 'scratch', d: .35 }, { t: .3, type: 'pop', soft: 1 }, { t: .4, type: 'pop', soft: 1 }, { t: .5, type: 'pop', soft: 1 },
+  ...[.95, 1.12, 1.29].map(x => ({ t: x, type: 'tick', key: 1 })), { t: 1.58, type: 'pop' },
+  { t: 2.19, type: 'whoosh', d: .75 }, { t: 2.55, type: 'tick' },
+  { t: 3.7, type: 'pop', soft: 1 }, { t: 4.08, type: 'pop', soft: 1 }, { t: 4.46, type: 'pop', soft: 1 },
+  ...[5.05, 5.35, 5.65, 5.95].map(x => ({ t: x, type: 'tick' })), { t: 6.55, type: 'whoosh', d: .9, soft: 1 },
+  { t: 7.72, type: 'pop' }, { t: 8.35, type: 'scratch', d: .5 }, { t: 8.62, type: 'pop', soft: 1 },
+  { t: 10.55, type: 'scratch', d: .35 }, { t: 10.9, type: 'whoosh', d: .6, soft: 1 }, { t: 12.55, type: 'tick' }, { t: 14.0, type: 'pop', soft: 1 }, { t: 14.05, type: 'whoosh', d: 1.6, soft: 1 }, { t: 15.08, type: 'pop' }, { t: 16.5, type: 'pop' }
+].map(c => Object.assign({}, c, { t: +(c.t + (c.t === .05 || c.t === .3 || c.t === .4 || c.t === .5 ? 0 : LEAD)).toFixed(3) }));
+window.DURATION = DURATION; window.CUES = CUES; window.seek = seek;
+const loaded = f => new Promise(r => { if (f.contentDocument && f.contentDocument.readyState === 'complete') r(); else f.addEventListener('load', r); });
+window.READY = (async () => { await loaded($('barF')); await $('barF').contentWindow.barReady; await document.fonts.ready; seek(0); return true; })();
+</script></body></html>

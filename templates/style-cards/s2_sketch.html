@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>Sketch Board</title>
+<link rel="stylesheet" href="../kit/fonts/lxgw-wenkai-webfont-1.7.0/lxgwwenkai-regular.css">
+<link rel="stylesheet" href="../kit/fonts/lxgw-wenkai-webfont-1.7.0/lxgwwenkai-bold.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-caveat-5.3.0/latin-700.css">
+<link rel="stylesheet" href="../kit/fonts/fontsource-caveat-5.3.0/latin-400.css">
+<style>
+html,body{margin:0;padding:0;background:#FDFCF8;}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#FDFCF8;}
+svg{position:absolute;left:0;top:0;}
+#tex{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:.55;}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 60%,rgba(90,70,40,.07) 100%);}
+.cap{position:absolute;left:960px;top:948px;height:78px;white-space:nowrap;display:none;}
+.cap svg{position:absolute;left:0;top:0;overflow:visible;}
+.cap span.t{position:relative;display:block;padding:0 46px;line-height:78px;font:700 46px 'LXGW WenKai';color:#1E1E1E;letter-spacing:1px;}
+.hl{background:linear-gradient(transparent 52%,#FFEC99 52%,#FFEC99 90%,transparent 90%);}
+.rd{color:#E03131;}
+.lt{font-family:'Caveat','LXGW WenKai';font-weight:700;font-size:54px;}
+#av{position:absolute;left:1670px;top:860px;width:242px;height:220px;}
+</style></head>
+<body><div id="stage">
+<svg id="board" width="1920" height="1080" viewBox="0 0 1920 1080">
+ <defs>
+  <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="16" cy="16" r="1.7" fill="#E7E3DA"/></pattern>
+  <filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="6"/></filter>
+ </defs>
+ <g id="cam"><rect x="-3000" y="-3000" width="10000" height="8000" fill="url(#dots)"/><g id="world"></g></g>
+</svg>
+<div id="tex"></div><div id="vig"></div>
+<svg id="ui" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+<div id="caps"></div>
+<img id="av">
+</div>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const INK='#1E1E1E', RED='#E03131', Y='#FFEC99', B='#A5D8FF', G='#B2F2BB', P='#FFC9C9', V='#D0BFFF', GREY='#6B665C';
+const WK="'LXGW WenKai'", CV="'Caveat','LXGW WenKai'";
+function mul(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let rnd=mul(20261020); const rr=(a,b)=>a+(b-a)*rnd();
+const f=v=>Math.round(v*10)/10;
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const E_={
+ lin:x=>x, out:x=>1-Math.pow(1-x,3), inout:x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,
+ pen:x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2, sine:x=>-(Math.cos(Math.PI*x)-1)/2,
+ back:x=>{const c1=1.9,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
+};
+function E(tag,a,par){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(par)par.appendChild(e);return e;}
+
+/* ---------- rough geometry ---------- */
+function seg(x1,y1,x2,y2,r=1.5){
+ const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L;
+ const rf=r*Math.min(1.5,.45+L/320), j=()=>rr(-rf,rf);
+ const bow=rr(-1,1)*Math.min(L*.012,5);
+ return `M${f(x1+j())} ${f(y1+j())}C${f(x1+dx*.3+nx*bow+j())} ${f(y1+dy*.3+ny*bow+j())} ${f(x1+dx*.7+nx*bow+j())} ${f(y1+dy*.7+ny*bow+j())} ${f(x2+j())} ${f(y2+j())}`;
+}
+const line2=(x1,y1,x2,y2,r)=>[seg(x1,y1,x2,y2,r),seg(x1,y1,x2,y2,r)];
+function rectD(x,y,w,h,r=1.6){const Pt=[[x,y],[x+w,y],[x+w,y+h],[x,y+h]],o=[];for(let k=0;k<2;k++)for(let i=0;i<4;i++){const p=Pt[i],q=Pt[(i+1)%4];o.push(seg(p[0],p[1],q[0],q[1],r));}return o;}
+function cr(P){let d=`M${f(P[0][0])} ${f(P[0][1])}`;for(let i=0;i<P.length-1;i++){const p0=P[i-1]||P[i],p1=P[i],p2=P[i+1],p3=P[i+2]||p2;d+=`C${f(p1[0]+(p2[0]-p0[0])/6)} ${f(p1[1]+(p2[1]-p0[1])/6)} ${f(p2[0]-(p3[0]-p1[0])/6)} ${f(p2[1]-(p3[1]-p1[1])/6)} ${f(p2[0])} ${f(p2[1])}`;}return d;}
+function ellD(cx,cy,rx,ry,r=1.5,passes=2,over=.4,th=null){const o=[];for(let k=0;k<passes;k++){const t0=th!==null?th+rr(-.15,.15):rr(0,6.28),tot=6.283+rr(over*.4,over),n=Math.max(10,Math.round((rx+ry)/16)),P=[];
+ for(let i=0;i<=n;i++){const a=t0+tot*i/n,s=1+rr(-.012,.012)+(k?.012:0);P.push([cx+Math.cos(a)*rx*s+rr(-r,r),cy+Math.sin(a)*ry*s+rr(-r,r)]);}o.push(cr(P));}return o;}
+function curveD(P,r=1.5){return cr(P.map((p,i)=>(i==0||i==P.length-1)?p:[p[0]+rr(-r,r),p[1]+rr(-r,r)]));}
+function headD(P,len=24,ang=.5){const a=P[P.length-1],b=P[P.length-2],th=Math.atan2(a[1]-b[1],a[0]-b[0]);
+ return [seg(a[0],a[1],a[0]-Math.cos(th-ang)*len,a[1]-Math.sin(th-ang)*len,1),seg(a[0],a[1],a[0]-Math.cos(th+ang)*len,a[1]-Math.sin(th+ang)*len,1)];}
+function hachRect(x,y,w,h,gap=11,r=1){const o=[];let fl=false;for(let c=gap*.6;c<w+h;c+=gap){const u1=Math.max(0,c-h),u2=Math.min(w,c);let p=[x+u1,y+(c-u1)],q=[x+u2,y+(c-u2)];if(fl)[p,q]=[q,p];fl=!fl;o.push(seg(p[0],p[1],q[0],q[1],r));}return o;}
+function blobRect(x,y,w,h,j=3){const P=[];const n=6;for(let i=0;i<n;i++)P.push([x+w*i/(n-1)+rr(-j,j),y+rr(-j,j)]);for(let i=1;i<4;i++)P.push([x+w+rr(-j,j),y+h*i/4+rr(-j,j)]);for(let i=n-1;i>=0;i--)P.push([x+w*i/(n-1)+rr(-j,j),y+h+rr(-j,j)]);for(let i=3;i>0;i--)P.push([x+rr(-j,j),y+h*i/4+rr(-j,j)]);return 'M'+P.map(p=>f(p[0])+' '+f(p[1])).join('L')+'Z';}
+
+/* ---------- registry ---------- */
+const items=[]; let clipN=0;
+function draw(par,ds,t0,dur,o={}){
+ const g=E('g',{},par); const segs=[]; let tot=0;
+ for(const d of ds){const el=E('path',{d,fill:'none',stroke:o.c||INK,'stroke-width':o.w||3.4,'stroke-linecap':'round','stroke-linejoin':'round'},g);
+  if(o.op)el.setAttribute('opacity',o.op); if(o.blend)el.style.mixBlendMode=o.blend;
+  const L=el.getTotalLength(); const S=[];for(let i=0;i<=16;i++){const p=el.getPointAtLength(L*i/16);S.push([p.x,p.y]);}
+  el.setAttribute('pathLength','1');el.setAttribute('stroke-dasharray','1 2');
+  segs.push({el,len:L,c0:tot,S});tot+=L;}
+ const it={k:'draw',g,segs,tot,t0,dur,pen:o.pen!==false,ease:E_[o.ease||'pen'],last:-1};items.push(it);return it;
+}
+function txt(par,x,y,s,o={}){const t=E('text',{x,y,'font-family':o.fam||WK,'font-size':o.size||32,'font-weight':o.wt||400,fill:o.c||INK,'text-anchor':o.anchor||'start'},par);
+ if(o.ls)t.setAttribute('letter-spacing',o.ls);
+ if(Array.isArray(s)){for(const [str,col,fam,sz] of s){const ts=E('tspan',{fill:col||o.c||INK},t);if(fam)ts.setAttribute('font-family',fam);if(sz)ts.setAttribute('font-size',sz);ts.textContent=str;}}else t.textContent=s;return t;}
+function wipeGroup(par,t0,dur,o={}){const id='cp'+(clipN++);const cp=E('clipPath',{id,clipPathUnits:'userSpaceOnUse'},document.querySelector('#board defs'));const rc=E('path',{d:'M0 0Z'},cp);
+ const g=E('g',{'clip-path':`url(#${id})`},par);const it={k:'wipe',g,rc,t0,dur,dir:o.dir||'right',pen:!!o.pen,ease:E_[o.ease||'pen'],pad:o.pad||14};items.push(it);return it;}
+function finishWipe(it){const b=it.g.getBBox();it.b=b;}
+function write(par,x,y,s,o,t0,dur){const it=wipeGroup(par,t0,dur,{pen:o.pen!==false,ease:'lin'});it.text=txt(it.g,x,y,s,o);finishWipe(it);return it;}
+function fill(par,d,col,t0,dur,o={}){const it=wipeGroup(par,t0,dur,{dir:o.dir||'right',pen:false,ease:'out'});const el=E('path',{d,fill:col},it.g);if(o.op)el.setAttribute('opacity',o.op);finishWipe(it);return it;}
+function pop(par,cx,cy,rot,t0,dur=.34,o={}){const g=E('g',{},par);const it={k:'pop',g,cx,cy,rot,t0,dur,from:o.from||1.45,spin:o.spin===undefined?7:o.spin};items.push(it);return it;}
+
+/* ---------- build the board ---------- */
+function sticky(par,cx,cy,w,h,col,rot,t0,o={}){
+ const it=pop(par,cx,cy,rot,t0,o.dur||.36,o);const g=it.g;
+ const x=cx-w/2,y=cy-h/2;
+ E('path',{d:blobRect(x+8,y+12,w,h,2),fill:'#5A4A2A',opacity:.22,filter:'url(#sh)'},g);
+ E('path',{d:`M${x} ${y}L${x+w} ${y+2}L${x+w-2} ${y+h-10}Q${x+w-14} ${y+h+2} ${x+w-34} ${y+h}L${x+1} ${y+h-1}Z`,fill:col},g);
+ E('path',{d:`M${x} ${y}L${x+w} ${y+2}L${x+w} ${y+16}L${x} ${y+14}Z`,fill:'#000',opacity:.04},g);
+ return g;
+}
+function build(){
+ const W=document.getElementById('world');
+ const L1=E('g',{},W), L2=E('g',{},W), L3=E('g',{},W); // under / mid / top
+
+ /* ===== A: paper page doodle + sticky ===== */
+ fill(L1,blobRect(70,150,280,360,2),'#FFFFFF',-.3,.3);
+ draw(L1,[...rectD(64,144,292,372,1.4),seg(306,144,356,194,1),seg(306,144,306,194,1),seg(306,194,356,194,1)],-.3,.5,{w:3,pen:false});
+ const sl=[];for(let k=0;k<9;k++){const y0=340+k*20,x0=96,wl=k%4==3?120:200*rr(.8,1);const Pp=[];for(let q=0;q<=8;q++)Pp.push([x0+wl*q/8,y0+(q%2?-3:3)]);sl.push(cr(Pp));}
+ draw(L1,sl,.1,.7,{w:2.2,c:'#868E96',pen:false,ease:'lin'});
+ write(L1,96,410-150+40,'arXiv',{fam:CV,size:44,wt:700,c:'#868E96',pen:false},-.2,.3);
+ const sA=sticky(L2,410,250,390,196,Y,-4,-.12);
+ txt(sA,410,250,'Google 新论文',{size:58,wt:700,anchor:'middle'});
+ txt(sA,410,305,'云 AI 团队 × 西北大学',{size:30,anchor:'middle',c:'#5C5440'});
+ draw(sA,line2(268,266,548,266,1.2),.45,.32,{c:RED,w:5,op:.85});
+
+ /* ===== A: model box ===== */
+ const M=[960,560];
+ fill(L1,blobRect(806,436,308,248,4),B,1.46,.32);
+ draw(L2,rectD(800,430,320,260,1.8),1.30,.48);
+ write(L2,960,492,'模型',{size:48,wt:700,anchor:'middle'},1.52,.3);
+ // weight grid 6x3
+ const gx=852,gy=520,cs=36,cols=6,rows=3; const grid=[];
+ for(let i=0;i<=rows;i++)grid.push(seg(gx,gy+i*cs,gx+cols*cs,gy+i*cs,1));
+ for(let j=0;j<=cols;j++)grid.push(seg(gx+j*cs,gy,gx+j*cs,gy+rows*cs,1));
+ draw(L2,grid,1.78,.42,{w:2.2});
+ const cellC=['#FFFFFF','#74C0FC','#FFFFFF','#D0BFFF','#FFFFFF','#74C0FC','#FFEC99','#FFFFFF','#74C0FC','#FFFFFF','#D0BFFF','#FFFFFF','#FFFFFF','#74C0FC','#FFFFFF','#FFEC99','#74C0FC','#FFFFFF'];
+ for(let i=0;i<rows;i++)for(let j=0;j<cols;j++){const k=i*cols+j;fill(L1,blobRect(gx+j*cs+3,gy+i*cs+3,cs-6,cs-6,1.5),cellC[k],1.95+((i+j)%6)*.035,.12,{op:.95});}
+ // padlock at top-right corner
+ const lk=E('g',{},L3);
+ fill(lk,blobRect(1092,412,64,52,2),Y,2.22,.18);
+ draw(lk,[curveD([[1102,414],[1100,388],[1124,374],[1148,388],[1146,414]],1)],2.12,.2,{w:3.6});
+ draw(lk,rectD(1090,410,68,56,1.2),2.24,.24,{w:3.4});
+ draw(lk,[...ellD(1124,434,6,6,.6,1,.3),seg(1124,440,1124,452,.6)],2.42,.12,{w:3});
+ // frozen note
+ write(L2,960,762,['权重 ',['0',RED],' 改动'].map(x=>Array.isArray(x)?x:[x,RED]),{size:40,wt:700,anchor:'middle',c:RED},2.42,.36);
+ draw(L2,[curveD([[870,778],[960,784],[1052,776]],1.2),curveD([[880,786],[965,790],[1045,783]],1.2)],2.80,.22,{c:RED,w:4.5});
+
+ /* ===== A: Harness ring ===== */
+ const rx=392,ry=292;
+ const band=E('g',{},L1);
+ draw(band,[cr(Array.from({length:41},(_,i)=>{const a=-Math.PI/2+i/40*Math.PI*2*1.02;return[M[0]+Math.cos(a)*rx,M[1]+Math.sin(a)*ry];}))],3.28,.95,{c:V,w:46,op:.55,pen:false,ease:'inout'});
+ const dashes=[];const ND=40;for(let i=0;i<ND;i++){const a0=-Math.PI/2+i/ND*Math.PI*2,a1=a0+Math.PI*2/ND*.58;const P=[];for(let k=0;k<4;k++){const a=a0+(a1-a0)*k/3;P.push([M[0]+Math.cos(a)*rx+rr(-1.6,1.6),M[1]+Math.sin(a)*ry+rr(-1.6,1.6)]);}dashes.push(cr(P));}
+ draw(L2,dashes,3.30,.95,{w:3.8,ease:'inout'});
+ const labs=[['提示词',Y],['护栏',P],['技能',G],['工具说明',B],['脚本',V],['记忆',Y]];
+ labs.forEach(([s,c],i)=>{const a=-Math.PI/2+i*Math.PI/3;const x=M[0]+Math.cos(a)*rx,y=M[1]+Math.sin(a)*ry;
+  const w=s.length*32+40,h=56;const it=pop(L3,x,y,rr(-5,5),3.5+i*.13,.32,{from:1.6});
+  E('path',{d:blobRect(x-w/2+4,y-h/2+6,w,h,2),fill:'#5A4A2A',opacity:.18,filter:'url(#sh)'},it.g);
+  E('path',{d:blobRect(x-w/2,y-h/2,w,h,2.5),fill:c},it.g);
+  for(const d of rectD(x-w/2,y-h/2,w,h,1.2))E('path',{d,fill:'none',stroke:INK,'stroke-width':2.4,'stroke-linecap':'round'},it.g);
+  txt(it.g,x,y+11,s,{size:31,wt:700,anchor:'middle'});
+ });
+ write(L3,1262,292,'Harness',{fam:CV,size:132,wt:700},4.42,.5);
+ draw(L3,[curveD([[1262,312],[1420,318],[1606,306]],1.4),curveD([[1276,322],[1440,326],[1590,316]],1.4)],4.88,.2,{c:RED,w:5.5});
+ const arP=[[1300,330],[1262,362],[1236,384]];
+ draw(L3,[curveD(arP,1),...headD(arP,20)],4.7,.2,{w:3.2});
+
+ /* ===== B: real task ===== */
+ const sB=sticky(L3,2300,212,340,112,P,3,5.42);
+ txt(sB,2300,228,'真实职场任务',{size:46,wt:700,anchor:'middle'});
+ write(L2,2502,206,'JobBench · 制片人对账',{size:38,wt:700},5.78,.62);
+ write(L2,2504,250,'（论文里的真实任务）',{size:28,c:GREY},6.2,.4);
+ // clapperboard doodle
+ const cb=E('g',{},L2);
+ fill(cb,blobRect(3040,196,140,84,2),'#E9ECEF',6.45,.2);
+ draw(cb,[...rectD(3036,192,148,92,1.2)],6.36,.26,{w:3.2});
+ draw(cb,[...rectD(3030,160,156,30,1),seg(3060,160,3075,190,.8),seg(3095,160,3110,190,.8),seg(3130,160,3145,190,.8),seg(3165,160,3180,190,.8)],6.55,.28,{w:3});
+ // three tables
+ const T=[[2250,'排期',B,7.05],[2650,'人员',G,7.48],[3050,'预算',P,7.92]];
+ const ty=322,tw=320,th=272,hh=60;
+ T.forEach(([cx,s,c,t0],ti)=>{const x=cx-tw/2;const tf=5.95+ti*.2;
+  fill(L1,blobRect(x+4,ty+4,tw-8,hh-6,2),c,t0,.24);
+  draw(L2,rectD(x,ty,tw,th,1.8),tf,.34,{w:3.4});
+  write(L2,cx,ty+44,s,{size:40,wt:700,anchor:'middle'},t0+.08,.22);
+  const gl=[seg(x,ty+hh,x+tw,ty+hh,1),seg(x,ty+hh+71,x+tw,ty+hh+71,1),seg(x,ty+hh+142,x+tw,ty+hh+142,1),seg(x+104,ty+hh,x+104,ty+th,1),seg(x+212,ty+hh,x+212,ty+th,1)];
+  draw(L2,gl,tf+.42,.3,{w:2.2});
+  const sc=[];for(let r=0;r<3;r++)for(let k=0;k<3;k++){const x0=x+[16,120,228][k],y0=ty+hh+36+r*71,wl=[60,64,62][k]*rr(.7,1);const Pp=[];for(let q=0;q<=6;q++)Pp.push([x0+wl*q/6,y0+(q%2?-5:5)*rr(.6,1)]);sc.push(cr(Pp));}
+  draw(L2,sc,t0+.3,.34,{w:2.4,c:'#495057'});
+ });
+ // reconcile band + checks
+ draw(L1,[curveD([[2094,ty+hh+106],[2650,ty+hh+102],[3206,ty+hh+107]],1.5)],8.48,.36,{c:'#FFD43B',w:46,op:.55,pen:false,ease:'inout'});
+ T.forEach(([cx],i)=>{const x=cx+tw/2-34,y=ty+hh+104;draw(L3,[curveD([[x-12,y],[x-2,y+12],[x+20,y-16]],.6)],8.72+i*.09,.12,{c:'#2B8A3E',w:5});});
+ const tgt=[[2250,604,2560,740],[2650,604,2650,730],[3050,604,2740,740]];
+ tgt.forEach(([a,b,c,d],i)=>{const P2=[[a,b+6],[(a+c)/2+(i-1)*-30,(b+d)/2+6],[c,d]];draw(L2,[curveD(P2,1),...headD(P2,20)],8.84+i*.06,.24,{w:3.2});});
+ fill(L1,blobRect(2496,744,308,84,3),G,9.12,.24);
+ draw(L2,rectD(2490,740,320,92,1.6),9.0,.3);
+ write(L2,2650,802,'对上账 ✓',{size:50,wt:700,anchor:'middle'},9.2,.3);
+ draw(L3,ellD(2650,786,232,78,2,2,.35,-2.2),9.46,.34,{c:RED,w:4.6});
+
+ /* ===== C: score ===== */
+ const C0=E('g',{transform:'translate(-450 0)'},W);const L2c=E('g',{},C0),L3c=E('g',{},C0),L1c=E('g',{},C0);C0.insertBefore(L1c,L2c);
+ const yv=v=>1620-v*5.3;
+ write(L2c,1250,1030,'事后打分',{size:54,wt:700},10.08,.4);
+ write(L2c,1475,1030,'JobBench 制片人任务',{size:28,c:GREY},10.3,.4);
+ fill(L1c,ellD(1390,1668,50,48,1,1,.1)[0]+'Z',P,10.36,.2);
+ draw(L2c,[...rectD(1336,1062,108,570,1.6)],10.14,.42);
+ draw(L2c,ellD(1390,1668,54,50,1.4,2,.3,-1.0),10.3,.22);
+ const tk=[];for(let v=0;v<=100;v+=20)tk.push(seg(1444,yv(v),1468,yv(v),.7));draw(L2c,tk,10.5,.2,{w:2.4});
+ [[0,'0'],[50,'50'],[100,'100']].forEach(([v,s],i)=>write(L2c,1478,yv(v)+11,s,{fam:CV,size:36,wt:700,c:GREY,pen:false},10.55+i*.05,.12));
+ // 43 fill (hatched grey)
+ const hz=E('g',{},L2c);
+ const cpi='cpT';const cpe=E('clipPath',{id:cpi},document.querySelector('#board defs'));E('rect',{x:1340,y:1066,width:100,height:600},cpe);hz.setAttribute('clip-path',`url(#${cpi})`);
+ fill(hz,blobRect(1342,yv(43),96,1620-yv(43)+40,2),'#DEE2E6',10.72,.3,{dir:'up'});
+ draw(hz,hachRect(1340,yv(43),100,1620-yv(43)+30,12,1),10.74,.34,{w:1.8,c:'#868E96',pen:false,ease:'lin'});
+ draw(L2c,line2(1330,yv(43),1450,yv(43),1),10.98,.14,{w:3});
+ // leader + 43
+ draw(L2c,[seg(1312,yv(43),1240,yv(43),1)],10.98,.12,{w:2.4,c:GREY});
+ write(L2c,1230,yv(43)+46,'43',{fam:CV,size:150,wt:700,anchor:'end'},10.98,.3);
+ draw(L3c,[seg(1080,yv(43)-40,1236,yv(43)+46,2),seg(1086,yv(43)+40,1230,yv(43)-46,2)],11.3,.22,{c:RED,w:7});
+ // rise to 78
+ fill(hz,blobRect(1342,yv(78),96,yv(43)-yv(78)+4,2),G,11.42,.36,{dir:'up'});
+ draw(hz,hachRect(1340,yv(78),100,yv(43)-yv(78),12,1),11.46,.34,{w:1.8,c:'#2F9E44',pen:false,ease:'lin'});
+ draw(L2c,line2(1330,yv(78),1450,yv(78),1),11.72,.14,{w:3});
+ const ar=[[1520,yv(43)+6],[1580,yv(60)],[1630,yv(76)]];
+ draw(L3c,[curveD(ar,1),...headD(ar,24)],11.5,.24,{c:RED,w:5});
+ write(L3c,1650,1306,'78',{fam:CV,size:340,wt:700,c:RED},11.68,.4);
+ write(L3c,2084,1300,'分',{size:62,wt:700},12.04,.14);
+ draw(L3c,ellD(1835,1196,232,150,2.5,2,.4,-2.6),12.04,.38,{c:INK,w:4.6});
+ write(L2c,1650,1430,'单个案例 · 事后评分',{size:32,c:GREY},12.18,.38);
+ // final headline
+ write(L3,1880,1160,'不动模型，',{size:130,wt:700},12.6,.26);
+ write(L3,1880,1330,[['只改 ',INK],['Harness',RED,CV,170]],{size:130,wt:700},12.86,.28);
+ draw(L3,[curveD([[2186,1356],[2380,1364],[2580,1352]],1.5),curveD([[2196,1368],[2390,1374],[2570,1364]],1.5)],13.12,.16,{c:RED,w:8});
+}
+
+/* ---------- camera ---------- */
+const CAM=[ // t, x, y, s
+ [0,350,300,1.36],[1.12,365,300,1.3],[2.0,1000,545,1.0],[3.15,1005,545,.99],[4.2,1050,540,.95],[5.12,1052,540,.95],
+ [5.72,2650,440,1.12],[8.7,2655,445,1.1],[9.25,2655,505,1.0],[9.78,2660,505,.99],[10.38,1215,1330,1.0],[12.56,1222,1325,.985],[13.2,1690,915,.52],[13.6,1690,915,.515]];
+function camAt(t){let i=0;while(i<CAM.length-2&&t>CAM[i+1][0])i++;const a=CAM[i],b=CAM[i+1];const p=E_.inout(clamp((t-a[0])/(b[0]-a[0])));
+ // interpolate scale in log space
+ return [a[1]+(b[1]-a[1])*p,a[2]+(b[2]-a[2])*p,Math.exp(Math.log(a[3])+(Math.log(b[3])-Math.log(a[3]))*p)];}
+
+/* ---------- UI: bar, avatar frame, pen, captions ---------- */
+const SEC=[['01','钩子',0],['02','背景',29],['03','核心思路',63],['04','走一遍例子',93],['05','自进化',150],['06','结果',198],['07','冷水',231],['08','收获',271]],TOT=348.8;
+let barFill,barHead,pen;
+function buildUI(){
+ const U=document.getElementById('ui');
+ E('rect',{x:0,y:0,width:1920,height:66,fill:'#FDFCF8'},U);
+ const x0=40,x1=1880,L=x1-x0;const bx=v=>x0+v/TOT*L;
+ // current highlight
+ const w0=bx(29)-bx(0);
+ E('path',{d:`M${x0+2} 16L${x0+w0-4} 12L${x0+w0-2} 47L${x0+4} 50Z`,fill:Y},U);
+ for(const d of [seg(x0,54,x1,55,1.2),seg(x0,56,x1,54,1.2)])E('path',{d,fill:'none',stroke:INK,'stroke-width':2.2,'stroke-linecap':'round',opacity:.85},U);
+ SEC.forEach(([n,s,st],i)=>{const a=bx(st),b=i<7?bx(SEC[i+1][2]):x1;
+  if(i>0)E('path',{d:seg(a,44,a,62,.6),stroke:INK,'stroke-width':2.4,fill:'none','stroke-linecap':'round'},U);
+  for(let k=1;k<Math.round((b-a)/40);k++){const xx=a+(b-a)*k/Math.round((b-a)/40);E('path',{d:seg(xx,51,xx,58,.3),stroke:INK,'stroke-width':1.4,fill:'none',opacity:.45},U);}
+  const cur=i==0;const t=E('text',{x:(a+b)/2,y:40,'text-anchor':'middle','font-family':WK,'font-size':cur?30:28,'font-weight':cur?700:400,fill:cur?INK:'#8C867A'},U);
+  const t1=E('tspan',{'font-family':CV,'font-weight':700,'font-size':cur?34:31},t);t1.textContent=n+' ';const t2=E('tspan',{},t);t2.textContent=s;
+ });
+ barFill=E('path',{d:`M${x0} 55L${bx(29)} 55`,stroke:RED,'stroke-width':8,'stroke-linecap':'round',fill:'none',opacity:.9,pathLength:1,'stroke-dasharray':'1 2'},U);
+ barHead=E('g',{},U);E('circle',{cx:0,cy:55,r:8,fill:RED},barHead);E('circle',{cx:0,cy:55,r:3,fill:'#FDFCF8'},barHead);
+ // avatar polaroid frame
+ const fx=1662,fy=850;
+ E('path',{d:blobRect(fx+6,fy+10,258,250,2),fill:'#5A4A2A',opacity:.18,filter:'url(#sh)'},U);
+ E('path',{d:blobRect(fx,fy,258,250,2),fill:'#FFFFFF'},U);
+ for(const d of rectD(fx,fy,258,250,1.2))E('path',{d,fill:'none',stroke:INK,'stroke-width':2.6,'stroke-linecap':'round'},U);
+ E('path',{d:`M${fx+86} ${fy-14}L${fx+176} ${fy-20}L${fx+178} ${fy+10}L${fx+88} ${fy+16}Z`,fill:Y,opacity:.85,transform:`rotate(-4 ${fx+130} ${fy})`},U);
+ // pen
+ pen=E('g',{},U);
+ const pg=E('g',{transform:'rotate(-52)'},pen);
+ E('path',{d:'M6 8L26 1L132 1L132 19L26 19Z',fill:'#000',opacity:.12,transform:'translate(4,6)'},pg);
+ E('path',{d:'M0 0L24 -8L24 8Z',fill:'#F3D9A4',stroke:INK,'stroke-width':2,'stroke-linejoin':'round'},pg);
+ E('path',{d:'M0 0L8 -2.7L8 2.7Z',fill:INK},pg);
+ E('path',{d:'M24 -8L120 -8L120 8L24 8Z',fill:'#FFD43B',stroke:INK,'stroke-width':2,'stroke-linejoin':'round'},pg);
+ E('path',{d:'M24 0L120 0',stroke:'#E8A900','stroke-width':2},pg);
+ E('path',{d:'M120 -8L132 -8L132 8L120 8Z',fill:'#ADB5BD',stroke:INK,'stroke-width':2},pg);
+ E('path',{d:'M132 -8L144 -8Q150 0 144 8L132 8Z',fill:'#FFA8A8',stroke:INK,'stroke-width':2},pg);
+}
+const CAPS=[[-.4,1.33,'Google 新论文：'],[1.33,3.19,'模型一行权重<span class=hl>都没动</span>'],[3.19,5.41,'只改了模型外面那一层，叫 <span class="rd lt">Harness</span>'],[5.41,6.72,'一个<span class=hl>真实</span>的职场任务'],[6.72,10.1,'帮制片人把排期、人员和预算几份表<span class=hl>对上账</span>'],[10.1,12.78,'事后打分从 <span class=lt>43</span> 分涨到 <span class="rd lt">78</span> 分']];
+const capEls=[];
+function buildCaps(){const C=document.getElementById('caps');
+ CAPS.forEach(([a,b,h],i)=>{const d=document.createElement('div');d.className='cap';d.style.display='block';const s=document.createElement('span');s.className='t';s.innerHTML=h;d.appendChild(s);C.appendChild(d);
+  const w=s.offsetWidth,H=78;const sv=E('svg',{width:w,height:H,viewBox:`0 0 ${w} ${H}`});
+  const Pt=[];for(let x=0;x<=w;x+=14)Pt.push([x,rr(0,4)]);Pt.push([w-rr(0,3),H*.5]);for(let x=w;x>=0;x-=14)Pt.push([x,H-rr(0,5)]);Pt.push([rr(0,3),H*.5]);
+  const dd='M'+Pt.map(p=>f(p[0])+' '+f(p[1])).join('L')+'Z';
+  E('path',{d:dd,fill:'#5A4A2A',opacity:.16,transform:'translate(4,6)',filter:'url(#sh2)'},sv);
+  E('path',{d:dd,fill:'#FFFFFF'},sv);
+  E('path',{d:`M10 ${H-7}L${w-10} ${H-8}`,stroke:'#E7E3DA','stroke-width':2},sv);
+  const df=E('defs',{},sv);const fl=E('filter',{id:'sh2'},df);E('feGaussianBlur',{stdDeviation:3},fl);
+  d.insertBefore(sv,s);d.style.marginLeft=(-w/2)+'px';d.style.display='none';
+  capEls.push({d,a,b,rot:(i%2?.7:-.6)});});
+}
+
+/* ---------- avatar ---------- */
+const AV=[];
+function loadAV(){const ps=[];for(let i=0;i<242;i++){const im=new Image();const s='../kit/av/'+String(i).padStart(3,'0')+'.png';ps.push(new Promise(r=>{im.onload=r;im.onerror=r;}));im.src=s;AV.push(s);}return Promise.all(ps);}
+
+/* ---------- paper texture ---------- */
+function paperTex(){const c=document.createElement('canvas');c.width=c.height=384;const x=c.getContext('2d');const id=x.createImageData(384,384);const r=mul(77);
+ for(let i=0;i<384*384;i++){const v=236+Math.floor(r()*20);id.data[i*4]=v;id.data[i*4+1]=v-2;id.data[i*4+2]=v-6;id.data[i*4+3]=255;}x.putImageData(id,0,0);
+ x.globalAlpha=.05;for(let k=0;k<220;k++){x.strokeStyle='#8a7a5a';x.lineWidth=.6;x.beginPath();const a=r()*384,b=r()*384;x.moveTo(a,b);x.lineTo(a+r()*30-15,b+r()*30-15);x.stroke();}
+ document.getElementById('tex').style.background=`url(${c.toDataURL()})`;}
+
+/* ---------- seek ---------- */
+function seek(t){
+ const [cx,cy,s]=camAt(t);
+ document.getElementById('cam').setAttribute('transform',`translate(960 500) scale(${s}) translate(${-cx} ${-cy})`);
+ let act=null;
+ for(const it of items){const raw=(t-it.t0)/it.dur;const p=it.ease?it.ease(clamp(raw)):clamp(raw);
+  if(it.k=='draw'){const D=p*it.tot;for(const sg of it.segs){const l=clamp((D-sg.c0)/sg.len);if(l<=0.001){sg.el.style.display='none';}else{sg.el.style.display='';sg.el.style.strokeDashoffset=String(1-l);}}
+   it.g.style.display=raw<=0?'none':'';
+  } else if(it.k=='wipe'){const b=it.b,pd=it.pad;
+   if(it.dir=='up'){const sl=Math.min(16,b.width*.15),H=b.height+2*pd+2*sl,h=H*p-sl,x0=b.x-pd,x1=b.x+b.width+pd,yb=b.y+b.height+pd;
+    it.rc.setAttribute('d',`M${f(x0)} ${f(yb)}L${f(x1)} ${f(yb)}L${f(x1)} ${f(yb-h+sl)}L${f(x0)} ${f(yb-h-sl)}Z`);}
+   else{const sl=Math.min(26,b.height*.35),x0=b.x-pd,y0=b.y-pd*3,y1=b.y+b.height+pd*3,w=(b.width+2*pd+2*sl)*p-sl;
+    it.rc.setAttribute('d',`M${f(x0)} ${f(y0)}L${f(x0+w+sl)} ${f(y0)}L${f(x0+w-sl)} ${f(y1)}L${f(x0)} ${f(y1)}Z`);}
+   it.g.style.display=raw<=0?'none':'';
+  } else if(it.k=='pop'){const q=clamp(raw);if(raw<=0){it.g.style.display='none';continue;}it.g.style.display='';
+   const e=E_.back(q);const sc=it.from+(1-it.from)*e;const rot=it.rot+(1-E_.out(q))*it.spin;
+   it.g.setAttribute('transform',`translate(${it.cx} ${it.cy}) rotate(${rot}) scale(${sc}) translate(${-it.cx} ${-it.cy})`);it.g.setAttribute('opacity',clamp(q*5));}
+  if(it.pen&&raw>0&&raw<1&&(!act||it.t0>=act.t0))act={it,p,t0:it.t0};
+ }
+ // pen tip
+ let pt=null;
+ if(act){const it=act.it;
+  if(it.k=='draw'){const D=act.p*it.tot;let sg=it.segs[0];for(const g of it.segs)if(D>=g.c0)sg=g;const l=clamp((D-sg.c0)/sg.len)*16;const i=Math.min(15,Math.floor(l)),fr=l-i;const a=sg.S[i],b=sg.S[i+1];
+   const m=sg.el.getScreenCTM();const P=new DOMPoint(a[0]+(b[0]-a[0])*fr,a[1]+(b[1]-a[1])*fr).matrixTransform(m);pt=[P.x,P.y];}
+  else{const b=it.b;const m=it.g.getScreenCTM();const wx=b.x+b.width*act.p,wy=b.y+b.height*(.62+.18*Math.sin(t*60));const P=new DOMPoint(wx,wy).matrixTransform(m);pt=[P.x,P.y];}
+ }
+ if(pt&&pt[1]>70){pen.style.display='';pen.setAttribute('transform',`translate(${f(pt[0])} ${f(pt[1])})`);}else pen.style.display='none';
+ // bar
+ const pr=clamp(t/29);barFill.style.strokeDashoffset=String(1-Math.max(.004,pr));
+ const hx=40+(t/TOT)*1840;barHead.setAttribute('transform',`translate(${f(hx)} 0)`);
+ // captions
+ for(const c of capEls){const on=t>=c.a&&t<c.b;c.d.style.display=on?'block':'none';if(on){const q=clamp((t-c.a)/.22);const e=E_.back(q);c.d.style.transform=`translateY(${f((1-e)*22)}px) rotate(${c.rot}deg)`;c.d.style.opacity=String(clamp(q*4));}}
+ // avatar
+ const fr=Math.round(t*30);document.getElementById('av').src=AV[Math.floor(fr*24/30)%242];
+}
+window.seek=seek;window.DURATION=13.6;
+window.CUES=[{t:0.0,type:'paper'},{t:0.45,type:'scratch',d:.3},{t:1.2,type:'whoosh',d:.8,soft:true},{t:1.32,type:'scratch',d:.45},{t:1.8,type:'scratch',d:.4},{t:2.14,type:'scratch',d:.3},{t:2.45,type:'tick',key:true},
+ {t:3.3,type:'scratch',d:.9},{t:3.52,type:'pop',soft:true},{t:3.78,type:'pop',soft:true},{t:4.04,type:'pop',soft:true},{t:4.42,type:'scratch',d:.5},
+ {t:5.12,type:'whoosh',d:.7},{t:5.44,type:'paper'},{t:5.8,type:'scratch',d:.5},{t:6.0,type:'scratch',d:.6},{t:7.05,type:'scratch',d:.45},{t:7.48,type:'scratch',d:.45},{t:7.92,type:'scratch',d:.45},{t:8.5,type:'scratch',d:.35},{t:9.2,type:'pop'},{t:9.46,type:'scratch',d:.34},
+ {t:9.78,type:'whoosh',d:.8},{t:10.14,type:'scratch',d:.45},{t:10.98,type:'tick',key:true},{t:11.3,type:'scratch',d:.25},{t:11.7,type:'pop'},{t:12.04,type:'scratch',d:.38},{t:12.56,type:'whoosh',d:.9,soft:true},{t:12.7,type:'scratch',d:.6}];
+const ALLTXT='Google新论文云AI团队×西北大学模型权重0改动提示词护栏技能工具说明脚本记忆Harness真实职场任务JobBench·制片人对账（论文里的真实任务）排期人员预算对上账✓事后打分JobBench制片人任务050100437 8分单个案例·事后评分不动模型，只改Harness0102030405060708钩子背景核心思路走一遍例子自进化结果冷水收获模型一行权重都没动只改了模型外面那一层，叫一个真实的职场任务帮制片人把排期、人员和预算几份表对上账事后打分从分涨到：';
+window.READY=(async()=>{
+ await Promise.all([document.fonts.load(`400 40px ${WK}`,ALLTXT),document.fonts.load(`700 40px ${WK}`,ALLTXT),document.fonts.load(`700 40px 'Caveat'`,'Harness0123456789 '),document.fonts.load(`400 40px 'Caveat'`,'0123')]);
+ await document.fonts.ready;
+ paperTex();build();buildUI();buildCaps();await loadAV();seek(0);return true;})();
+</script></body></html>

@@ -1,0 +1,215 @@
+<!doctype html><html><head><meta charset="utf-8"><title>clipA</title>
+<link rel="stylesheet" href="common.css">
+<style>
+#page{position:absolute;perspective:2600px}
+#pageShadow{position:absolute;inset:0;border-radius:2px}
+#p7{position:absolute;inset:0;background:#fff;overflow:hidden}
+#p1{position:absolute;inset:0;transform-origin:0 50%;transform-style:preserve-3d;z-index:2}
+#p1f,#p1b{position:absolute;inset:0;background:#fff;overflow:hidden;backface-visibility:hidden}
+#p1b{transform:rotateY(180deg);background:#f6f3ec}
+#turnShade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(60,40,20,.25),rgba(60,40,20,0) 60%);z-index:1;opacity:0}
+.meta1{white-space:nowrap;font-size:36px;font-weight:700;color:#222}
+.meta2{white-space:nowrap;font-size:30px;color:#8a857c}
+#hdr{font-size:88px;font-weight:700;line-height:1.2;transform-origin:0 0;white-space:nowrap;color:#1d1d1d}
+#sup{font-size:56px;vertical-align:super;line-height:0}
+#formA{font-size:60px;font-weight:700;line-height:1.2;white-space:nowrap;color:#1d1d1d}
+.chip{position:absolute;background:#fff;border:3px solid #222;overflow:hidden}
+.badge{position:absolute;width:62px;height:62px;border-radius:50%;background:#D9502E;color:#fff;font-size:36px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.chipT{position:absolute;font-size:48px;font-weight:700;white-space:nowrap}
+.lab{position:absolute;background:#fff;border:2.5px solid #cfc9bd;border-radius:10px;font-size:38px;font-weight:500;color:#333;padding:6px 22px;white-space:nowrap;transform-origin:50% 50%}
+#aiBadge{position:absolute;background:#D9502E;color:#fff;font-size:34px;font-weight:700;padding:6px 20px;border-radius:30px;white-space:nowrap}
+#hl{position:absolute;background:rgba(246,180,90,.55);mix-blend-mode:multiply;border-radius:2px}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><filter id="mb" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur id="mbb" stdDeviation="0 0"/></filter></svg>
+<div id="viewport"><div id="world">
+  <div id="meta" class="abs" style="left:60px;top:372px"><div class="meta1">Google 云 AI 团队 · 西北大学</div><div class="meta2" style="margin-top:8px">arXiv 2610.14224 · 2026.10.09 提交</div></div>
+  <div id="page">
+    <div id="pageShadow"></div>
+    <div id="p7"><img src="p7.jpg" class="abs" style="left:0;top:0;width:600px;height:848px"><div id="hl" style="left:205px;top:605px;height:17px;width:0"></div><div class="tex" style="--tex:var(--T)"></div><div id="turnShade"></div></div>
+    <div id="p1"><div id="p1f"><img id="p1img" src="p1.jpg" class="abs"><div class="tex" id="tex1"></div></div><div id="p1b"><img src="p1.jpg" class="abs" style="left:0;top:0;width:100%;height:100%;opacity:.13;transform:scaleX(-1)"><div class="tex" style="--tex:var(--T)"></div><div id="backShade" class="abs" style="left:0;top:0;width:100%;height:100%;background:linear-gradient(270deg,rgba(60,40,20,.28),rgba(60,40,20,0) 55%)"></div></div></div>
+  </div>
+  <div id="diag" class="abs" style="left:0;top:0;width:1920px;height:1080px;transform-origin:960px 560px">
+    <div id="sub0" class="abs" style="left:762px;top:262px;font-size:34px;color:#8a857c;white-space:nowrap">Harness 平方 · Agent Harness 自进化</div>
+    <div id="chip2" class="chip" style="left:760px;top:530px;width:1060px;height:130px;border-radius:10px"><div class="badge" style="left:30px;top:31px">2</div><div class="chipT" style="left:122px;top:30px">明天就能怎么用</div></div>
+    <div id="chip1" class="chip"><div id="c1old" class="abs" style="left:0;top:0;width:1060px;height:130px"><div class="badge" style="left:30px;top:31px">1</div><div class="chipT" style="left:122px;top:30px">拆解完整架构</div></div>
+      <div id="c1new" class="abs" style="left:0;top:0;width:214px;height:214px;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:50px;font-weight:700;color:#2b2b2b;line-height:1.1">模型</div><div id="lockA" style="margin-top:6px"></div></div></div>
+    <svg id="ringSvg" class="abs" width="1920" height="1080" style="left:0;top:0;overflow:visible">
+      <circle id="ring" cx="960" cy="560" r="250" fill="none" stroke="#b5afa4" stroke-width="3" stroke-dasharray="12 10"/>
+      <path id="arc" fill="none" stroke="#D9502E" stroke-width="6" stroke-linecap="round"/>
+      <path id="arcHead" fill="#D9502E"/>
+    </svg>
+    <div id="formA" class="abs">agent = 模型 +&nbsp;</div>
+    <div id="hdr" class="abs">Harness<span id="sup">2</span></div>
+    <div id="sub1" class="abs" style="font-size:34px;color:#8a857c;white-space:nowrap">Harness = 模型外面那一圈</div>
+    <div id="L0" class="lab">提示词</div><div id="L1" class="lab">记忆</div><div id="L2" class="lab">技能</div><div id="L3" class="lab">工具说明</div>
+    <div id="aiBadge">AI 自己改</div>
+  </div>
+</div></div>
+<div id="tag" class="tag">p1</div>
+<div id="cap" class="cap"><span id="capT"></span></div>
+<span id="meas" style="position:absolute;left:-9999px;top:0;font-size:60px;font-weight:700;white-space:nowrap"><span id="mA">agent = 模型 +&nbsp;</span><span id="mB">Harness</span></span>
+<script src="common.js"></script>
+<script>
+const DURATION = 15.6;
+document.documentElement.style.setProperty('--T', PAPER_TEX);
+$('tex1').style.setProperty('--tex', PAPER_TEX);
+$('lockA').innerHTML = LOCK_SVG(46, '#8a857c');
+const S = 560 / 1402; // sentence crop scale on page
+const PW = 600, PH = 848, PS = 600 / 2481, FS = 0.32;  // page width/height, page img scale, flat-title scale
+// formula geometry
+let FA_W, FB_W, F_LEFT;
+function measure() { FA_W = $('mA').getBoundingClientRect().width; FB_W = $('mB').getBoundingClientRect().width; F_LEFT = 960 - (FA_W + FB_W) / 2; $('formA').style.left = F_LEFT + 'px'; $('formA').style.top = '112px'; }
+const RING = { cx: 960, cy: 560, r: 250 };
+const LAB = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const LAB_T = [7.85, 8.45, 8.87, 9.23];
+// page geometry in world (center, size, rot, scale)
+function pageState(t) {
+  const m = eio(P(t, 1.8, 1.0));
+  let cx = 360, cy = lerp(260, 544, m), w = PW, h = lerp(144, PH, m), rot = lerp(0, -2, m), s = 1;
+  const tk = eio(P(t, 3.3, 0.85));
+  cx = lerp(cx, 70, tk); cy = lerp(cy, 985, tk); s = lerp(1, 0.38, tk); rot = lerp(rot, -9, tk);
+  const rt = eio(P(t, 12.1, 0.65));
+  cx = lerp(cx, 440, rt); cy = lerp(cy, 540, rt); s = lerp(s, 1, rt); rot = lerp(rot, -2, rt);
+  return { cx, cy, w, h, rot, s, m };
+}
+function sentenceWorld() {
+  // centre of the sentence crop in world coords once the page is back (t>12.9)
+  const st = pageState(13.6);
+  const lx = 0, ly = 620.3 - PH / 2;
+  const a = st.rot * Math.PI / 180;
+  return [st.cx + lx * Math.cos(a) - ly * Math.sin(a), st.cy + lx * Math.sin(a) + ly * Math.cos(a)];
+}
+let CAM;
+const CAPS = [
+  [0.12, 1.75, '最后告诉你明天就能怎么用'],
+  [3.3, 4.05, '先说背景'],
+  [4.4, 6.1, 'agent 等于模型加 Harness'],
+  [6.15, 7.75, 'Harness 就是模型外面那一圈'],
+  [7.8, 10.05, '提示词、记忆、技能、工具说明这些'],
+  [10.45, 12.6, '已经有不少工作在让 AI 自己改 Harness'],
+  [12.9, 15.45, '比如斯坦福牵头做的 Meta-Harness'],
+];
+const CUES = [
+  { t: 0.88, type: 'pop' }, { t: 1.8, type: 'whoosh', d: 1.0 }, { t: 1.95, type: 'paper' },
+  { t: 3.3, type: 'whoosh', d: 0.85 }, { t: 4.5, type: 'whoosh', d: 0.8 }, { t: 5.2, type: 'pop' },
+  { t: 6.3, type: 'whoosh', d: 0.9, soft: 1 },
+  ...LAB_T.map(t => ({ t: t + 0.05, type: 'pop' })),
+  { t: 10.5, type: 'scratch', d: 0.85 }, { t: 11.2, type: 'pop' },
+  { t: 12.1, type: 'whoosh', d: 0.65 }, { t: 12.78, type: 'paper' }, { t: 13.1, type: 'paper' }, { t: 13.55, type: 'whoosh', d: 0.7 },
+  { t: 14.15, type: 'scratch', d: 0.8 },
+];
+function arcPath(r, a0, a1) { // angles in deg, 0 = up, clockwise
+  const pt = a => [960 + r * Math.sin(a * Math.PI / 180), 560 - r * Math.cos(a * Math.PI / 180)];
+  const [x0, y0] = pt(a0), [x1, y1] = pt(a1);
+  return `M${x0},${y0} A${r},${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1},${y1}`;
+}
+function seek(t) {
+  // camera
+  const c = camAt(CAM, t);
+  $('world').style.transform = camCSS(c);
+  motionBlur(CAM, t, $('viewport'), $('mbb'));
+  // meta text fades as page lifts
+  $('meta').style.opacity = 1 - P(t, 1.8, 0.4);
+  // page
+  const ps = pageState(t), pg = $('page');
+  pg.style.left = (ps.cx - ps.w / 2) + 'px'; pg.style.top = (ps.cy - ps.h / 2) + 'px';
+  pg.style.width = ps.w + 'px'; pg.style.height = ps.h + 'px';
+  pg.style.transform = `rotate(${ps.rot}deg) scale(${ps.s})`;
+  const k = ps.m;
+  $('pageShadow').style.boxShadow = `0 ${lerp(0, 22, k)}px ${lerp(0, 48, k)}px rgba(70,50,25,${lerp(0, .22, k)}), 0 2px 6px rgba(0,0,0,${lerp(0, .10, k)}), 0 0 0 ${lerp(1.5, 0, k)}px #dedad2`;
+  $('tex1').style.opacity = k; document.querySelector('#p7 .tex').style.opacity = 1;
+  // title crop: flat box -> page layout
+  const ti = $('p1img'), isc = lerp(FS, PS, k);
+  ti.style.width = 2481 * isc + 'px'; ti.style.height = 3508 * isc + 'px'; ti.style.left = lerp(-239 * FS, 0, k) + 'px'; ti.style.top = lerp(-341 * FS, 0, k) + 'px';
+  // page turn p1 -> p7
+  const pt = eio(P(t, 12.75, 0.8));
+  $('p1').style.transform = `rotateY(${-179 * pt}deg)`;
+  $('backShade').style.opacity = 0.4 + 0.6 * Math.sin(Math.PI * pt);
+  $('p7').style.visibility = t < 12.7 ? 'hidden' : 'visible';
+  $('turnShade').style.opacity = Math.sin(Math.PI * pt) * 1.0;
+  // marker sweep
+  const hp = eio(P(t, 14.15, 0.8));
+  $('hl').style.width = (297 * hp) + 'px';
+  // ---- diagram group
+  const sh = eio(P(t, 12.1, 0.65));
+  $('diag').style.transform = `translate(${450 * sh}px,0) scale(${1 - 0.15 * sh})`;
+  // sub0 / chip2
+  $('sub0').style.opacity = 1 - P(t, 3.3, 0.4); $('sub0').style.transform = `translateY(${-24 * eio(P(t, 3.3, 0.5))}px)`;
+  const c2in = back(P(t, 0.8, 0.45)), c2out = eio(P(t, 3.35, 0.7));
+  $('chip2').style.opacity = clamp(P(t, 0.8, 0.12)) * (1 - P(t, 3.8, 0.2));
+  $('chip2').style.transform = `translate(${1250 * c2out}px,${lerp(-160, 0, c2in)}px)`;
+  $('chip2').style.zIndex = t < 1.2 ? 0 : 2;
+  // chip1 -> model circle
+  const mo = eio(P(t, 4.6, 0.7)), mob = back(P(t, 4.6, 0.75), 1.1);
+  const ch = $('chip1');
+  const x = lerp(760, 853, mob), y = lerp(370, 453, mob), w = lerp(1060, 214, mo), hh = lerp(130, 214, mo);
+  ch.style.left = x + 'px'; ch.style.top = y + 'px'; ch.style.width = w + 'px'; ch.style.height = hh + 'px';
+  ch.style.borderRadius = lerp(10, 107, mo) + 'px'; ch.style.zIndex = 3;
+  ch.style.borderColor = mo > .5 ? '#3a3a3a' : '#222';
+  $('c1old').style.opacity = 1 - P(t, 4.6, 0.25);
+  $('c1new').style.opacity = P(t, 4.95, 0.3); $('c1new').style.transform = `scale(${lerp(.7, 1, back(P(t, 4.95, 0.4)))})`;
+  // header Harness² -> formula
+  const hm = eio(P(t, 4.4, 0.65));
+  const fx = F_LEFT + FA_W, sc = 60 / 88;
+  $('hdr').style.transform = `translate(${lerp(760, fx, hm)}px,${lerp(168, 112, hm)}px) scale(${lerp(1, sc, hm)})`;
+  $('sup').style.opacity = 1 - P(t, 4.4, 0.3);
+  $('formA').style.opacity = P(t, 4.85, 0.3); $('formA').style.clipPath = `inset(0 0 0 ${100 * (1 - eout(P(t, 4.85, 0.5)))}%)`;
+  $('sub1').style.left = (960 - 190) + 'px';
+  $('sub1').style.top = lerp(170, 196, eout(P(t, 6.6, 0.45))) + 'px'; $('sub1').style.opacity = P(t, 6.6, 0.35);
+  // ring grows out of the circle
+  const rg = P(t, 6.3, 1.0);
+  const ring = $('ring');
+  ring.setAttribute('r', lerp(107, 250, back(rg, 1.2)));
+  ring.style.opacity = clamp(rg * 5); ring.setAttribute('stroke-dashoffset', -t * 14);
+  // labels
+  LAB.forEach((d, i) => {
+    const el = $('L' + i), p = back(P(t, LAB_T[i], 0.5), 1.5), q = P(t, LAB_T[i], 0.12);
+    const r = lerp(100, 250, p);
+    const bw = el.offsetWidth, bh = el.offsetHeight;
+    let cx = 960 + d[0] * r, cy = 560 + d[1] * r;
+    el.style.left = (cx - bw / 2) + 'px'; el.style.top = (cy - bh / 2) + 'px';
+    // "AI edits harness" wobble
+    const wt = 11.35 + i * 0.18, wp = P(t, wt, 0.5);
+    const wob = Math.sin(wp * Math.PI * 3) * 4 * (1 - wp);
+    el.style.transform = `scale(${lerp(.35, 1, p)}) rotate(${wob}deg)`;
+    el.style.opacity = q;
+    el.style.borderColor = (wp > 0 && wp < 1) ? '#D9502E' : '#cfc9bd';
+    el.style.zIndex = 4;
+  });
+  // AI-edit arc
+  const ap = eio(P(t, 10.5, 0.85));
+  if (ap > 0) {
+    const a0 = 35, a1 = lerp(35, 150, ap);
+    $('arc').setAttribute('d', arcPath(330, a0, a1));
+    const ar = a1 * Math.PI / 180, hx = 960 + 330 * Math.sin(ar), hy = 560 - 330 * Math.cos(ar);
+    const tx = Math.cos(ar), ty = Math.sin(ar); // tangent (clockwise)
+    const nx = -ty, ny = tx;
+    $('arcHead').setAttribute('d', `M${hx + tx * 18},${hy + ty * 18} L${hx - tx * 6 + nx * 13},${hy - ty * 6 + ny * 13} L${hx - tx * 6 - nx * 13},${hy - ty * 6 - ny * 13} Z`);
+    $('arc').style.opacity = 1; $('arcHead').style.opacity = 1;
+  } else { $('arc').style.opacity = 0; $('arcHead').style.opacity = 0; }
+  const bp = back(P(t, 11.2, 0.45), 1.6), ab = $('aiBadge');
+  const bx = 960 + 440 * Math.sin(92 * Math.PI / 180), by = 560 - 440 * Math.cos(92 * Math.PI / 180);
+  ab.style.left = (bx - ab.offsetWidth / 2 + 30) + 'px'; ab.style.top = (by - ab.offsetHeight / 2) + 'px';
+  ab.style.opacity = P(t, 11.2, 0.1); ab.style.transform = `scale(${lerp(.4, 1, bp)})`;
+  // tag
+  const tg = $('tag'); const tagTxt = t < 4.4 ? 'p1' : (t < 12.75 ? '§1 · p2' : '§3.1 · p7');
+  if (tg.textContent !== tagTxt) tg.textContent = tagTxt;
+  const tb = [4.4, 12.75].reduce((m, b) => Math.min(m, Math.abs(t - b)), 9);
+  tg.style.opacity = clamp(tb / 0.15);
+  caption(CAPS, t, $('cap'), $('capT'));
+}
+window.DURATION = DURATION; window.CUES = CUES; window.seek = seek;
+window.READY = document.fonts.ready.then(() => new Promise(r => {
+  const im = [...document.images]; let n = im.length; if (!n) r();
+  im.forEach(i => { if (i.complete) { if (--n === 0) r(); } else { i.onload = i.onerror = () => { if (--n === 0) r(); }; } });
+})).then(() => {
+  measure();
+  const [sx, sy] = sentenceWorld();
+  CAM = [{ cx: 960, cy: 540, z: 1 },
+    { t: 1.8, d: 1.0, cx: 360, cy: 548, z: 1.1 },
+    { t: 3.3, d: 0.85, cx: 1290, cy: 480, z: 1 },
+    { t: 4.4, d: 0.8, cx: 960, cy: 540, z: 1 },
+    { t: 13.55, d: 0.7, cx: sx, cy: sy, z: 3.69, r: 2 }];
+  seek(0); return true;
+});
+</script></body></html>

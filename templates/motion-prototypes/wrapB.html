@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><title>wrapB</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#FAFAF5}
+#barF{position:absolute;left:0;top:0;width:1920px;height:64px;border:0}
+#frame{position:absolute;left:57px;top:64px;width:1920px;height:1080px;transform:scale(0.940625);transform-origin:0 0;overflow:hidden}
+#inner{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0}
+.a{position:absolute;white-space:nowrap}
+.mono{font-family:"DejaVu Sans Mono",monospace}
+.meta{font-size:17px;letter-spacing:3px;text-transform:uppercase;color:#1E1C19}
+</style></head><body>
+<iframe id="barF" src="progress-bar.html?variant=3"></iframe>
+<div id="frame">
+  <iframe id="inner" src="../h2proto/build/clipB_v2.html"></iframe>
+</div>
+<script>
+// segment of clipB_v2: inner time TB0 .. TB0+DURATION ; source time = 94.4 + inner time
+const TB0 = 28.3, SRC0 = 94.4 + TB0, DURATION = 7.1;  // 6.5s of clipB + 0.6s chapter hold
+const $ = id => document.getElementById(id);
+function tcode(s) { const m = Math.floor(s / 60), ss = Math.floor(s % 60), ff = Math.floor((s % 1) * 30); return `TC ${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}:${String(ff).padStart(2, '0')}`; }
+function seek(t) {
+  $('barF').contentWindow.seek(SRC0 + t, { animScale: 1, teaser: true });
+  $('inner').contentWindow.seek(Math.min(TB0 + t, 34.8 - 1 / 30));
+}
+window.DURATION = DURATION; window.CUES = [];
+const loaded = f => new Promise(r => { if (f.contentDocument && f.contentDocument.readyState === 'complete') r(); else f.addEventListener('load', r); });
+window.READY = (async () => {
+  await loaded($('barF')); await loaded($('inner'));
+  await $('barF').contentWindow.barReady; await $('inner').contentWindow.READY;
+  const d = $('inner').contentDocument;
+  await document.fonts.ready; seek(0); return true;
+})();
+</script></body></html>

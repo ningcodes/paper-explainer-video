@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>Harness² · 样片 A · 钩子</title>
+<style>
+:root{--paper:#FFF1E5;--ink:#33302E;--sec:#66605C;--rule:#CCC1B7;--claret:#990F3D;--oxford:#0F5499;--teal:#0D7680;--wheat:#F2DFCE;}
+html,body{margin:0;padding:0;background:var(--paper);}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--paper);color:var(--ink);
+  font-family:'Noto Sans CJK SC',sans-serif;-webkit-font-smoothing:antialiased;}
+.a{position:absolute;white-space:nowrap;}
+.serif{font-family:'Noto Serif CJK SC',serif;}
+.num{font-family:'Inter',sans-serif;font-feature-settings:'tnum' 1,'lnum' 1;}
+.lm{font-family:'Latin Modern Roman','Noto Serif CJK SC',serif;}
+.ln{overflow:hidden;display:block;}
+.ln>span{display:inline-block;}
+.kick{font-family:'Inter','Noto Sans CJK SC',sans-serif;font-weight:700;font-size:28px;letter-spacing:.14em;color:var(--ink);}
+.krule{position:absolute;height:5px;background:var(--claret);}
+#world{position:absolute;left:0;top:0;width:10px;height:10px;transform-origin:0 0;}
+.reg{position:absolute;top:0;width:1920px;height:1080px;}
+/* bar */
+#bar{position:absolute;left:0;top:0;width:1920px;height:64px;background:var(--paper);}
+.slot{position:absolute;top:0;height:62px;}
+.slot .n{position:absolute;top:19px;font-family:'Inter';font-weight:600;font-size:22px;font-feature-settings:'tnum' 1;color:var(--sec);letter-spacing:.04em;}
+.slot .nm{position:absolute;top:16px;font-size:24px;color:var(--sec);}
+.slot.on .n{color:var(--claret);font-weight:700;}
+.slot.on .nm{font-family:'Noto Serif CJK SC',serif;font-weight:700;font-size:28px;top:12px;color:var(--claret);}
+.tbl{position:absolute;width:360px;}
+.row{position:absolute;left:0;width:360px;height:62px;}
+.cell{position:absolute;top:0;line-height:62px;font-size:30px;}
+#cap{position:absolute;left:0;top:958px;width:1660px;height:92px;}
+#capt{position:absolute;left:0;width:1660px;top:18px;text-align:center;font-family:'Noto Serif CJK SC',serif;font-weight:700;font-size:44px;line-height:56px;color:var(--ink);}
+#sheet{position:absolute;left:0;top:0;width:900px;height:1273px;transform-origin:0 0;background:#fff;
+  box-shadow:0 1px 2px rgba(51,48,46,.18),0 10px 24px rgba(80,50,30,.16),0 30px 60px rgba(80,50,30,.12);}
+#sheet img.pg{position:absolute;left:0;top:0;width:900px;height:1273px;}
+#grain{position:absolute;left:0;top:0;width:900px;height:1273px;background:url(grain.png);background-size:256px 256px;mix-blend-mode:multiply;opacity:.22;}
+.hl{position:absolute;background:rgba(250,199,117,.7);mix-blend-mode:multiply;border-radius:2px 5px 3px 6px;transform-origin:0 50%;}
+.card{position:absolute;width:400px;height:158px;}
+.strip{position:absolute;left:790px;width:850px;height:150px;}
+</style></head>
+<body><div id="stage">
+ <div id="world">
+  <!-- ===== R1 : splash + thesis ===== -->
+  <div class="reg" id="r1" style="left:0;top:0">
+    <div class="krule" id="aKr" style="left:120px;top:100px;width:56px"></div>
+    <div class="a kick" id="aK" style="left:120px;top:116px">论文速读 · AI AGENTS</div>
+    <div class="a serif" id="aSrc" style="left:120px;top:176px;font-size:44px;font-weight:600;color:var(--sec)"><span class="ln"><span>Google 新论文 <span style="color:var(--teal)">·</span> 单个任务 <span class="num" id="ph43" style="font-weight:800;color:transparent">43</span><span class="num" id="phAr" style="font-weight:400;color:transparent;margin:0 6px">→</span><span class="num" id="ph78" style="font-weight:800;color:transparent">78</span></span></span></div>
+    <!-- splash -->
+    <div class="a" id="spTop" style="left:124px;top:282px;font-size:30px;font-weight:700;color:var(--sec);letter-spacing:.04em">事后评分 <span style="font-weight:400">· 满分 100 · 原文 <span class="num">43.1 → 77.8</span></span></div>
+    <div class="a" id="spRule" style="left:120px;top:742px;width:1480px;height:2px;background:var(--ink);transform-origin:0 0"></div>
+    <div class="a" id="spL1" style="left:128px;top:760px;font-size:32px;font-weight:700;color:var(--oxford)">原来的 Harness</div>
+    <div class="a" id="spL2" style="left:940px;top:760px;font-size:32px;font-weight:700;color:var(--claret)">Harness² 自己改完后</div>
+    <div class="a" id="spL3" style="left:1600px;top:760px;font-size:28px;color:var(--sec);transform:translateX(-100%)">同一个模型</div>
+    <div class="a" id="aHl" style="left:510px;top:488px;width:270px;height:56px;background:rgba(153,15,61,.16);transform-origin:0 0"></div>
+    <div class="a serif" id="aH" style="left:116px;top:262px;font-size:132px;font-weight:900;line-height:150px;letter-spacing:-.01em">
+      <span class="ln" id="aH1"><span>模型一行</span></span><span class="ln" id="aH2"><span>权重都没动</span></span>
+    </div>
+    <div class="a" id="aRule" style="left:120px;top:590px;height:1px;width:780px;background:var(--ink);transform-origin:0 0"></div>
+    <div class="a" id="aDek" style="left:120px;top:614px;font-size:40px;line-height:56px;font-weight:500"><span class="ln"><span>只改了模型外面那一层，叫 <span style="position:relative;font-family:Inter;font-weight:700;color:var(--claret)">Harness<span id="hlU" style="position:absolute;left:0;bottom:2px;height:4px;width:100%;background:var(--claret);transform-origin:0 50%"></span></span></span></span></div>
+    <div class="a" id="aNote" style="left:120px;top:702px;font-size:28px;line-height:44px;color:var(--sec)">
+      <span class="ln"><span>论文把 Harness 拆成 <b class="num" style="color:var(--claret)">8</b> 个文件（表 5）：提示词、护栏、</span></span><span class="ln"><span>记忆、工具说明、子 agent、技能、脚本、插件。</span></span><span class="ln"><span><b style="color:var(--ink)">每个都是文件，改一次就是一个 diff。</b></span></span>
+    </div>
+  </div>
+  <!-- ===== R2 : task ===== -->
+  <div class="reg" id="r2" style="left:1920px;top:0">
+    <div class="krule" style="left:120px;top:100px;width:56px"></div>
+    <div class="a kick" id="bK" style="left:120px;top:116px">案例 · JOBBENCH 制片人任务</div>
+    <div class="a serif" id="bH" style="left:118px;top:158px;font-size:92px;font-weight:900;line-height:120px"><span class="ln"><span>一个真实的职场任务</span></span></div>
+    <div class="a" id="bDek" style="left:120px;top:288px;font-size:40px;font-weight:500;color:var(--ink)">帮制片人把<b id="kw1">排期</b>、<b id="kw2">人员</b>和<b id="kw3">预算</b>几份表对上账</div>
+    <div class="a" id="bQ" style="left:120px;top:352px;font-size:28px;color:var(--sec)"><span class="ln"><span><span style="font-family:Inter;font-style:italic">“Reconcile schedule, roster and budget files into interconnected production deliverables.”</span> <span style="font-size:24px">— 图 9 任务原文</span></span></span></div>
+    <div id="tbls"></div>
+    <div class="a" id="bMock" style="left:1600px;top:410px;font-size:24px;color:var(--sec);transform:translateX(-100%)">表格内容为示意</div>
+    <svg id="bSvg" class="a" style="left:0;top:0;overflow:visible" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+    <div class="a" id="mLab2" style="left:110px;top:716px;font-size:28px;line-height:40px">
+      <div style="font-weight:700">执行者 <span class="num">Gemini 3.5 Flash</span></div>
+      <div style="color:var(--oxford)">原版 Harness · OpenCode</div></div>
+    <div class="a" id="bStat" style="left:440px;top:800px;font-size:32px;font-weight:700;color:var(--teal)"><span class="ln"><span>✓ 三份表逐项对上 <span style="color:var(--sec);font-weight:400">→ 交出互相关联的制作文件，事后打分</span></span></span></div>
+  </div>
+  <!-- ===== R3 : result + blind ===== -->
+  <div class="reg" id="r3" style="left:1920px;top:1080px">
+    <div class="krule" style="left:120px;top:100px;width:56px"></div>
+    <div class="a kick" id="cK" style="left:120px;top:116px">结果 · 事后评分（满分 100）</div>
+    <div class="a serif" id="cH" style="left:118px;top:158px;font-size:84px;font-weight:900;line-height:112px"><span class="ln"><span>同一个模型，只换了外层</span></span></div>
+    <svg id="cSvg" class="a" style="left:0;top:0;overflow:visible" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+    <div class="a" id="mLab3" style="left:1440px;top:640px;font-size:28px;line-height:40px;text-align:center;transform:translateX(-50%)">
+      <div style="position:relative;height:40px;width:300px"><div id="mL3a" class="a" style="left:0;width:300px;font-weight:700;color:var(--oxford)">原来的 Harness</div><div id="mL3b" class="a" style="left:0;width:300px;font-weight:700;color:var(--claret)">Harness² 改完后</div></div>
+      <div style="color:var(--sec)">模型权重 · 一行没动</div></div>
+    <!-- blind column -->
+    <div class="a serif" id="dH" style="left:1240px;top:318px;font-size:60px;font-weight:900;line-height:76px"><span class="ln"><span>更难的是</span></span></div>
+    <div class="a" id="dDek" style="left:1240px;top:398px;font-size:30px;color:var(--ink)"><span class="ln"><span>改 Harness 的过程中，它拿不到：</span></span></div>
+    <div class="card" id="cd1" style="left:1240px;top:462px">
+      <div class="a" style="left:0;top:0;width:400px;height:158px;background:var(--wheat);opacity:.6"></div>
+      <div class="a" style="left:0;top:0;width:400px;height:4px;background:var(--ink)"></div>
+      <div class="a serif" id="cd1w" style="left:24px;top:22px;font-size:60px;font-weight:900;line-height:76px">标准答案</div>
+      <div class="a" id="cd1s" style="left:16px;top:58px;width:272px;height:7px;background:var(--claret);transform-origin:0 50%"></div>
+      <div class="a" style="left:24px;top:106px;font-size:28px;color:var(--sec)">没人告诉它 · 无 <span style="font-family:Inter">ground-truth</span></div>
+      <svg class="a" id="cd1x" style="left:318px;top:28px" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#990F3D"/><path d="M21 21 L43 43 M43 21 L21 43" stroke="#FFF1E5" stroke-width="6" stroke-linecap="round"/></svg>
+    </div>
+    <div class="card" id="cd2" style="left:1240px;top:646px">
+      <div class="a" style="left:0;top:0;width:400px;height:158px;background:var(--wheat);opacity:.6"></div>
+      <div class="a" style="left:0;top:0;width:400px;height:4px;background:var(--ink)"></div>
+      <div class="a serif" id="cd2w" style="left:24px;top:22px;font-size:60px;font-weight:900;line-height:76px">分数</div>
+      <div class="a" id="cd2s" style="left:16px;top:58px;width:152px;height:7px;background:var(--claret);transform-origin:0 50%"></div>
+      <div class="a" style="left:24px;top:106px;font-size:28px;color:var(--sec)">看不到 · 评分文件被守卫拦下</div>
+      <svg class="a" id="cd2x" style="left:318px;top:28px" width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#990F3D"/><path d="M21 21 L43 43 M43 21 L21 43" stroke="#FFF1E5" stroke-width="6" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <!-- diagram (travels) -->
+  <div id="dg" class="a" style="left:0;top:0;width:640px;height:680px;transform-origin:0 0"><svg id="dgS" width="640" height="680" viewBox="0 0 640 680" style="overflow:visible"></svg></div>
+  <!-- paper sheet -->
+  <div id="sheet"><img class="pg" src="p1.jpg"><div class="a" id="logoMask" style="left:90.0px;top:62.0px;width:93.0px;height:34.2px;background:#fff"></div><div id="grain"></div><div id="hls"></div>
+    <svg id="shS" class="a" style="left:0;top:0;overflow:visible" width="900" height="1273" viewBox="0 0 900 1273"></svg></div>
+ </div>
+ <!-- screen overlay: finale -->
+ <div id="ov" class="a" style="left:0;top:0;width:1920px;height:1080px">
+   <svg id="ovS" class="a" style="left:0;top:0" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+   <div class="krule" id="eKr" style="left:790px;top:118px;width:56px"></div>
+   <div class="a kick" id="eK" style="left:790px;top:134px">本期拆解 · RECURSIVE AGENT HARNESSING</div>
+   <div class="a" id="eDek" style="left:792px;top:404px;font-size:34px;font-weight:500;color:var(--ink)"><span class="ln"><span>Google 云 AI 团队 × 西北大学 <span style="color:var(--teal)">·</span> <span style="color:var(--teal);font-weight:700">代码已开源</span></span></span></div>
+   <div class="strip" id="st1" style="top:486px"><div class="a sbg" style="left:0;top:0;width:850px;height:150px;background:var(--wheat);opacity:.6;transform-origin:0 0"></div><div class="a srl" style="left:0;top:0;width:850px;height:3px;background:var(--ink);transform-origin:0 0"></div>
+     <div class="a num sn" style="left:26px;top:14px;font-size:104px;font-weight:800;color:var(--claret);line-height:120px">1</div>
+     <div class="a serif st" style="left:130px;top:22px;font-size:54px;font-weight:900;line-height:66px"><span class="ln"><span>拆解它的完整架构</span></span></div>
+     <div class="a ss" style="left:132px;top:96px;font-size:28px;color:var(--sec)"><span class="ln"><span>两层递归 · <span style="font-family:Inter">Propose–Probe–Compose</span></span></span></div>
+     <div class="a num sg" style="left:826px;top:30px;font-size:28px;font-weight:700;color:var(--claret);transform:translateX(-100%)">→ 03–05 节</div></div>
+   <div class="strip" id="st2" style="top:660px"><div class="a sbg" style="left:0;top:0;width:850px;height:150px;background:var(--wheat);opacity:.6;transform-origin:0 0"></div><div class="a srl" style="left:0;top:0;width:850px;height:3px;background:var(--ink);transform-origin:0 0"></div>
+     <div class="a num sn" style="left:26px;top:14px;font-size:104px;font-weight:800;color:var(--claret);line-height:120px">2</div>
+     <div class="a serif st" style="left:130px;top:22px;font-size:54px;font-weight:900;line-height:66px"><span class="ln"><span>我们能从中学到什么</span></span></div>
+     <div class="a ss" style="left:132px;top:96px;font-size:28px;color:var(--sec)"><span class="ln"><span>先泼冷水，再说收获</span></span></div>
+     <div class="a num sg" style="left:826px;top:30px;font-size:28px;font-weight:700;color:var(--claret);transform:translateX(-100%)">→ 07–08 节</div></div>
+   <div id="bigH" class="a lm" style="left:0;top:0;transform-origin:0 0;color:var(--ink);font-weight:700"><span id="bigHs" style="font-size:200px;line-height:1">H<span style="font-size:.8em">ARNESS</span><sup style="font-size:.55em;color:var(--claret);vertical-align:.62em;margin-left:.04em">2</sup></span></div>
+ </div>
+ <!-- footer source -->
+ <div class="a" id="fRule" style="left:120px;top:888px;width:1480px;height:1px;background:var(--rule)"></div>
+ <div class="a" id="fSrc" style="left:120px;top:898px;font-size:26px;color:var(--sec)"></div>
+ <div id="capG" class="a" style="left:0;top:850px;width:1920px;height:230px;background:linear-gradient(to bottom,rgba(255,241,229,0) 0px,rgba(255,241,229,.96) 92px,#FFF1E5 108px)"></div>
+ <div id="cap"><div style="position:absolute;left:0;top:0;width:1660px;height:92px;background:var(--paper)"></div><div style="position:absolute;left:0;top:0;width:1660px;height:1px;background:var(--ink)"></div>
+   <div style="position:absolute;left:0;top:1px;width:1660px;height:91px;background:var(--wheat);opacity:.55"></div>
+   <div id="capt"></div></div>
+ <div id="bar"></div>
+ <img id="av" class="a" style="left:1670px;top:860px;height:220px;width:242px">
+</div>
+<script>
+'use strict';
+const NS='http://www.w3.org/2000/svg';
+const C={paper:'#FFF1E5',ink:'#33302E',sec:'#66605C',rule:'#CCC1B7',claret:'#990F3D',oxford:'#0F5499',teal:'#0D7680',wheat:'#F2DFCE'};
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,e)=>a+(b-a)*e;
+const eIO=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;};
+const eQ=x=>{x=clamp(x);return 1-Math.pow(1-x,4);};
+const eS=x=>{x=clamp(x);return x*x*(3-2*x);};
+const p=(t,t0,d)=>clamp((t-t0)/d);
+const $=id=>document.getElementById(id);
+function S(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+function hx(a){return [1,3,5].map(i=>parseInt(a.substr(i,2),16));}
+function mixHex(a,b,e){const pa=hx(a),pb=hx(b);return 'rgb('+pa.map((v,i)=>Math.round(lerp(v,pb[i],e))).join(',')+')';}
+function lineRev(el,t,t0,d=0.55){const s=el.classList.contains('ln')?el.children[0]:el.querySelector('.ln>span');const e=eQ(p(t,t0,d));s.style.transform=`translateY(${(1-e)*105}%)`;}
+function wipe(el,t,t0,d){const e=eIO(p(t,t0,d));el.style.clipPath=`inset(-20px ${(1-e)*100}% -20px 0)`;}
+function show(el,o){el.style.opacity=o;el.style.visibility=o<=0.001?'hidden':'visible';}
+const D2R=Math.PI/180;
+function rot(x,y,deg){const a=deg*D2R,c=Math.cos(a),s=Math.sin(a);return [x*c-y*s,x*s+y*c];}
+
+window.DURATION=29.4;
+window.CUES=[
+ {t:0.08,type:'paper'},{t:1.2,type:'whoosh',d:0.7,soft:true},{t:1.33,type:'tick'},{t:2.05,type:'tick'},{t:2.6,type:'pop',soft:true},
+ {t:3.25,type:'whoosh',d:1.1,soft:true},{t:4.5,type:'pop',soft:true},{t:5.18,type:'paper'},{t:5.2,type:'whoosh',d:0.7,soft:true},
+ {t:7.3,type:'tick'},{t:7.8,type:'tick'},{t:8.3,type:'tick'},{t:9.0,type:'pop',soft:true},{t:9.15,type:'pop',soft:true},{t:9.3,type:'pop',soft:true},
+ {t:9.88,type:'whoosh',d:0.7,soft:true},{t:10.85,type:'tick'},{t:11.4,type:'whoosh',d:0.9,soft:true},{t:12.35,type:'tick',key:true},{t:12.42,type:'pop'},
+ {t:13.15,type:'whoosh',d:0.6,soft:true},{t:15.35,type:'pop',soft:true},{t:16.0,type:'scratch',d:0.35},{t:16.2,type:'pop',soft:true},{t:16.55,type:'scratch',d:0.3},{t:16.72,type:'tick'},
+ {t:16.9,type:'paper'},{t:16.92,type:'whoosh',d:0.6,soft:true},{t:17.3,type:'whoosh',d:0.7,soft:true},
+ {t:17.85,type:'scratch',d:0.5},{t:18.55,type:'scratch',d:0.45},{t:19.2,type:'pop',soft:true},{t:19.75,type:'scratch',d:0.95},
+ {t:21.85,type:'whoosh',d:0.6,soft:true},{t:22.35,type:'pop',soft:true},{t:22.95,type:'whoosh',d:0.6,soft:true},{t:23.55,type:'scratch',d:0.5},
+ {t:24.2,type:'whoosh',d:1.0,soft:true},{t:25.15,type:'pop'},{t:25.3,type:'paper'},{t:27.0,type:'whoosh',d:0.5,soft:true},{t:27.35,type:'pop',soft:true},{t:28.2,type:'tick',key:true}
+];
+const CAPS=[[0.15,'Google 新论文：'],[1.33,'模型一行权重都没动'],[3.19,'只改了模型外面那一层，叫 Harness'],[5.41,'一个真实的职场任务'],[6.72,'帮制片人把排期、人员和预算几份表对上账'],[10.10,'事后打分从 43 分涨到 78 分'],
+ [13.14,'而且更难的是，改的过程中，没人告诉它标准答案，也看不到分数'],[17.39,'这就是 Google 云 AI 团队和西北大学'],[19.18,'刚发布的 Agent Harness 自进化论文'],[22.02,'叫 Harness 平方'],[23.29,'代码已经开源'],[24.80,'接下来我们一起拆解它的完整架构'],[27.02,'最后聊聊我们能从中学到什么']];
+const SRCS=[[0,'来源：Harness² 论文（Google 云 AI 团队、西北大学）· 图 9 单个 JobBench 案例 · 事后评分'],
+ [3.3,'来源：Harness² 论文表 5 · 八个可编辑组件，每个都是一个文件'],
+ [5.5,'来源：论文图 9 · JobBench 案例，执行者 Gemini 3.5 Flash + OpenCode'],
+ [10.2,'来源：论文 §4 案例研究 · 原版 43.1，重跑 77.8（事后对照参考答案评分）'],
+ [13.3,'来源：论文附录 D.2 · 守卫拒绝交出任何含评分结论、评分标准或分数的目录'],
+ [24.6,'来源：arXiv:2610.14224 第 1 页 · github.com/google-research/harness2']];
+
+/* ---------------- BAR ---------------- */
+const SECS=[['01','钩子',0],['02','背景',29.5],['03','核心思路',61],['04','走一遍例子',79],['05','自进化',172],['06','结果',205],['07','冷水',232],['08','收获',280]];
+const bar=$('bar');
+const mast=document.createElement('div');mast.className='a serif';mast.style.cssText='left:40px;top:12px;font-size:28px;font-weight:900;color:var(--ink);letter-spacing:.02em';mast.textContent='论文速读';bar.appendChild(mast);
+const vr=document.createElement('div');vr.className='a';vr.style.cssText='left:176px;top:16px;width:1px;height:32px;background:var(--rule)';bar.appendChild(vr);
+const slots=[];const slotX=[];let sx=208;
+SECS.forEach((s,i)=>{const d=document.createElement('div');d.className='slot'+(i==0?' on':'');const x=sx;sx+=36+s[1].length*(i==0?28:24)+(i==0?64:46);d.style.left=x+'px';d.style.width='176px';
+ d.innerHTML=`<span class="n" style="left:0">${s[0]}</span><span class="nm" style="left:36px">${s[1]}</span>`;bar.appendChild(d);slots.push(d);slotX.push(x);});
+const barBase=document.createElement('div');barBase.className='a';barBase.style.cssText='left:0;top:63px;width:1920px;height:1px;background:var(--ink)';bar.appendChild(barBase);
+const secUbg=document.createElement('div');secUbg.className='a';secUbg.style.cssText=`left:${208+36}px;top:51px;height:1px;width:${56+30}px;background:var(--rule)`;bar.appendChild(secUbg);
+const secU=document.createElement('div');secU.className='a';secU.style.cssText=`left:${208+36}px;top:50px;height:3px;background:var(--claret)`;bar.appendChild(secU);
+const glob=document.createElement('div');glob.className='a';glob.style.cssText='left:0;top:61px;height:3px;background:var(--claret)';bar.appendChild(glob);
+const tc=document.createElement('div');tc.className='a num';tc.style.cssText='left:1636px;top:17px;font-size:24px;font-weight:500;color:var(--sec);width:244px;text-align:right';bar.appendChild(tc);
+// preview pings under slots 03 and 07/08
+const pings=[2,6,7].map(i=>{const d=document.createElement('div');d.className='a';const w=36+SECS[i][1].length*24;d.style.cssText=`left:${slotX[i]}px;top:50px;height:3px;width:${w}px;background:var(--claret);transform-origin:0 0`;bar.appendChild(d);return d;});
+const fmt=s=>{s=Math.floor(s);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+function seekBar(t){const T=348.8;glob.style.width=(1920*t/T)+'px';secU.style.width=((56+30)*clamp(t/29.5))+'px';tc.innerHTML=`<span style="color:var(--ink);font-weight:700">${fmt(t)}</span> / ${fmt(T)}`;
+  const e1=eIO(p(t,25.6,0.5)),e2=eIO(p(t,27.8,0.5));
+  pings[0].style.transform=`scaleX(${e1})`;pings[1].style.transform=`scaleX(${e2})`;pings[2].style.transform=`scaleX(${e2})`;
+  [[2,e1],[6,e2],[7,e2]].forEach(([i,e])=>{slots[i].querySelector('.nm').style.color=mixHex(C.sec,C.claret,e);slots[i].querySelector('.n').style.color=mixHex(C.sec,C.claret,e);});}
+
+/* ---------------- DIAGRAM (model + harness, travels) ---------------- */
+const dS=$('dgS');const gA=S('g',{},dS);
+const BX=160,BY=170,BW=320,BH=330;
+const FX=30,FY=60,FW=580,FH=560,FCX=FX+FW/2;
+const frameBg=S('rect',{x:FX,y:FY,width:FW,height:FH,fill:C.wheat,opacity:0},gA);
+const box=S('rect',{x:BX,y:BY,width:BW,height:BH,fill:C.paper,stroke:C.ink,'stroke-width':2},gA);
+const boxHd=S('rect',{x:BX,y:BY,width:BW,height:52,fill:C.wheat},gA);
+const boxT=S('text',{x:BX+20,y:BY+37,'font-family':'Noto Serif CJK SC','font-weight':700,'font-size':30,fill:C.ink},gA);boxT.textContent='模型';
+const boxT2=S('text',{x:BX+BW-46,y:BY+36,'text-anchor':'end','font-family':'Inter','font-weight':700,'font-size':22,'letter-spacing':'2',fill:C.sec},gA);boxT2.textContent='WEIGHTS';
+const cells=[];const N=8,CS=26,CG=6,GX=BX+(BW-(N*CS+(N-1)*CG))/2,GY=BY+52+(BH-52-(N*CS+(N-1)*CG))/2;
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){const v=rnd();const el=S('rect',{x:GX+c*(CS+CG),y:GY+r*(CS+CG),width:CS,height:CS},gA);cells.push({el,r,c,v,col:v<.5?mixHex(C.wheat,C.oxford,0.25+v*1.2):mixHex(C.wheat,C.teal,0.15+(v-.5)*1.4)});}
+function blend(col,fz){const m=col.match(/\d+/g).map(Number);const tg=[0x9F,0xAE,0xBD];return 'rgb('+m.map((v,i)=>Math.round(lerp(v,lerp(tg[i],v,0.25),fz))).join(',')+')';}
+const lockG=S('g',{},gA);
+S('circle',{cx:BX+BW,cy:BY,r:30,fill:C.oxford},lockG);
+S('rect',{x:BX+BW-11,y:BY-4,width:22,height:17,rx:2,fill:C.paper},lockG);
+S('path',{d:`M${BX+BW-7} ${BY-4} v-6 a7 7 0 0 1 14 0 v6`,fill:'none',stroke:C.paper,'stroke-width':3.5},lockG);
+const callT=S('text',{x:BX+BW/2,y:BY+BH+50,'text-anchor':'middle','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':28,fill:C.oxford},gA);callT.innerHTML='权重冻结 · <tspan font-family="Inter">0</tspan> 行改动';
+const framePath=`M${FCX} ${FY} H${FX+FW} V${FY+FH} H${FX} V${FY} H${FCX}`;const PER=2*(FW+FH);
+const frame=S('path',{d:framePath,fill:'none',stroke:C.claret,'stroke-width':3,'stroke-dasharray':PER,'stroke-dashoffset':PER},gA);
+// 8 components (paper Table 5)
+const PARTS=[['C1','提示词',FX+490,FY,200],['C2','护栏',FX+FW,FY+140,430],['C3','记忆',FX+FW,FY+420,710],['C4','工具说明',FX+440,FY+FH,1000],
+             ['C5','子 agent',FX+140,FY+FH,1300],['C6','技能',FX,FY+420,1570],['C7','脚本',FX,FY+140,1850],['C8','插件',FX+90,FY,2080]];
+const FR0=3.25,FRD=1.25;
+function crossT(frac){let lo=0,hi=1;for(let i=0;i<30;i++){const m=(lo+hi)/2;if(eIO(m)<frac)lo=m;else hi=m;}return FR0+lo*FRD;}
+const tabs=PARTS.map(([cn,name,x,y,d])=>{const g=S('g',{},gA);const w=name.replace(/ /g,'').length*(name.includes('agent')?17:28)+76;
+ const rect=S('rect',{x:x-w/2,y:y-24,width:w,height:48,fill:C.paper,stroke:C.claret,'stroke-width':1.5},g);
+ const nt=S('text',{x:x-w/2+14,y:y+8,'font-family':'Inter','font-weight':800,'font-size':20,fill:C.claret},g);nt.textContent=cn;
+ const tt=S('text',{x:x-w/2+50,y:y+10,'font-family':'Noto Sans CJK SC','font-weight':500,'font-size':28,fill:C.ink},g);tt.textContent=name;
+ return {g,rect,nt,t:crossT(d/PER),x,y};});
+const hG=S('g',{},gA);
+const hRect=S('rect',{x:FCX-110,y:FY-30,width:220,height:60,fill:C.claret},hG);
+S('text',{x:FCX,y:FY+12,'text-anchor':'middle','font-family':'Inter','font-weight':800,'font-size':32,'letter-spacing':'5',fill:C.paper},hG).textContent='HARNESS';
+
+// diagram placement keys: [t, worldCx, worldCy, scale]
+const DGK=[[0,1270,500,1],[5.2,1270,500,1],[5.95,1920+236,556,0.4],[9.86,1920+236,556,0.4],[10.55,1920+1440,1080+470,0.4],[13.1,1920+1440,1080+470,0.4],[13.75,1920+1560,1080+196,0.25]];
+function keyInterp(K,t){if(t<=K[0][0])return K[0].slice(1);for(let i=1;i<K.length;i++){if(t<=K[i][0]){const a=K[i-1],b=K[i];const e=eIO((t-a[0])/(b[0]-a[0]));return a.slice(1).map((v,j)=>lerp(v,b[j+1],e));}}return K[K.length-1].slice(1);}
+function seekDiagram(t){
+  const [cx,cy,s]=keyInterp(DGK,t);const dg=$('dg');dg.style.transform=`translate(${cx-320*s}px,${cy-340*s}px) scale(${s})`;
+  show(dg,t<18.2?1:0);
+  const be=eQ(p(t,1.6,0.6));
+  [box,boxHd,boxT,boxT2].forEach(e=>e.setAttribute('opacity',be));
+  box.setAttribute('transform',`translate(0 ${(1-be)*16})`);
+  cells.forEach(o=>{const st=1.66+(o.r+o.c)*0.022;const e=eQ(p(t,st,0.4));const fz=eIO(p(t,2.15+o.c*0.06,0.3));
+    o.el.setAttribute('fill',fz>0?blend(o.col,fz):o.col);o.el.setAttribute('opacity',e);o.el.setAttribute('transform',`translate(0 ${(1-e)*10})`);});
+  const le=eQ(p(t,2.5,0.4));lockG.setAttribute('opacity',le);lockG.setAttribute('transform',`translate(${BX+BW} ${BY}) scale(${0.6+0.4*le}) translate(${-(BX+BW)} ${-BY})`);
+  const ce=eQ(p(t,2.6,0.4))*(1-eQ(p(t,5.2,0.4)));callT.setAttribute('opacity',ce);callT.setAttribute('transform',`translate(0 ${(1-eQ(p(t,2.6,0.4)))*12})`);
+  frame.setAttribute('stroke-dashoffset',PER*(1-eIO(p(t,FR0,FRD))));
+  frameBg.setAttribute('opacity',0.45*eQ(p(t,4.3,0.6)));
+  // colour: claret (R1) -> oxford (原版, R2) -> claret (改完后, 11.4)
+  const k=eIO(p(t,5.3,0.6))*(1-eIO(p(t,11.45,0.85)));const col=mixHex(C.claret,C.oxford,k);
+  frame.setAttribute('stroke',col);hRect.setAttribute('fill',col);frame.setAttribute('stroke-width',3+3*eIO(p(t,5.3,0.6)));
+  const fl=eQ(p(t,11.45,0.5))*(1-eQ(p(t,12.4,0.6))); // flash: rewritten files
+  tabs.forEach((o,i)=>{const e=eQ(p(t,o.t-0.04,0.32));o.g.setAttribute('opacity',e);o.g.setAttribute('transform',`translate(${o.x} ${o.y}) scale(${0.85+0.15*e}) translate(${-o.x} ${-o.y})`);
+    o.rect.setAttribute('stroke',col);o.nt.setAttribute('fill',col);
+    const rew=(i==1||i==3||i==5||i==6); // Fig.9: guardrails, tool guidance, skills, scripts rewritten
+    o.rect.setAttribute('fill',rew&&t>11.45?mixHex(C.paper,C.claret,0.25*eQ(p(t,11.5+i*0.05,0.4))):C.paper);});
+  const he=eQ(p(t,4.45,0.4));hG.setAttribute('opacity',he);hG.setAttribute('transform',`translate(0 ${(1-he)*-14})`);
+}
+
+/* ---------------- R1 ---------------- */
+let PH={};
+const big=[];
+function mkBig(id,txt,fs,col,wt){const d=document.createElement('div');d.className='a num';d.style.cssText=`left:0;top:0;transform-origin:0 0;color:${col};font-weight:${wt};letter-spacing:-.02em`;
+  d.innerHTML=`<span style="font-size:${fs}px;line-height:1">${txt}</span>`;$('r1').appendChild(d);return {el:d,sp:d.children[0],fs};}
+const B43=mkBig('b43','43',420,C.oxford,800),BAR_=mkBig('bAr','→',220,C.ink,300),B78=mkBig('b78','78',500,C.claret,800);
+// splash layout (top-left of the inline span box)
+const SPL={43:[110,300],ar:[640,470],78:[860,236]};
+function seekR1(t){
+  show($('r1'),t<6.1?1:0);
+  $('aKr').style.width=(56*eQ(p(t,-0.3,0.3)))+'px';
+  lineRev($('aSrc'),t,0.1,0.55);
+  // big numbers morph into the subhead line
+  
+  [[B43,SPL[43],PH.n43],[BAR_,SPL.ar,PH.nar],[B78,SPL[78],PH.n78]].forEach(([b,sp,ph],i)=>{
+    const mi=eIO(p(t,1.08+i*0.07,0.62));
+    const s=lerp(1,ph.h/b.h0,mi);const x=lerp(sp[0],ph.x,mi),y=lerp(sp[1],ph.y,mi);
+    const push=1+0.02*eS(p(t,0,1.2))*(1-mi);
+    b.el.style.transform=`translate(${x}px,${y}px) scale(${s*push})`;
+  });
+  B43.el.style.color=C.oxford;
+  const so=1-eQ(p(t,1.1,0.45));const sl=1-eQ(p(t,1.95,0.4));
+  $('spTop').style.opacity=so;['spL1','spL2','spL3'].forEach(id=>{$(id).style.opacity=sl;});
+  $('spTop').style.transform=`translateY(${(1-so)*-20}px)`;
+  [$('spL1'),$('spL2')].forEach(e=>e.style.transform=`translateY(${(1-sl)*24}px)`);
+  $('spL3').style.transform=`translateX(-100%) translateY(${(1-sl)*24}px)`;
+  const rm=eIO(p(t,1.95,0.6));
+  $('spRule').style.transform=`translateY(${-152*rm}px) scaleX(${lerp(1,780/1480,rm)})`;
+  $('spRule').style.opacity=1-eQ(p(t,2.55,0.3));
+  lineRev($('aH1'),t,1.45,0.6);lineRev($('aH2'),t,1.9,0.6);
+  $('aRule').style.transform=`scaleX(${eIO(p(t,2.55,0.5))})`;
+  lineRev($('aDek'),t,3.15,0.6);$('aHl').style.transform=`scaleX(${eIO(p(t,2.35,0.45))})`;
+  $('hlU').style.transform=`scaleX(${eIO(p(t,4.45,0.45))})`;
+  const nl=$('aNote').querySelectorAll('.ln');lineRev(nl[0],t,3.75,0.5);lineRev(nl[1],t,3.95,0.5);lineRev(nl[2],t,4.6,0.5);
+}
+
+/* ---------------- R2 tables ---------------- */
+const TB=[{t:'排期表',en:'SCHEDULE',cols:['场次','地点'],rows:[['第 1 场','外景'],['第 2 场','棚内'],['第 3 场','外景']],t0:7.3},
+          {t:'人员名单',en:'ROSTER',cols:['场次','班组'],rows:[['第 1 场','摄影组'],['第 2 场','灯光组'],['第 3 场','美术组']],t0:7.8},
+          {t:'预算表',en:'BUDGET',cols:['场次','科目'],rows:[['第 1 场','场租'],['第 2 场','器材'],['第 3 场','人工']],t0:8.3}];
+const TX=[440,840,1240],TY=440;const tblEls=[];const ghosts=[];
+TB.forEach((d,i)=>{const gb=document.createElement('div');gb.className='a';gb.style.cssText=`left:${TX[i]-16}px;top:${TY-14}px;width:392px;height:330px;background:var(--wheat)`;$('tbls').appendChild(gb);
+  const gh=document.createElement('div');gh.className='a';gh.style.cssText=`left:${TX[i]}px;top:${TY}px;width:360px;height:310px`;let gs=`<div class=a style='left:0;top:0;width:360px;height:4px;background:var(--rule)'></div><div class=a style='left:0;top:20px;width:110px;height:30px;background:var(--rule)'></div>`;for(let j=0;j<3;j++)gs+=`<div class=a style='left:0;top:${136+j*62}px;width:96px;height:22px;background:var(--rule)'></div><div class=a style='left:180px;top:${136+j*62}px;width:${70+((i*3+j)*37)%80}px;height:22px;background:var(--rule)'></div>`;gh.innerHTML=gs;$('tbls').appendChild(gh);ghosts.push({gb,gh,i});});
+TB.forEach((d,i)=>{const w=document.createElement('div');w.className='tbl';w.style.left=TX[i]+'px';w.style.top=TY+'px';w.style.height='310px';
+  let h=`<div class="hd a" style="left:0;top:0;width:360px;height:70px"><div class="a" style="left:0;top:0;height:4px;width:360px;background:var(--ink);transform-origin:0 0" data-r></div>
+   <div class="a serif" style="left:0;top:12px;font-size:38px;font-weight:900">${d.t}</div>
+   <div class="a" style="left:360px;top:26px;font-family:Inter;font-weight:700;font-size:20px;letter-spacing:.14em;color:var(--sec);transform:translateX(-100%)">${d.en}</div></div>
+   <div class="row" style="top:70px;height:46px"><div class="cell" style="left:0;line-height:46px;font-size:26px;color:var(--sec)">${d.cols[0]}</div><div class="cell" style="left:180px;line-height:46px;font-size:26px;color:var(--sec)">${d.cols[1]}</div>
+   <div class="a" style="left:0;top:45px;width:360px;height:1px;background:var(--ink)"></div></div>`;
+  d.rows.forEach((r,j)=>{h+=`<div class="row" data-row style="top:${116+j*62}px"><div class="cell num" style="left:0;font-weight:600">${r[0]}</div><div class="cell" style="left:180px">${r[1]}</div><div class="a" style="left:0;top:61px;width:360px;height:1px;background:var(--rule)"></div></div>`;});
+  w.innerHTML=h;$('tbls').appendChild(w);tblEls.push({w,rows:[...w.querySelectorAll('[data-row]')],hd:w.querySelector('.hd'),rule:w.querySelector('[data-r]'),ch:w.children[1],t0:d.t0});});
+const bS=$('bSvg');const links=[];const checks=[];
+for(let j=0;j<3;j++){const y=TY+116+j*62+31;
+  for(let k=0;k<2;k++){const l=S('path',{d:`M${TX[k]+360-4} ${y} H${TX[k+1]-4}`,stroke:C.teal,'stroke-width':3,fill:'none'},bS);
+    const d1=S('circle',{cx:TX[k]+360-4,cy:y,r:5,fill:C.teal},bS);const d2=S('circle',{cx:TX[k+1]-4,cy:y,r:5,fill:C.teal},bS);
+    links.push({l,d1,d2,len:TX[k+1]-TX[k]-360,t:8.75+j*0.12+k*0.07});}
+  const cg=S('g',{},bS);const cx=TX[2]+332,cy=y;
+  S('circle',{cx,cy,r:17,fill:C.teal},cg);S('path',{d:`M${cx-8} ${cy} l6 6 l10 -12`,stroke:C.paper,'stroke-width':3.5,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'},cg);
+  checks.push({g:cg,cx,cy,t:9.0+j*0.15});}
+// agent -> tables arrow
+const arr=S('path',{d:`M372 556 H${TX[0]-26}`,stroke:C.oxford,'stroke-width':3,fill:'none','stroke-dasharray':'8 7'},bS);
+const arrH=S('path',{d:`M${TX[0]-36} 546 l12 10 l-12 10`,stroke:C.oxford,'stroke-width':3,fill:'none'},bS);
+const kws=[['kw1',7.3],['kw2',7.8],['kw3',8.3]];
+function seekR2(t){
+  show($('r2'),(t>4.9&&t<10.7)?1:0);
+  lineRev($('bH'),t,5.5,0.6);wipe($('bK'),t,5.35,0.5);
+  ghosts.forEach(o=>{const e=eQ(p(t,5.7+o.i*0.1,0.5));o.gb.style.opacity=e;o.gb.style.transform=`translateY(${(1-e)*20}px)`;o.gh.style.opacity=e*(1-eQ(p(t,TB[o.i].t0-0.15,0.3)));o.gh.style.transform=o.gb.style.transform;});
+  wipe($('bDek'),t,6.7,1.0);lineRev($('bQ'),t,6.9,0.55);
+  $('bMock').style.opacity=eQ(p(t,7.3,0.5));
+  kws.forEach(([id,t0])=>{const e=eQ(p(t,t0-0.1,0.3));$(id).style.color=mixHex('#33302E','#990F3D',e);$(id).style.boxShadow=`inset 0 -${Math.round(10*e)}px 0 rgba(153,15,61,.14)`;});
+  tblEls.forEach(o=>{const e=eQ(p(t,o.t0-0.12,0.5));o.rule.style.transform=`scaleX(${eIO(p(t,o.t0-0.15,0.5))})`;
+    o.hd.style.opacity=e;o.hd.style.transform=`translateY(${(1-e)*14}px)`;o.ch.style.opacity=eQ(p(t,o.t0,0.4));
+    o.rows.forEach((r,j)=>{const re=eQ(p(t,o.t0+0.08+j*0.08,0.45));r.style.opacity=re;r.style.transform=`translateY(${(1-re)*16}px)`;
+      const hl=eQ(p(t,8.75+j*0.12,0.35));r.style.background=hl>0?`rgba(13,118,128,${0.10*hl})`:'transparent';});});
+  links.forEach(o=>{const e=eIO(p(t,o.t,0.3));o.l.setAttribute('stroke-dasharray',o.len);o.l.setAttribute('stroke-dashoffset',o.len*(1-e));o.d1.setAttribute('opacity',e>0?1:0);o.d2.setAttribute('opacity',e>=1?1:0);});
+  checks.forEach(o=>{const e=eQ(p(t,o.t,0.3));o.g.setAttribute('opacity',e);o.g.setAttribute('transform',`translate(${o.cx} ${o.cy}) scale(${0.5+0.5*e}) translate(${-o.cx} ${-o.cy})`);});
+  const ae=eIO(p(t,6.9,0.5));const al=TX[0]-26-372;arr.setAttribute('stroke-dashoffset',0);arr.style.clipPath=`inset(0 ${(1-ae)*100}% 0 0)`;arrH.setAttribute('opacity',ae>=0.98?1:0);
+  const le=eQ(p(t,5.75,0.5));$('mLab2').style.opacity=le;$('mLab2').style.transform=`translateY(${(1-le)*14}px)`;
+  lineRev($('bStat'),t,9.2,0.5);
+}
+
+/* ---------------- R3 chart ---------------- */
+const cS=$('cSvg');const yv=v=>860-v*5;const LX=520,RX=880;
+[0,25,50,75,100].forEach(v=>{S('line',{x1:170,x2:1150,y1:yv(v),y2:yv(v),stroke:v==0?C.ink:C.rule,'stroke-width':v==0?2:1.2,class:'grid'},cS);
+  const tx=S('text',{x:150,y:yv(v)+9,'text-anchor':'end','font-family':'Inter','font-size':26,'font-feature-settings':'tnum',fill:C.sec,class:'grid'},cS);tx.textContent=v;});
+const colL=S('text',{x:LX,y:340,'text-anchor':'middle','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':28,fill:C.oxford},cS);colL.textContent='原来的 Harness';
+const colR=S('text',{x:RX,y:340,'text-anchor':'middle','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':28,fill:C.claret},cS);colR.textContent='Harness² 改完后';
+const tickL=S('line',{x1:LX,x2:LX,y1:358,y2:860,stroke:C.rule,'stroke-width':1.2,'stroke-dasharray':'4 6'},cS);
+const tickR=S('line',{x1:RX,x2:RX,y1:358,y2:860,stroke:C.rule,'stroke-width':1.2,'stroke-dasharray':'4 6'},cS);
+const defs=S('defs',{},cS);const lg=S('linearGradient',{id:'lg',x1:LX,x2:RX,y1:0,y2:0,gradientUnits:'userSpaceOnUse'},defs);
+S('stop',{offset:'0','stop-color':C.oxford},lg);S('stop',{offset:'1','stop-color':C.claret},lg);
+const slope=S('line',{x1:LX,y1:yv(43),x2:LX,y2:yv(43),stroke:'url(#lg)','stroke-width':6,'stroke-linecap':'round'},cS);
+const dL=S('circle',{cx:LX,cy:yv(43),r:13,fill:C.oxford,stroke:C.paper,'stroke-width':4},cS);
+const dR=S('circle',{cx:LX,cy:yv(43),r:15,fill:C.claret,stroke:C.paper,'stroke-width':4},cS);
+const n43=S('text',{x:LX-34,y:yv(43)+76,'text-anchor':'end','font-family':'Inter','font-weight':800,'font-size':220,'font-feature-settings':'tnum',fill:C.oxford,'letter-spacing':'-6',stroke:C.paper,'stroke-width':10,'paint-order':'stroke'},cS);n43.textContent='43';
+const nR=S('text',{x:LX+30,y:yv(43)+86,'font-family':'Inter','font-weight':800,'font-size':236,'font-feature-settings':'tnum',fill:C.claret,'letter-spacing':'-7',stroke:C.paper,'stroke-width':10,'paint-order':'stroke'},cS);nR.textContent='43';
+// dimension line at RX
+const dim=S('path',{d:`M${RX-60} ${yv(43)} H${RX-14} M${RX-36} ${yv(43)} V${yv(78)+22}`,stroke:C.claret,'stroke-width':2.5,fill:'none'},cS);
+const dimLen=46+(yv(43)-yv(78)-22);
+const plus=S('text',{x:RX-60,y:yv(43)+120,'text-anchor':'end','font-family':'Noto Serif CJK SC','font-weight':900,'font-size':80,fill:C.claret},cS);plus.innerHTML='<tspan font-family="Inter" font-weight="800" font-feature-settings="tnum">+35</tspan> 分';
+const note1=S('text',{x:RX-60,y:yv(43)+170,'text-anchor':'end','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':28,fill:C.ink},cS);note1.innerHTML='单个案例<tspan fill="#66605C" font-weight="400"> · 原文 </tspan><tspan font-family="Inter" fill="#66605C" font-weight="400">43.1 → 77.8</tspan>';
+// grey tapes: pipeline can't see the score
+function tape(x,y,w,rot_){const g=S('g',{transform:`rotate(${rot_} ${x+w/2} ${y+30})`},cS);const r=S('rect',{x,y,width:w,height:64,fill:C.sec},g);
+  const tx=S('text',{x:x+w/2,y:y+44,'text-anchor':'middle','font-family':'Noto Sans CJK SC','font-weight':700,'font-size':30,fill:C.paper,'letter-spacing':'2'},g);tx.textContent='改的时候看不到';return {g,r,x,w};}
+const tp1=tape(LX-330,yv(43)-34,320,-4),tp2=tape(RX+10,yv(78)-36,320,3);
+const headU=document.createElement('div');headU.className='a';headU.style.cssText='left:120px;top:276px;height:6px;width:930px;background:var(--claret);transform-origin:0 0';$('r3').appendChild(headU);
+const gridEls=[...cS.querySelectorAll('.grid')];
+function seekR3(t){
+  show($('r3'),(t>9.6&&t<18.2)?1:0);
+  lineRev($('cH'),t,10.12,0.6);wipe($('cK'),t,10.0,0.5);
+  headU.style.transform=`scaleX(${eIO(p(t,12.55,0.5))})`;
+  gridEls.forEach((g,i)=>{g.setAttribute('opacity',eQ(p(t,10.2+(i>>1)*0.05,0.5)));});
+  [colL,tickL].forEach(e=>e.setAttribute('opacity',eQ(p(t,10.5,0.4))));
+  [colR,tickR].forEach(e=>e.setAttribute('opacity',eQ(p(t,11.35,0.4))));
+  const e43=eQ(p(t,10.85,0.4));dL.setAttribute('opacity',e43);dL.setAttribute('r',13*(0.4+0.6*e43));
+  n43.setAttribute('opacity',e43);n43.setAttribute('transform',`translate(${(1-e43)*-18} 0)`);
+  const k=eIO(p(t,11.4,0.95));const x=lerp(LX,RX,k),v=lerp(43,78,k),y=yv(v);
+  slope.setAttribute('x2',x);slope.setAttribute('y2',y);
+  dR.setAttribute('cx',x);dR.setAttribute('cy',y);dR.setAttribute('opacity',k>0?1:0);
+  nR.setAttribute('x',x+30);nR.setAttribute('y',y+86);nR.textContent=String(Math.round(v));nR.setAttribute('opacity',clamp((k-0.12)*6));
+  const lk=eQ(p(t,12.3,0.3));dR.setAttribute('r',15+6*Math.sin(Math.PI*lk));
+  dim.setAttribute('stroke-dasharray',dimLen);dim.setAttribute('stroke-dashoffset',dimLen*(1-eIO(p(t,12.3,0.4))));
+  const pe=eQ(p(t,12.4,0.45));plus.setAttribute('opacity',pe);plus.setAttribute('transform',`translate(0 ${(1-pe)*16})`);
+  note1.setAttribute('opacity',eQ(p(t,12.7,0.45)));
+  const cp=1+0.02*eIO(p(t,10.3,6.5));cS.style.transformOrigin='600px 600px';cS.style.transform=`scale(${cp})`;
+  // labels under mini diagram
+  const l3=eQ(p(t,10.6,0.5))*(1-eQ(p(t,13.0,0.35)));$('mLab3').style.opacity=l3;
+  const sw=eIO(p(t,11.5,0.5));$('mL3a').style.opacity=1-sw;$('mL3a').style.transform=`translateY(${-sw*20}px)`;$('mL3b').style.opacity=sw;$('mL3b').style.transform=`translateY(${(1-sw)*20}px)`;
+  // blind column
+  lineRev($('dH'),t,13.2,0.55);lineRev($('dDek'),t,14.15,0.55);
+  [['cd1',15.3,16.0],['cd2',16.15,16.55]].forEach(([id,t0,ts])=>{const e=eQ(p(t,t0,0.45));const c=$(id);c.style.opacity=e;c.style.transform=`translateY(${(1-e)*26}px)`;
+    $(id+'s').style.transform=`scaleX(${eIO(p(t,ts,0.3))})`;const xe=eQ(p(t,ts+0.15,0.3));const xx=$(id+'x');xx.style.opacity=xe;xx.style.transform=`scale(${0.5+0.5*xe})`;
+    $(id+'w').style.color=mixHex(C.ink,C.sec,eQ(p(t,ts,0.4)));});
+  [tp1,tp2].forEach((o,i)=>{const e=eIO(p(t,16.62+i*0.08,0.3));o.g.setAttribute('opacity',e>0?1:0);o.g.style.clipPath=`inset(0 ${(1-e)*100}% 0 0)`;});
+}
+
+/* ---------------- PAPER SHEET ---------------- */
+const KP=900/595.276; // px per pt on sheet
+const R3O=[1920,1080];
+const SL=[R3O[0]+1040,R3O[1]+150], SROT=-2;
+function sheetTf(t){const e=eIO(p(t,16.88,0.62));return {x:lerp(SL[0]+1100,SL[0],e),y:lerp(SL[1]-60,SL[1],e),r:lerp(7,SROT,e)};}
+function s2w(px,py,tf){const [a,b]=rot(px,py,tf.r);return [tf.x+a,tf.y+b];}
+const box_=(x0,y0,x1,y1)=>({x:x0*KP,y:y0*KP,w:(x1-x0)*KP,h:(y1-y0)*KP});
+// pdftotext -bbox-layout page 1 (pt)
+const BB={goog:box_(157.4,176.1,247.6,186.4),nw:box_(65.7,176.1,151.4,186.4),date:box_(486.3,55.3,526.8,62.8),
+  t1:box_(92.7,92.1,465.0,110.0),t2:box_(62.4,114.0,191.0,131.9),hw:box_(92.7,89.2,184.8,110.0),gh:box_(76.1,432.4,249.7,446.0),gio:box_(284.4,432.4,368.3,446.0),
+  abs:box_(62.4,313.5,533.1,323.2),fig:box_(400,470,535,600)};
+const HLS=[['goog',17.82,0.5],['nw',18.52,0.45],['t1',19.72,0.75],['t2',20.47,0.3],['gh',23.55,0.55]];
+const hlEls=HLS.map(([k,t0,d])=>{const b=BB[k];const el=document.createElement('div');el.className='hl';
+  el.style.cssText+=`left:${b.x-3}px;top:${b.y-2}px;width:${b.w+6}px;height:${b.h+3}px;`;$('hls').appendChild(el);return {el,t0,d};});
+const shS=$('shS');
+function ann(){ // claret marks in sheet px
+  const g=S('g',{},shS);return g;}
+const aG=ann();
+const lbl=(x,y,txt,sz=15,anchor='start')=>{const e=S('text',{x,y,'font-family':'Noto Sans CJK SC','font-weight':700,'font-size':sz,fill:C.claret,'text-anchor':anchor},aG);e.textContent=txt;return e;};
+// affiliation labels
+const gB=BB.goog,nB=BB.nw;
+const aff1=S('path',{d:`M${gB.x} ${gB.y+gB.h+3} H${gB.x+gB.w}`,stroke:C.claret,'stroke-width':1.6,fill:'none'},aG);
+const aff1t=lbl(gB.x+gB.w+10,gB.y+gB.h-1,'Google 云 AI 团队',14);
+const aff2=S('path',{d:`M${nB.x} ${nB.y+nB.h+3} H${nB.x+nB.w}`,stroke:C.claret,'stroke-width':1.6,fill:'none'},aG);
+const aff2t=lbl(nB.x,nB.y+nB.h+20,'西北大学',14);
+// date ellipse
+const dB=BB.date;const dEl=S('ellipse',{cx:dB.x+dB.w/2,cy:dB.y+dB.h/2,rx:dB.w/2+12,ry:dB.h/2+8,stroke:C.claret,'stroke-width':1.8,fill:'none',transform:`rotate(-3 ${dB.x+dB.w/2} ${dB.y+dB.h/2})`},aG);
+const dElLen=2*Math.PI*Math.sqrt(((dB.w/2+12)**2+(dB.h/2+8)**2)/2);
+const dT=lbl(dB.x-22,dB.y+dB.h-1,'刚发布',14,'end');
+// Harness² ellipse + label
+const hB=BB.hw;const hEl=S('ellipse',{cx:hB.x+hB.w/2,cy:hB.y+hB.h/2+1,rx:hB.w/2+10,ry:hB.h/2+7,stroke:C.claret,'stroke-width':2,fill:'none',transform:`rotate(-2 ${hB.x+hB.w/2} ${hB.y+hB.h/2})`},aG);
+const hElLen=2*Math.PI*Math.sqrt(((hB.w/2+10)**2+(hB.h/2+7)**2)/2);
+const hT=lbl(hB.x+2,hB.y-12,'Harness 平方',14);
+// github label
+const ghB=BB.gio;const ghArr=S('path',{d:`M${ghB.x+ghB.w+60} ${ghB.y+ghB.h/2} H${ghB.x+ghB.w+12} m8 -6 l-8 6 l8 6`,stroke:C.claret,'stroke-width':1.8,fill:'none'},aG);
+const ghT=lbl(ghB.x+ghB.w+66,ghB.y+ghB.h/2+5,'代码已开源',14);
+// anchors for finale strips (small claret brackets on the sheet margin)
+const abB=BB.abs,fgB=BB.fig;
+const an1=S('path',{d:`M${abB.x+abB.w+8} ${abB.y-2} h6 v${abB.h+4} h-6`,stroke:C.claret,'stroke-width':2,fill:'none'},aG);
+const an2=S('path',{d:`M${fgB.x+fgB.w+8} ${fgB.y} h6 v${fgB.h} h-6`,stroke:C.claret,'stroke-width':2,fill:'none'},aG);
+function drawStroke(el,len,e){el.setAttribute('stroke-dasharray',len);el.setAttribute('stroke-dashoffset',len*(1-e));el.setAttribute('opacity',e>0?1:0);}
+function fadeT(el,t0){const e=eQ(p(window.__t,t0,0.35));el.setAttribute('opacity',e);el.setAttribute('transform',`translate(0 ${(1-e)*4})`);}
+function seekSheet(t){
+  const tf=sheetTf(t);const sh=$('sheet');sh.style.transform=`translate(${tf.x}px,${tf.y}px) rotate(${tf.r}deg)`;show(sh,t>16.8?1:0);
+  hlEls.forEach(o=>{const e=eIO(p(t,o.t0,o.d));o.el.style.transform=`scaleX(${e})`;o.el.style.opacity=e>0?1:0;});
+  drawStroke(aff1,gB.w,eIO(p(t,18.15,0.3)));fadeT(aff1t,18.2);
+  drawStroke(aff2,nB.w,eIO(p(t,18.8,0.3)));fadeT(aff2t,18.85);
+  drawStroke(dEl,dElLen,eIO(p(t,19.18,0.45)));fadeT(dT,19.35);
+  drawStroke(hEl,hElLen,eIO(p(t,22.2,0.5)));fadeT(hT,22.4);
+  drawStroke(ghArr,90,eIO(p(t,23.85,0.3)));fadeT(ghT,23.95);
+  drawStroke(an1,abB.h+16,eIO(p(t,24.95,0.3)));drawStroke(an2,fgB.h+12,eIO(p(t,27.05,0.3)));
+  return tf;
+}
+
+/* ---------------- CAMERA ---------------- */
+// keys: [t, cx, cy, z, r]  (world coords) ; sheet-relative keys computed from final sheet transform
+const TFL={x:SL[0],y:SL[1],r:SROT};
+function sc(lx,ly){return s2w(lx,ly,TFL);}
+let CAM=[];
+function buildCam(){
+  const R3c=[R3O[0]+960,R3O[1]+540];
+  const hd=sc(420,232), hd2=sc(440,226), hw=sc(300,175), gh=sc(400,650);
+  // final: sheet top-left at screen (112,166), z .66, r 0
+  const zf=0.66;const tl=sc(0,0);const fc=[tl[0]-(112-960)/zf,tl[1]-(166-540)/zf];
+  CAM=[[0,960,540,1,0],[5.18,960,540,1,0],[5.86,2880,540,1,0],[9.86,2880,540,1,0],[10.52,R3c[0],R3c[1],1,0],
+       [17.28,R3c[0]+40,R3c[1],1.0,0],[17.92,hd[0],hd[1],2.2,SROT*0.85],[21.84,hd2[0],hd2[1],2.34,SROT*0.85],
+       [22.42,hw[0],hw[1],3.05,SROT*0.9],[22.95,hw[0]+6,hw[1],3.12,SROT*0.9],[23.62,gh[0],gh[1],2.6,SROT*0.85,'dip'],[24.2,gh[0]+4,gh[1]+2,2.64,SROT*0.85],
+       [25.3,fc[0],fc[1],zf,0],[29.4,fc[0]-12,fc[1]-4,zf*1.012,0]];
+}
+function cam(t){const K=CAM;if(t<=K[0][0])return K[0].slice(1,5);
+  for(let i=1;i<K.length;i++){if(t<=K[i][0]){const a=K[i-1],b=K[i];let u=(t-a[0])/(b[0]-a[0]);
+      const e=(i==K.length-1)?eS(u):eIO(u);
+      let z=Math.exp(lerp(Math.log(a[3]),Math.log(b[3]),e));if(b[5]=='dip')z*=1-0.32*Math.sin(Math.PI*e);
+      // zoom-aware pan: weight centre by zoom so the push feels anchored
+      return [lerp(a[1],b[1],e),lerp(a[2],b[2],e),z,lerp(a[4],b[4],e)];}}
+  return K[K.length-1].slice(1,5);}
+function w2s(w,c){const [x,y]=rot(w[0]-c[0],w[1]-c[1],-c[3]);return [960+c[2]*x,540+c[2]*y];}
+
+/* ---------------- FINALE OVERLAY ---------------- */
+const ovS=$('ovS');
+const ld1=S('path',{stroke:C.claret,'stroke-width':2,fill:'none'},ovS),ld2=S('path',{stroke:C.claret,'stroke-width':2,fill:'none'},ovS);
+const ldD1=S('circle',{r:5,fill:C.claret},ovS),ldD2=S('circle',{r:5,fill:C.claret},ovS);
+let BIG={w:1,h:1};
+const BIGF={x:792,y:150,s:1};
+function seekFinale(t,c,tf){
+  // big Harness² lifts off the paper title
+  const m=eIO(p(t,24.45,0.95));
+  const a=w2s(s2w(BB.hw.x,BB.hw.y,tf),c);const sPaper=c[2]*BB.hw.w/BIG.w; const rPaper=tf.r-c[3];
+  // vertical: match cap region (paper bbox includes superscript) -> align tops
+  const x=lerp(a[0],BIGF.x,m),y=lerp(a[1]-BIG.top*sPaper,BIGF.y,m),s=Math.exp(lerp(Math.log(sPaper),Math.log(BIGF.s),m)),r=lerp(rPaper,0,m);
+  const bh=$('bigH');bh.style.transform=`translate(${x}px,${y}px) rotate(${r}deg) scale(${s})`;
+  bh.style.opacity=t<24.45?0:1;bh.style.textShadow=`0 ${10*Math.sin(Math.PI*m)}px ${24*Math.sin(Math.PI*m)}px rgba(80,50,30,${0.25*Math.sin(Math.PI*m)})`;
+  bh.style.color=mixHex('#111111',C.ink,m);
+  $('eKr').style.width=(56*eQ(p(t,25.0,0.4)))+'px';wipe($('eK'),t,25.0,0.6);
+  lineRev($('eDek'),t,25.2,0.55);
+  [['st1',24.95,an1,ld1,ldD1,BB.abs,'abs'],['st2',27.02,an2,ld2,ldD2,BB.fig,'fig']].forEach(([id,t0,an,ld,dd,b])=>{
+    const st=$(id);const top=parseFloat(st.style.top);
+    const anc=w2s(s2w(b.x+b.w+14,b.y+b.h/2,tf),c);const tx=790,ty=top+75;
+    const le=eIO(p(t,t0+0.1,0.4));const mx=anc[0]+(tx-anc[0])*0.45;
+    ld.setAttribute('d',`M${anc[0]} ${anc[1]} H${mx} V${ty} H${tx}`);
+    const L=Math.abs(mx-anc[0])+Math.abs(ty-anc[1])+Math.abs(tx-mx)+2;ld.setAttribute('stroke-dasharray',L);ld.setAttribute('stroke-dashoffset',L*(1-le));ld.setAttribute('opacity',le>0?1:0);
+    dd.setAttribute('cx',anc[0]);dd.setAttribute('cy',anc[1]);dd.setAttribute('opacity',le>0?1:0);
+    const ge=eIO(p(t,t0+0.4,0.55));st.querySelector('.sbg').style.transform=`scaleX(${ge})`;st.querySelector('.srl').style.transform=`scaleX(${ge})`;
+    st.querySelector('.sbg').style.opacity=ge>0?0.6:0;st.querySelector('.srl').style.opacity=ge>0?1:0;
+    const ne=eQ(p(t,t0+0.6,0.45));const sn=st.querySelector('.sn');sn.style.opacity=ne;sn.style.transform=`translateY(${(1-ne)*30}px)`;
+    lineRev(st.querySelector('.st'),t,t0+0.68,0.55);lineRev(st.querySelector('.ss'),t,t0+0.9,0.5);
+    const ge2=eQ(p(t,t0+1.0,0.4));const sg=st.querySelector('.sg');sg.style.opacity=ge2;sg.style.transform=`translateX(-100%) translateX(${(1-ge2)*-16}px)`;
+  });
+}
+
+/* ---------------- master ---------------- */
+const av=$('av');const avImgs=[];const capt=$('capt');const fSrc=$('fSrc');
+function seek(t){
+  window.__t=t;
+  seekBar(t);
+  const c=cam(t);
+  $('world').style.transform=`translate(960px,540px) rotate(${-c[3]}deg) scale(${c[2]}) translate(${-c[0]}px,${-c[1]}px)`;
+  seekR1(t);seekR2(t);seekR3(t);seekDiagram(t);const tf=seekSheet(t);seekFinale(t,c,tf);
+  // footer: hidden while the sheet is under the camera
+  let si=0;SRCS.forEach((s,i)=>{if(t>=s[0])si=i;});
+  if(fSrc.dataset.i!=si){fSrc.textContent=SRCS[si][1];fSrc.dataset.i=si;}
+  const fe=eQ(p(t,SRCS[si][0],0.5));const fh=1-eQ(p(t,17.0,0.3))+eQ(p(t,25.4,0.5));const fo=clamp(fh);
+  fSrc.style.clipPath=`inset(0 ${(1-fe)*100}% 0 0)`;fSrc.style.opacity=fo;
+  $('fRule').style.opacity=fo;$('fRule').style.left=(t>24?790:120)+'px';$('fRule').style.width=(t>24?850:1480)+'px';fSrc.style.left=(t>24?790:120)+'px';
+  if(t>24){fSrc.style.fontSize='24px';}else fSrc.style.fontSize='26px';
+  show($('capG'),eIO(p(t,16.95,0.4))*(1-eIO(p(t,24.25,0.5))));
+  let ci=-1;CAPS.forEach((cc,i)=>{if(t>=cc[0]-0.06)ci=i;});
+  if(ci<0){capt.textContent='';}else{const cc=CAPS[ci];if(capt.dataset.i!=ci){capt.textContent=cc[1];capt.dataset.i=ci;}
+    const e=eQ(p(t,cc[0]-0.06,0.22));capt.style.opacity=e;capt.style.transform=`translateY(${(1-e)*8}px)`;capt.style.clipPath=`inset(0 0 ${(1-e)*30}% 0)`;}
+  const f=Math.round(t*30);const idx=Math.floor(f*24/30)%242;av.src=avImgs[idx].src;
+}
+window.seek=seek;
+window.READY=(async()=>{
+  const ps=[];for(let i=0;i<242;i++){const im=new Image();im.src=`../kit/av/${String(i).padStart(3,'0')}.png`;avImgs.push(im);ps.push(im.decode().catch(()=>{}));}
+  const pg=document.querySelector('#sheet img');ps.push(pg.decode().catch(()=>{}));
+  await Promise.all(ps);
+  await document.fonts.load('900 40px "Noto Serif CJK SC"');await document.fonts.load('800 40px Inter');await document.fonts.load('700 40px "Latin Modern Roman"');await document.fonts.ready;
+  // measure placeholders (camera identity, subhead in final state)
+  $('world').style.transform='none';const sp=$('aSrc').querySelector('.ln>span');sp.style.transform='none';
+  const r1=$('r1').getBoundingClientRect();
+  const m=id=>{const r=$(id).getBoundingClientRect();return {x:r.left-r1.left,y:r.top-r1.top,h:r.height,w:r.width};};
+  PH={n43:m('ph43'),nar:m('phAr'),n78:m('ph78')};
+  [B43,BAR_,B78].forEach(b=>{b.el.style.transform='none';const r=b.sp.getBoundingClientRect();b.h0=r.height;b.w0=r.width;});
+  const bh=$('bigH');bh.style.transform='none';const br=$('bigHs').getBoundingClientRect();BIG={w:br.width,h:br.height,top:0};
+  // offset from span top to cap-top of 'H' (approx 0.17em for LM at line-height 1)
+  BIG.top=0;
+  buildCam();
+  seek(0);return true;})();
+</script></body></html>

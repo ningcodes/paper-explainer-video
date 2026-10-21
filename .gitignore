@@ -1,0 +1,32 @@
+# render outputs
+fr/
+frames*/
+f/
+sh/
+sh*/
+pv/
+patch/
+out/
+*.mp4
+*.mov
+*.webm
+# audio
+*.wav
+*.mp3
+*.m4a
+*.aac
+*.f32
+# ffmpeg two-pass logs
+ffmpeg2pass-*.log*
+# python
+__pycache__/
+*.pyc
+.venv/
+# private / copyrighted inputs
+*.pdf
+av/
+avatar*.png
+voice/
+asr/
+kit/fonts/
+.DS_Store
